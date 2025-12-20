@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowRight, X, Play } from "lucide-react";
+import { ArrowRight, X, Play, Video as VideoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
@@ -48,7 +48,7 @@ export default function SectionPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
   const [section, setSection] = useState<Section | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
-  const [recommendedVideo, setRecommendedVideo] = useState<Video | null>(null);
+  const [sectionVideos, setSectionVideos] = useState<Video[]>([]);
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,15 +107,14 @@ export default function SectionPage() {
       
       setClaims(claimsData || []);
 
-      // Fetch recommended video for this section
-      const { data: videoData } = await supabase
+      // Fetch ALL videos for this section (ordered by recommended first)
+      const { data: videosData } = await supabase
         .from('videos')
         .select('*')
         .eq('section_id', sectionId.toLowerCase())
-        .eq('recommended', true)
-        .maybeSingle();
+        .order('recommended', { ascending: false });
       
-      setRecommendedVideo(videoData);
+      setSectionVideos(videosData || []);
 
       // Fetch related figures (from claims with figure_ids)
       if (claimsData && claimsData.length > 0) {
@@ -192,7 +191,14 @@ export default function SectionPage() {
     );
   }
 
-  const embedUrl = recommendedVideo?.url ? getYouTubeEmbedUrl(recommendedVideo.url) : null;
+  // Helper to render markdown bold text
+  const renderBoldText = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return parts.map((part, i) => 
+      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+    );
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -246,44 +252,73 @@ export default function SectionPage() {
           <ConvictionBadge conviction={section.conviction} />
         </div>
         <p className="text-muted-foreground leading-relaxed">{section.description}</p>
-        <div className="mt-4 text-sm text-muted-foreground">
-          <strong>Claims ({claims.length})</strong>
-        </div>
       </div>
 
-      {/* Recommended Video Embed */}
-      {recommendedVideo && (
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Play className="w-5 h-5 text-primary" />
-            Recommended Video
-          </h2>
-          <div className="card-elevated overflow-hidden">
-            {embedUrl ? (
-              <div className="aspect-video">
-                <iframe
-                  src={embedUrl}
-                  title={recommendedVideo.title}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <VideoCard video={recommendedVideo} showEmbed />
-            )}
-            <div className="p-4 border-t border-border">
-              <h3 className="font-semibold">{recommendedVideo.title}</h3>
-              {recommendedVideo.duration && (
-                <span className="text-sm text-muted-foreground">{recommendedVideo.duration}</span>
-              )}
-              {recommendedVideo.description && (
-                <p className="text-sm text-muted-foreground mt-2">{recommendedVideo.description}</p>
-              )}
-            </div>
+      {/* Intro Content */}
+      {(section as any).intro_content && (
+        <div className="mb-8 p-6 bg-muted/50 rounded-lg animate-fade-in" style={{ animationDelay: '50ms' }}>
+          <div className="prose prose-sm max-w-none text-foreground leading-relaxed space-y-4">
+            {((section as any).intro_content as string).split('\n\n').map((paragraph, i) => (
+              <p key={i}>{renderBoldText(paragraph)}</p>
+            ))}
           </div>
         </div>
       )}
+
+      {/* Section Videos */}
+      {sectionVideos.length > 0 && (
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <VideoIcon className="w-5 h-5 text-primary" />
+            Section Videos ({sectionVideos.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sectionVideos.map((video) => {
+              const embedUrl = getYouTubeEmbedUrl(video.url);
+              return (
+                <div key={video.id} className="card-elevated overflow-hidden">
+                  {embedUrl ? (
+                    <div className="aspect-video">
+                      <iframe
+                        src={embedUrl}
+                        title={video.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-muted flex items-center justify-center">
+                      <a 
+                        href={video.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Watch Video
+                      </a>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm">{video.title}</h3>
+                    {video.duration && (
+                      <span className="text-xs text-muted-foreground">{video.duration}</span>
+                    )}
+                    {video.description && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{video.description}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Claims Header */}
+      <div className="mb-4 text-sm text-muted-foreground">
+        <strong>Claims ({claims.length})</strong>
+      </div>
 
       {/* All Claims */}
       <div className="space-y-4 mb-8">
