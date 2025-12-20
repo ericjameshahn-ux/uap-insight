@@ -6,7 +6,8 @@ interface ConvictionBadgeProps {
 }
 
 export const ConvictionBadge = ({ conviction, className }: ConvictionBadgeProps) => {
-  const getConvictionClass = (conviction: string) => {
+  const getConvictionClass = (conviction: string | null | undefined) => {
+    if (!conviction) return 'conviction-info';
     const normalized = conviction.toLowerCase().replace(/[^a-z]/g, '');
     switch (normalized) {
       case 'highest':
