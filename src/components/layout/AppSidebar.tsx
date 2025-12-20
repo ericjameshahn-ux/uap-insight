@@ -7,8 +7,7 @@ import {
   Atom,
   FileText,
   Video,
-  ChevronDown,
-  Menu,
+  Sparkles,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,7 +19,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
@@ -53,11 +51,14 @@ const utilityNav = [
   { title: "Videos", url: "/videos", icon: Video },
 ];
 
+const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
+
 export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [sections, setSections] = useState<Section[]>(fallbackSections);
+  const [personalizedPath, setPersonalizedPath] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -71,9 +72,26 @@ export function AppSidebar() {
       }
     };
     fetchSections();
+
+    // Load personalized path for highlighting
+    const mode = localStorage.getItem('uap_navigation_mode');
+    if (mode === 'personalized') {
+      try {
+        const quizData = localStorage.getItem('uap-persona-quiz');
+        if (quizData) {
+          const parsed = JSON.parse(quizData);
+          if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
+            setPersonalizedPath(parsed.recommendedPath.map((s: string) => s.toLowerCase()));
+          }
+        }
+      } catch (e) {
+        console.error('Error reading personalized path:', e);
+      }
+    }
   }, []);
 
   const isActive = (path: string) => location.pathname === path;
+  const isInPersonalizedPath = (letter: string) => personalizedPath.includes(letter.toLowerCase());
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -101,6 +119,7 @@ export function AppSidebar() {
               {sections.filter(section => section.letter != null).map((section) => {
                 const path = section.letter === 'INTRO' ? '/' : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
+                const inPath = isInPersonalizedPath(section.letter);
                 
                 return (
                   <SidebarMenuItem key={section.id}>
@@ -108,13 +127,20 @@ export function AppSidebar() {
                       <Link
                         to={path}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-2 rounded-md transition-colors",
+                          "flex items-center gap-3 px-4 py-2 rounded-md transition-colors relative",
                           active 
                             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
                             : "hover:bg-sidebar-accent/50"
                         )}
                       >
-                        <span className="font-mono font-medium text-xs w-8 shrink-0">
+                        {/* Personalized path indicator */}
+                        {inPath && !collapsed && (
+                          <span className="absolute left-1 w-1 h-4 bg-primary rounded-full" />
+                        )}
+                        <span className={cn(
+                          "font-mono font-medium text-xs w-8 shrink-0",
+                          inPath && "text-primary"
+                        )}>
                           {section.letter}
                         </span>
                         {!collapsed && (
@@ -159,6 +185,21 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+              
+              {/* AI Research Assistant */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a
+                    href={AI_ASSISTANT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-sidebar-accent/50 text-primary"
+                  >
+                    <Sparkles className="w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="text-sm font-medium">AI Research Assistant</span>}
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
@@ -8,6 +8,7 @@ import { VideoCard } from "@/components/VideoCard";
 import { FigureCard } from "@/components/FigureCard";
 import { supabase, Section, Claim, Video, Figure } from "@/lib/supabase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 // Fallback section data
 const fallbackSections: Record<string, Section> = {
@@ -26,7 +27,22 @@ const fallbackSections: Record<string, Section> = {
   m: { id: 'm', letter: 'M', title: 'Other Adjacent Info', conviction: 'INFO', subtitle: 'Additional Context', description: 'Other information relevant to UAP research.', sort_order: 13 },
 };
 
-const sectionOrder = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
+const defaultSectionOrder = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
+
+// Helper to extract YouTube video ID and create embed URL
+function getYouTubeEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  
+  // Handle youtube.com/watch?v=XXX
+  const watchMatch = url.match(/youtube\.com\/watch\?v=([^&]+)/);
+  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  
+  // Handle youtu.be/XXX
+  const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+  
+  return null;
+}
 
 export default function SectionPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
@@ -36,9 +52,33 @@ export default function SectionPage() {
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Navigation state
+  const [navigationMode, setNavigationMode] = useState<'free' | 'personalized'>('free');
+  const [personalizedPath, setPersonalizedPath] = useState<string[]>([]);
+  const [pathName, setPathName] = useState<string>('');
 
   useEffect(() => {
     if (!sectionId) return;
+
+    // Load navigation preferences from localStorage
+    const mode = localStorage.getItem('uap_navigation_mode') as 'free' | 'personalized' || 'free';
+    setNavigationMode(mode);
+    
+    if (mode === 'personalized') {
+      try {
+        const quizData = localStorage.getItem('uap-persona-quiz');
+        if (quizData) {
+          const parsed = JSON.parse(quizData);
+          if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
+            setPersonalizedPath(parsed.recommendedPath.map((s: string) => s.toLowerCase()));
+            setPathName(parsed.primaryName || 'Personalized');
+          }
+        }
+      } catch (e) {
+        console.error('Error reading personalized path:', e);
+      }
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -58,14 +98,12 @@ export default function SectionPage() {
 
       // Fetch ALL claims for this section (no limit!)
       const queryId = sectionId.toLowerCase();
-      console.log('Fetching claims for section_id:', queryId);
       
-      const { data: claimsData, error: claimsError } = await supabase
+      const { data: claimsData } = await supabase
         .from('claims')
         .select('*')
-        .eq('section_id', queryId);
-      
-      console.log('Claims response:', { data: claimsData, error: claimsError, count: claimsData?.length });
+        .eq('section_id', queryId)
+        .order('id');
       
       setClaims(claimsData || []);
 
@@ -110,28 +148,28 @@ export default function SectionPage() {
     }
   };
 
-  // Get personalized path from localStorage or use default order
-  const getPersonalizedPath = (): string[] => {
-    try {
-      const quizData = localStorage.getItem('uap-persona-quiz');
-      if (quizData) {
-        const parsed = JSON.parse(quizData);
-        if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
-          return parsed.recommendedPath.map((s: string) => s.toLowerCase());
-        }
-      }
-    } catch (e) {
-      console.error('Error reading personalized path:', e);
-    }
-    return sectionOrder;
+  const handleExitPersonalizedPath = () => {
+    localStorage.setItem('uap_navigation_mode', 'free');
+    setNavigationMode('free');
+    setPersonalizedPath([]);
+    setPathName('');
   };
 
-  const personalizedPath = getPersonalizedPath();
-  const currentIndex = personalizedPath.indexOf(sectionId?.toLowerCase() || '');
-  const nextSection = currentIndex >= 0 && currentIndex < personalizedPath.length - 1 
-    ? personalizedPath[currentIndex + 1] 
+  // Calculate navigation based on mode
+  const activePath = navigationMode === 'personalized' && personalizedPath.length > 0 
+    ? personalizedPath 
+    : defaultSectionOrder;
+  
+  const currentIndex = activePath.indexOf(sectionId?.toLowerCase() || '');
+  const nextSection = currentIndex >= 0 && currentIndex < activePath.length - 1 
+    ? activePath[currentIndex + 1] 
     : null;
-  const prevSection = currentIndex > 0 ? personalizedPath[currentIndex - 1] : null;
+  const prevSection = currentIndex > 0 ? activePath[currentIndex - 1] : null;
+  
+  // Progress calculation for personalized path
+  const pathProgress = navigationMode === 'personalized' && personalizedPath.length > 0
+    ? ((currentIndex + 1) / personalizedPath.length) * 100
+    : 0;
 
   if (loading) {
     return (
@@ -154,8 +192,45 @@ export default function SectionPage() {
     );
   }
 
+  const embedUrl = recommendedVideo?.url ? getYouTubeEmbedUrl(recommendedVideo.url) : null;
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      {/* Personalized Path Progress Banner */}
+      {navigationMode === 'personalized' && personalizedPath.length > 0 && currentIndex >= 0 && (
+        <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-primary">
+              Part {currentIndex + 1} of {personalizedPath.length} in your {pathName} path
+            </span>
+            <button 
+              onClick={handleExitPersonalizedPath}
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Exit personalized path
+            </button>
+          </div>
+          <Progress value={pathProgress} className="h-2" />
+          <div className="flex items-center gap-1 mt-2 flex-wrap">
+            {personalizedPath.map((s, i) => (
+              <span 
+                key={s} 
+                className={`px-2 py-0.5 rounded text-xs font-mono ${
+                  s === sectionId?.toLowerCase() 
+                    ? 'bg-primary text-primary-foreground' 
+                    : i < currentIndex 
+                      ? 'bg-primary/20 text-primary'
+                      : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {s.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Section Header */}
       <div className="mb-8 animate-fade-in">
         <div className="flex items-center gap-4 mb-4">
@@ -176,11 +251,37 @@ export default function SectionPage() {
         </div>
       </div>
 
-      {/* Recommended Video */}
+      {/* Recommended Video Embed */}
       {recommendedVideo && (
         <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <h2 className="text-lg font-semibold mb-4">Recommended Video</h2>
-          <VideoCard video={recommendedVideo} showEmbed />
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Play className="w-5 h-5 text-primary" />
+            Recommended Video
+          </h2>
+          <div className="card-elevated overflow-hidden">
+            {embedUrl ? (
+              <div className="aspect-video">
+                <iframe
+                  src={embedUrl}
+                  title={recommendedVideo.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <VideoCard video={recommendedVideo} showEmbed />
+            )}
+            <div className="p-4 border-t border-border">
+              <h3 className="font-semibold">{recommendedVideo.title}</h3>
+              {recommendedVideo.duration && (
+                <span className="text-sm text-muted-foreground">{recommendedVideo.duration}</span>
+              )}
+              {recommendedVideo.description && (
+                <p className="text-sm text-muted-foreground mt-2">{recommendedVideo.description}</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -228,14 +329,21 @@ export default function SectionPage() {
           </Link>
         ) : <div />}
         
-        {nextSection && (
+        {nextSection ? (
           <Link to={`/section/${nextSection}`}>
-            <Button>
+            <Button className="shadow-md">
               Continue to Section {nextSection.toUpperCase()}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
-        )}
+        ) : navigationMode === 'personalized' && currentIndex === personalizedPath.length - 1 ? (
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground mb-2">🎉 Path Complete!</p>
+            <Link to="/">
+              <Button variant="outline">Return to Home</Button>
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {/* Figure Modal */}
