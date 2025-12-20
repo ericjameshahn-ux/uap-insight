@@ -8,6 +8,7 @@ import {
   FileText,
   Video,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -198,6 +199,33 @@ export function AppSidebar() {
                     <Sparkles className="w-4 h-4 shrink-0" />
                     {!collapsed && <span className="text-sm font-medium">AI Research Assistant</span>}
                   </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* About Section */}
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground px-4 py-2">
+            {!collapsed && "About"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    to="/about-quiz"
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md transition-colors",
+                      isActive('/about-quiz')
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                        : "hover:bg-sidebar-accent/50"
+                    )}
+                  >
+                    <HelpCircle className="w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="text-sm">About the Quiz</span>}
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

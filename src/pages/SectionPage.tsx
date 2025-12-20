@@ -348,8 +348,8 @@ export default function SectionPage() {
 
       {/* Figure Modal */}
       <Dialog open={!!selectedFigure} onOpenChange={() => setSelectedFigure(null)}>
-        <DialogContent className="max-w-lg">
-          {selectedFigure && <FigureCard figure={selectedFigure} />}
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedFigure && <FigureCard figure={selectedFigure} showFullDetails />}
         </DialogContent>
       </Dialog>
     </div>

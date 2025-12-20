@@ -271,20 +271,27 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
               
               <div className="space-y-3">
                 {question?.options && Array.isArray(question.options) && question.options.length > 0 ? (
-                  question.options.map((option: { label: string; value: string }) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleAnswer(option.value)}
-                      className={cn(
-                        "w-full p-4 text-left rounded-lg border-2 transition-all",
-                        answers[question.question_number] === option.value
-                          ? "border-primary bg-accent"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  ))
+                  question.options.map((option: string | { label: string; value: string }, index: number) => {
+                    // Handle both string arrays ["Option 1", "Option 2"] and object arrays [{label, value}]
+                    const isString = typeof option === 'string';
+                    const label = isString ? option : option.label;
+                    const value = isString ? option : option.value;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleAnswer(value)}
+                        className={cn(
+                          "w-full p-4 text-left rounded-lg border-2 transition-all",
+                          answers[question.question_number] === value
+                            ? "border-primary bg-accent"
+                            : "border-border hover:border-primary/50 hover:bg-muted/50"
+                        )}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })
                 ) : (
                   <div className="text-center text-muted-foreground py-8">
                     <p>No options available for this question.</p>

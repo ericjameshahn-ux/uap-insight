@@ -41,8 +41,9 @@ const featuredAnalysis = [
     name: "Dillon Guthrie",
     text: "Presented 'Five Challenges and Opportunities in Disclosure' at Yale University (Nov 2025). Key finding: No legal barrier prevents sharing classified UAP info with Congress. No person has ever been prosecuted for disclosing classified information to Congress in private.",
     badge: "HIGH",
-    buttonText: "View Presentation",
-    buttonUrl: "#",
+    buttonText: "Explore Section F",
+    buttonUrl: "/section/f",
+    isInternal: true,
     icon: FileText,
   },
 ];
@@ -228,10 +229,17 @@ export default function Index() {
                 className="w-full"
                 asChild
               >
-                <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  {item.buttonText}
-                </a>
+                {(item as any).isInternal ? (
+                  <Link to={item.buttonUrl}>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    {item.buttonText}
+                  </Link>
+                ) : (
+                  <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    {item.buttonText}
+                  </a>
+                )}
               </Button>
             </div>
           ))}
