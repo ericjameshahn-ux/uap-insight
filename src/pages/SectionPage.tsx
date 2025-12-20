@@ -110,10 +110,28 @@ export default function SectionPage() {
     }
   };
 
-  // Get next section for navigation
-  const currentIndex = sectionOrder.indexOf(sectionId?.toLowerCase() || '');
-  const nextSection = currentIndex < sectionOrder.length - 1 ? sectionOrder[currentIndex + 1] : null;
-  const prevSection = currentIndex > 0 ? sectionOrder[currentIndex - 1] : null;
+  // Get personalized path from localStorage or use default order
+  const getPersonalizedPath = (): string[] => {
+    try {
+      const quizData = localStorage.getItem('uap-persona-quiz');
+      if (quizData) {
+        const parsed = JSON.parse(quizData);
+        if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
+          return parsed.recommendedPath.map((s: string) => s.toLowerCase());
+        }
+      }
+    } catch (e) {
+      console.error('Error reading personalized path:', e);
+    }
+    return sectionOrder;
+  };
+
+  const personalizedPath = getPersonalizedPath();
+  const currentIndex = personalizedPath.indexOf(sectionId?.toLowerCase() || '');
+  const nextSection = currentIndex >= 0 && currentIndex < personalizedPath.length - 1 
+    ? personalizedPath[currentIndex + 1] 
+    : null;
+  const prevSection = currentIndex > 0 ? personalizedPath[currentIndex - 1] : null;
 
   if (loading) {
     return (

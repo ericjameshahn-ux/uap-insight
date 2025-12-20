@@ -85,8 +85,25 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
         supabase.from('persona_archetypes').select('*')
       ]);
       
-      if (questionsRes.data) setQuestions(questionsRes.data);
-      if (archetypesRes.data) setArchetypes(archetypesRes.data);
+      if (questionsRes.data && questionsRes.data.length > 0) {
+        // Parse options if they're stored as JSONB strings
+        const parsedQuestions = questionsRes.data.map((q: any) => ({
+          ...q,
+          options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+          scoring_map: typeof q.scoring_map === 'string' ? JSON.parse(q.scoring_map) : q.scoring_map
+        }));
+        setQuestions(parsedQuestions);
+      }
+      if (archetypesRes.data && archetypesRes.data.length > 0) {
+        // Parse recommended_sections if stored as JSONB string
+        const parsedArchetypes = archetypesRes.data.map((a: any) => ({
+          ...a,
+          recommended_sections: typeof a.recommended_sections === 'string' 
+            ? JSON.parse(a.recommended_sections) 
+            : a.recommended_sections
+        }));
+        setArchetypes(parsedArchetypes);
+      }
     };
     
     if (isOpen) fetchData();
@@ -117,12 +134,18 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
     const sorted = Object.entries(finalScores).sort(([, a], [, b]) => b - a);
     setShowResults(true);
     
-    // Store results in localStorage
+    // Get primary archetype's recommended sections
+    const primaryId = sorted[0]?.[0];
+    const primaryArchetype = archetypes.find(a => a.id === primaryId);
+    const recommendedPath = primaryArchetype?.recommended_sections || [];
+    
+    // Store results in localStorage including the recommended path
     localStorage.setItem('uap-persona-quiz', JSON.stringify({
       answers,
       scores: finalScores,
-      primary: sorted[0]?.[0],
+      primary: primaryId,
       secondary: sorted[1]?.[0],
+      recommendedPath,
       completedAt: new Date().toISOString()
     }));
   };
