@@ -189,7 +189,7 @@ export default function Index() {
           asChild
         >
           <a 
-            href="https://www.amazon.com/Age-Disclosure-Larry-Maguire/dp/B0CL38R56S" 
+            href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT" 
             target="_blank" 
             rel="noopener noreferrer"
           >
