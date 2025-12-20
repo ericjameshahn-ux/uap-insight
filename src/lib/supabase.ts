@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
-
-console.log('🔗 Supabase URL:', supabaseUrl);
-console.log('🔑 Supabase Key present:', !!supabaseAnonKey && supabaseAnonKey !== 'placeholder-key');
-console.log('📦 All VITE env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+const supabaseUrl = 'https://tlfnowncwmvcupghitak.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZm5vd25jd212Y3VwZ2hpdGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDU3NDgsImV4cCI6MjA4MTgyMTc0OH0.6wqPQml86cUFBbeF1Gj83ipmy_yCbs55XpmUDOMn1h8';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
