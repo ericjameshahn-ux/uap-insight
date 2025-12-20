@@ -98,7 +98,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {sections.map((section) => {
+              {sections.filter(section => section.letter != null).map((section) => {
                 const path = section.letter === 'INTRO' ? '/' : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
                 
