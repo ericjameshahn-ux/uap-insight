@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, PlayCircle, ChevronDown, Sparkles, Clock, BarChart3, Atom, Brain } from "lucide-react";
+import { BookOpen, PlayCircle, ChevronDown, Sparkles, Clock, BarChart3, Atom, Brain, ExternalLink, Video, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
 import { supabase, PersonaArchetype } from "@/lib/supabase";
+import { Badge } from "@/components/ui/badge";
 
 const preconceptions = [
   { expectation: "UAP are a recent phenomenon", reality: "Documented encounters span decades with consistent patterns" },
@@ -20,6 +21,57 @@ const journeys = [
   { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims" },
   { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research" },
 ];
+
+const featuredAnalysis = [
+  {
+    id: "mellon",
+    title: "USAF UAP Suppression",
+    subtitle: "Former Deputy Assistant Secretary of Defense for Intelligence",
+    name: "Chris Mellon",
+    text: "Christopher Mellon alleges the US Air Force is actively suppressing UAP data, citing General James Clapper's admission of a secret 1990s monitoring program. Details include seizing USS Princeton radar data, enforcing NDAs on pilots, and withholding NORAD data from Congress.",
+    badge: "HIGH",
+    buttonText: "Watch Interview",
+    buttonUrl: "https://youtu.be/kBFgexrONyA",
+    icon: Video,
+  },
+  {
+    id: "guthrie",
+    title: "Legal Framework for Disclosure",
+    subtitle: "Former Counsel, Federal Reserve Bank of NY; Former Senate Foreign Relations Committee",
+    name: "Dillon Guthrie",
+    text: "Presented 'Five Challenges and Opportunities in Disclosure' at Yale University (Nov 2025). Key finding: No legal barrier prevents sharing classified UAP info with Congress. No person has ever been prosecuted for disclosing classified information to Congress in private.",
+    badge: "HIGH",
+    buttonText: "View Presentation",
+    buttonUrl: "#",
+    icon: FileText,
+  },
+];
+
+// Animated counter component
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    const duration = 1500;
+    const steps = 30;
+    const increment = value / steps;
+    let current = 0;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    
+    return () => clearInterval(timer);
+  }, [value]);
+  
+  return <span>{count}{suffix}</span>;
+}
 
 export default function Index() {
   const navigate = useNavigate();
@@ -60,47 +112,60 @@ export default function Index() {
 
   const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
     setHasSeenQuiz(true);
+    // Store navigation mode for personalized path
+    localStorage.setItem('uap_navigation_mode', 'personalized');
+    localStorage.setItem('uap_current_path_index', '0');
     if (path.length > 0) {
       navigate(`/section/${path[0].toLowerCase()}`);
     }
   };
 
+  const handleExploreFreelyFromQuiz = () => {
+    localStorage.setItem('uap_navigation_mode', 'free');
+    setShowQuiz(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      {/* Churchill Quote */}
-      <blockquote className="text-center mb-12 animate-fade-in">
-        <p className="font-serif text-xl italic text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-          "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
-        </p>
-        <footer className="mt-3 text-sm text-muted-foreground">
-          — Winston Churchill
-        </footer>
-      </blockquote>
+      {/* Hero Section with Gradient Background */}
+      <div className="bg-gradient-to-b from-primary/5 to-transparent -mx-6 px-6 pt-8 pb-12 mb-8 rounded-b-3xl">
+        {/* Churchill Quote */}
+        <blockquote className="text-center mb-12 animate-fade-in border-l-4 border-primary/40 pl-6 py-4 bg-card/50 rounded-r-lg max-w-2xl mx-auto">
+          <p className="font-serif text-xl italic text-muted-foreground leading-relaxed">
+            "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
+          </p>
+          <footer className="mt-3 text-sm text-muted-foreground font-medium">
+            — Winston Churchill
+          </footer>
+        </blockquote>
 
-      {/* Welcome Card */}
-      <div className="card-elevated p-8 mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-        <h1 className="text-2xl font-bold mb-4">Welcome to the UAP Research Navigator</h1>
-        <p className="text-muted-foreground leading-relaxed">
-          This is a research tool designed for institutional professionals exploring Unidentified Anomalous Phenomena (UAP). 
-          We focus on <strong>falsifiable claims</strong> and <strong>prioritized sources</strong> — evidence that can be evaluated, 
-          witnesses whose credentials can be verified, and data that has been officially acknowledged.
-        </p>
-        <p className="text-muted-foreground leading-relaxed mt-4">
-          Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, 
-          but to present the most rigorous available evidence in a structured, navigable format.
-        </p>
+        {/* Welcome Card */}
+        <div className="card-elevated p-8 mb-8 animate-fade-in shadow-lg" style={{ animationDelay: '100ms' }}>
+          <h1 className="text-2xl font-bold mb-4">Welcome to the UAP Research Navigator</h1>
+          <p className="text-muted-foreground leading-relaxed">
+            This is a research tool designed for institutional professionals exploring Unidentified Anomalous Phenomena (UAP). 
+            We focus on <strong>falsifiable claims</strong> and <strong>prioritized sources</strong> — evidence that can be evaluated, 
+            witnesses whose credentials can be verified, and data that has been officially acknowledged.
+          </p>
+          <p className="text-muted-foreground leading-relaxed mt-4">
+            Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, 
+            but to present the most rigorous available evidence in a structured, navigable format.
+          </p>
+        </div>
       </div>
 
       {/* Stats Bar */}
       <div className="grid grid-cols-4 gap-4 mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
         {[
-          { label: "Claims", value: `${stats.claims}+` },
-          { label: "Figures", value: `${stats.figures}+` },
-          { label: "Sections", value: stats.sections },
-          { label: "Videos", value: `${stats.videos}+` },
+          { label: "Claims", value: stats.claims, suffix: "+" },
+          { label: "Figures", value: stats.figures, suffix: "+" },
+          { label: "Sections", value: stats.sections, suffix: "" },
+          { label: "Videos", value: stats.videos, suffix: "+" },
         ].map((stat) => (
-          <div key={stat.label} className="text-center p-4 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+          <div key={stat.label} className="text-center p-4 bg-muted/50 rounded-lg shadow-sm">
+            <div className="text-3xl font-bold text-foreground">
+              <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+            </div>
             <div className="text-sm text-muted-foreground">{stat.label}</div>
           </div>
         ))}
@@ -110,7 +175,7 @@ export default function Index() {
       <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
         <Button 
           size="lg" 
-          className="flex-1 h-14 text-base"
+          className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
           onClick={() => setShowQuiz(true)}
         >
           <Sparkles className="w-5 h-5 mr-2" />
@@ -133,10 +198,50 @@ export default function Index() {
         </Button>
       </div>
 
+      {/* Featured Analysis Section */}
+      <div className="mb-12 animate-fade-in" style={{ animationDelay: '350ms' }}>
+        <h2 className="text-lg font-semibold mb-4">Featured Analysis</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {featuredAnalysis.map((item) => (
+            <div key={item.id} className="card-elevated p-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <item.icon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold truncate">{item.title}</h3>
+                    <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20 shrink-0">
+                      {item.badge}
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-medium text-foreground">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                {item.text}
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                asChild
+              >
+                <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  {item.buttonText}
+                </a>
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Common Preconceptions */}
       <div className="mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
         <Accordion type="single" collapsible>
-          <AccordionItem value="preconceptions" className="card-elevated border-0">
+          <AccordionItem value="preconceptions" className="card-elevated border-0 shadow-sm">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
               <span className="font-semibold">Common Preconceptions</span>
             </AccordionTrigger>
@@ -195,6 +300,7 @@ export default function Index() {
         isOpen={showQuiz} 
         onClose={() => setShowQuiz(false)}
         onComplete={handleQuizComplete}
+        onExploreFreelyClick={handleExploreFreelyFromQuiz}
       />
     </div>
   );

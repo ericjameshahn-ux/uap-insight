@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { FileText, Download, ExternalLink, Filter } from "lucide-react";
+import { FileText, Download, ExternalLink, Filter, Sparkles } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { supabase, Document } from "@/lib/supabase";
 
 const sectionOptions = ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
+const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
 
 export default function Documents() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -52,6 +53,35 @@ export default function Documents() {
         <p className="text-muted-foreground">
           Official documents, reports, and research papers related to UAP.
         </p>
+      </div>
+
+      {/* AI Research Assistant Card */}
+      <div className="mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <a 
+          href={AI_ASSISTANT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block card-elevated p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:shadow-lg transition-all group"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
+                Query All Source Documents with AI
+              </h2>
+              <p className="text-sm text-muted-foreground mb-3">
+                Ask questions about all source materials using NotebookLM's AI assistant. 
+                Get instant answers, summaries, and cross-referenced insights from the entire document collection.
+              </p>
+              <Button size="sm" className="pointer-events-none">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open AI Assistant
+              </Button>
+            </div>
+          </div>
+        </a>
       </div>
 
       {/* Filters */}

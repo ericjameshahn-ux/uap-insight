@@ -9,6 +9,7 @@ interface PersonaQuizProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => void;
+  onExploreFreelyClick?: () => void;
 }
 
 // Fallback data when database isn't connected
@@ -70,7 +71,7 @@ const fallbackArchetypes: PersonaArchetype[] = [
   }
 ];
 
-export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
+export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick }: PersonaQuizProps) {
   const [questions, setQuestions] = useState<PersonaQuestion[]>(fallbackQuestions);
   const [archetypes, setArchetypes] = useState<PersonaArchetype[]>(fallbackArchetypes);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -86,22 +87,69 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
       ]);
       
       if (questionsRes.data && questionsRes.data.length > 0) {
-        // Parse options if they're stored as JSONB strings
-        const parsedQuestions = questionsRes.data.map((q: any) => ({
-          ...q,
-          options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
-          scoring_map: typeof q.scoring_map === 'string' ? JSON.parse(q.scoring_map) : q.scoring_map
-        }));
+        // Parse options and scoring_map if they're stored as JSONB strings
+        const parsedQuestions = questionsRes.data.map((q: any) => {
+          let options = q.options;
+          let scoring_map = q.scoring_map;
+          
+          // Parse options
+          if (typeof options === 'string') {
+            try {
+              options = JSON.parse(options);
+            } catch (e) {
+              console.error('Error parsing options:', e);
+              options = [];
+            }
+          }
+          
+          // Parse scoring_map
+          if (typeof scoring_map === 'string') {
+            try {
+              scoring_map = JSON.parse(scoring_map);
+            } catch (e) {
+              console.error('Error parsing scoring_map:', e);
+              scoring_map = {};
+            }
+          }
+          
+          // Ensure options is an array
+          if (!Array.isArray(options)) {
+            options = [];
+          }
+          
+          return {
+            ...q,
+            options,
+            scoring_map: scoring_map || {}
+          };
+        });
         setQuestions(parsedQuestions);
       }
+      
       if (archetypesRes.data && archetypesRes.data.length > 0) {
         // Parse recommended_sections if stored as JSONB string
-        const parsedArchetypes = archetypesRes.data.map((a: any) => ({
-          ...a,
-          recommended_sections: typeof a.recommended_sections === 'string' 
-            ? JSON.parse(a.recommended_sections) 
-            : a.recommended_sections
-        }));
+        const parsedArchetypes = archetypesRes.data.map((a: any) => {
+          let recommended_sections = a.recommended_sections;
+          
+          if (typeof recommended_sections === 'string') {
+            try {
+              recommended_sections = JSON.parse(recommended_sections);
+            } catch (e) {
+              console.error('Error parsing recommended_sections:', e);
+              recommended_sections = [];
+            }
+          }
+          
+          // Ensure it's an array
+          if (!Array.isArray(recommended_sections)) {
+            recommended_sections = [];
+          }
+          
+          return {
+            ...a,
+            recommended_sections
+          };
+        });
         setArchetypes(parsedArchetypes);
       }
     };
@@ -111,15 +159,19 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
 
   const handleAnswer = (value: string) => {
     const question = questions[currentQuestion];
+    if (!question) return;
+    
     const newAnswers = { ...answers, [question.question_number]: value };
     setAnswers(newAnswers);
     
     // Update scores
-    const archetypesToAdd = question.scoring_map[value] || [];
+    const archetypesToAdd = question.scoring_map?.[value] || [];
     const newScores = { ...scores };
-    archetypesToAdd.forEach((archetype: string) => {
-      newScores[archetype] = (newScores[archetype] || 0) + 1;
-    });
+    if (Array.isArray(archetypesToAdd)) {
+      archetypesToAdd.forEach((archetype: string) => {
+        newScores[archetype] = (newScores[archetype] || 0) + 1;
+      });
+    }
     setScores(newScores);
     
     // Auto-advance or show results
@@ -146,8 +198,13 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
       primary: primaryId,
       secondary: sorted[1]?.[0],
       recommendedPath,
+      primaryName: primaryArchetype?.name || 'Researcher',
       completedAt: new Date().toISOString()
     }));
+    
+    // Set navigation mode to personalized
+    localStorage.setItem('uap_navigation_mode', 'personalized');
+    localStorage.setItem('uap_current_path_index', '0');
   };
 
   const getPrimaryArchetype = (): PersonaArchetype | undefined => {
@@ -167,6 +224,16 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
       onComplete(primary, secondary, primary.recommended_sections);
     }
     onClose();
+  };
+
+  const handleExploreFreelyInternal = () => {
+    localStorage.setItem('uap_navigation_mode', 'free');
+    localStorage.removeItem('uap-persona-quiz');
+    if (onExploreFreelyClick) {
+      onExploreFreelyClick();
+    } else {
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -199,24 +266,31 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
               </div>
               
               <h2 className="text-xl font-semibold mb-6">
-                {question?.question_text}
+                {question?.question_text || "Loading question..."}
               </h2>
               
               <div className="space-y-3">
-                {question?.options.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleAnswer(option.value)}
-                    className={cn(
-                      "w-full p-4 text-left rounded-lg border-2 transition-all",
-                      answers[question.question_number] === option.value
-                        ? "border-primary bg-accent"
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                {question?.options && Array.isArray(question.options) && question.options.length > 0 ? (
+                  question.options.map((option: { label: string; value: string }) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleAnswer(option.value)}
+                      className={cn(
+                        "w-full p-4 text-left rounded-lg border-2 transition-all",
+                        answers[question.question_number] === option.value
+                          ? "border-primary bg-accent"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>No options available for this question.</p>
+                    <p className="text-sm mt-2">Please check if persona_questions table has valid options data.</p>
+                  </div>
+                )}
               </div>
               
               {currentQuestion > 0 && (
@@ -260,15 +334,19 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
               
               <div className="mb-8">
                 <h3 className="font-semibold mb-3">Your Recommended Path</h3>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {getPrimaryArchetype()?.recommended_sections.map((section, i, arr) => (
-                    <div key={section} className="flex items-center gap-2">
-                      <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-mono font-medium text-sm">
-                        {section}
-                      </span>
-                      {i < arr.length - 1 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2 flex-wrap p-4 bg-muted/50 rounded-lg">
+                  {getPrimaryArchetype()?.recommended_sections && getPrimaryArchetype()!.recommended_sections.length > 0 ? (
+                    getPrimaryArchetype()!.recommended_sections.map((section, i, arr) => (
+                      <div key={section} className="flex items-center gap-2">
+                        <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-mono font-medium text-sm">
+                          {section}
+                        </span>
+                        {i < arr.length - 1 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">A → B → C → D → E → F</span>
+                  )}
                 </div>
               </div>
               
@@ -276,7 +354,7 @@ export function PersonaQuiz({ isOpen, onClose, onComplete }: PersonaQuizProps) {
                 <Button onClick={handleComplete} className="flex-1">
                   Begin Your Path
                 </Button>
-                <Button variant="outline" onClick={onClose}>
+                <Button variant="outline" onClick={handleExploreFreelyInternal}>
                   Explore Freely
                 </Button>
               </div>
