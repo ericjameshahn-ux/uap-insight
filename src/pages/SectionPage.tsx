@@ -57,10 +57,15 @@ export default function SectionPage() {
       }
 
       // Fetch ALL claims for this section (no limit!)
-      const { data: claimsData } = await supabase
+      const queryId = sectionId.toLowerCase();
+      console.log('Fetching claims for section_id:', queryId);
+      
+      const { data: claimsData, error: claimsError } = await supabase
         .from('claims')
         .select('*')
-        .eq('section_id', sectionId.toLowerCase());
+        .eq('section_id', queryId);
+      
+      console.log('Claims response:', { data: claimsData, error: claimsError, count: claimsData?.length });
       
       setClaims(claimsData || []);
 
