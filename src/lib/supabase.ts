@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
+console.log('🔗 Supabase URL:', supabaseUrl);
+console.log('🔑 Supabase Key present:', !!supabaseAnonKey && supabaseAnonKey !== 'placeholder-key');
+console.log('📦 All VITE env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Type definitions based on the database schema
