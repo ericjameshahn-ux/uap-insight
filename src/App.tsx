@@ -12,6 +12,7 @@ import PhysicsAnalysis from "./pages/PhysicsAnalysis";
 import Documents from "./pages/Documents";
 import Videos from "./pages/Videos";
 import JourneyPage from "./pages/JourneyPage";
+import AboutQuiz from "./pages/AboutQuiz";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/documents" element={<Documents />} />
             <Route path="/videos" element={<Videos />} />
             <Route path="/journey/:journeyId" element={<JourneyPage />} />
+            <Route path="/about-quiz" element={<AboutQuiz />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
