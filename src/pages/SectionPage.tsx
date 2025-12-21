@@ -45,6 +45,36 @@ function getYouTubeEmbedUrl(url: string): string | null {
   return null;
 }
 
+// Component to handle embeddable videos with fallback for age-restricted content
+function EmbeddableVideo({ embedUrl, title, originalUrl }: { embedUrl: string; title: string; originalUrl: string }) {
+  const [embedFailed, setEmbedFailed] = useState(false);
+
+  if (embedFailed) {
+    return (
+      <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-3">
+        <p className="text-sm text-muted-foreground">This video cannot be embedded</p>
+        <button 
+          onClick={() => window.open(originalUrl, '_blank', 'noopener,noreferrer')}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <Play className="w-4 h-4" /> Watch on YouTube
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <iframe
+      src={embedUrl}
+      title={title}
+      className="w-full h-full"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+      onError={() => setEmbedFailed(true)}
+    />
+  );
+}
+
 export default function SectionPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
   const navigate = useNavigate();
@@ -324,23 +354,19 @@ export default function SectionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2">
                   <div className="aspect-video overflow-hidden">
                     {embedUrl ? (
-                      <iframe
-                        src={embedUrl}
-                        title={block.title}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                      <EmbeddableVideo 
+                        embedUrl={embedUrl} 
+                        title={block.title} 
+                        originalUrl={block.video_url || ''} 
                       />
                     ) : block.video_url ? (
                       <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <a 
-                          href={block.video_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                        <button 
+                          onClick={() => window.open(block.video_url!, '_blank', 'noopener,noreferrer')}
                           className="text-primary hover:underline flex items-center gap-2"
                         >
                           <Play className="w-5 h-5" /> Watch Video
-                        </a>
+                        </button>
                       </div>
                     ) : (
                       <div className="w-full h-full bg-muted" />
@@ -376,15 +402,13 @@ export default function SectionPage() {
               <FileText className="h-5 w-5 text-primary" />
               Source Documents
             </h3>
-            <a
-              href={NOTEBOOK_LM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => window.open(NOTEBOOK_LM_URL, '_blank', 'noopener,noreferrer')}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
             >
               <Sparkles className="h-4 w-4" />
               Ask AI About These Sources
-            </a>
+            </button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
