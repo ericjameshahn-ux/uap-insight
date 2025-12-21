@@ -10,7 +10,8 @@ import {
   Brain,
   ExternalLink,
   Video,
-  FileText,
+  Target,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -99,16 +100,15 @@ const featuredAnalysis = [
     icon: Video,
   },
   {
-    id: "guthrie",
-    title: "Legal Framework for Disclosure",
-    subtitle: "Former Counsel, Federal Reserve Bank of NY; Former Senate Foreign Relations Committee",
-    name: "Dillon Guthrie",
-    text: "Presented 'Five Challenges and Opportunities in Disclosure' at Yale University (Nov 2025). Key finding: No legal barrier prevents sharing classified UAP info with Congress. No person has ever been prosecuted for disclosing classified information to Congress in private.",
+    id: "mellon2",
+    title: "Pentagon UAP Secrecy",
+    subtitle: "Christopher Mellon, Former Deputy Assistant Secretary of Defense",
+    name: "Chris Mellon",
+    text: "Mellon details how UAP information is being withheld from Congress, the history of government UAP programs, and why disclosure is a national security imperative.",
     badge: "HIGH",
-    buttonText: "Explore Section F",
-    buttonUrl: "/section/f",
-    isInternal: true,
-    icon: FileText,
+    buttonText: "Watch Interview",
+    buttonUrl: "https://youtu.be/FuyVlw4EOWs",
+    icon: Target,
   },
 ];
 
@@ -329,15 +329,14 @@ export default function Index() {
             <Sparkles className="w-5 h-5 mr-2" />
             Take the Persona Quiz
           </Button>
-          <Button variant="outline" size="lg" className="flex-1 h-14 text-base" asChild>
-            <a
-              href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <PlayCircle className="w-5 h-5 mr-2" />
-              Start with Age of Disclosure
-            </a>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="flex-1 h-14 text-base"
+            onClick={() => window.open('https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT', '_blank', 'noopener,noreferrer')}
+          >
+            <PlayCircle className="w-5 h-5 mr-2" />
+            Start with Age of Disclosure
           </Button>
         </div>
 
@@ -363,18 +362,14 @@ export default function Index() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.text}</p>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  {(item as any).isInternal ? (
-                    <Link to={item.buttonUrl}>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      {item.buttonText}
-                    </Link>
-                  ) : (
-                    <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      {item.buttonText}
-                    </a>
-                  )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => window.open(item.buttonUrl, '_blank', 'noopener,noreferrer')}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  {item.buttonText}
                 </Button>
               </div>
             ))}
@@ -406,6 +401,37 @@ export default function Index() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+        </div>
+
+        {/* CTA Buttons above Guided Journeys */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 animate-fade-in" style={{ animationDelay: "450ms" }}>
+          <button
+            onClick={() => {
+              setSelectedJourney(null);
+              setShowQuiz(true);
+            }}
+            className="flex items-center gap-4 p-6 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all hover:scale-[1.02] shadow-lg"
+          >
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Take the Persona Quiz</div>
+              <div className="text-sm opacity-80">Get your personalized research path</div>
+            </div>
+          </button>
+          <button
+            onClick={() => window.open('https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7', '_blank', 'noopener,noreferrer')}
+            className="flex items-center gap-4 p-6 bg-background border-2 border-primary/20 rounded-xl hover:border-primary/40 hover:bg-primary/5 transition-all hover:scale-[1.02]"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-primary" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-lg text-foreground">Ask AI Research Assistant</div>
+              <div className="text-sm text-muted-foreground">Query our source documents</div>
+            </div>
+          </button>
         </div>
 
         {/* Guided Journeys - Enhanced with Persona Labels */}
