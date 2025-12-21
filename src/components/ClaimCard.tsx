@@ -15,7 +15,7 @@ export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProp
   const isLongQuote = claim.quote && claim.quote.length > 300;
   
   // Generate claim ID like "A-01"
-  const claimNumber = claim.id?.slice(-2) || '01';
+  const claimNumber = claim.id ? String(claim.id).padStart(2, '0') : '01';
   const displayId = sectionLetter ? `${sectionLetter}-${claimNumber}` : claimNumber;
 
   return (
