@@ -167,7 +167,9 @@ export function AppSidebar() {
         {userPath.length > 0 && !collapsed && (
           <SidebarGroup className="border-b border-sidebar-border pb-4">
             <SidebarGroupLabel className="text-xs uppercase tracking-wider text-primary px-4 py-2 font-semibold">
-              Your Path
+              <Link to="/my-path" className="hover:underline">
+                Your Path
+              </Link>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <div className="px-4 space-y-3">
