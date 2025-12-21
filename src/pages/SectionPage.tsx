@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles } from "lucide-react";
+import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
@@ -402,13 +402,16 @@ export default function SectionPage() {
               <FileText className="h-5 w-5 text-primary" />
               Source Documents
             </h3>
-            <button
-              onClick={() => window.open(NOTEBOOK_LM_URL, '_blank', 'noopener,noreferrer')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              <Sparkles className="h-4 w-4" />
-              Ask AI About These Sources
-            </button>
+            <div className="flex flex-col items-end">
+              <button
+                onClick={() => window.open(NOTEBOOK_LM_URL, '_blank', 'noopener,noreferrer')}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                <Sparkles className="h-4 w-4" />
+                Query Source Documents
+              </button>
+              <span className="text-xs text-muted-foreground mt-1">Powered by Google NotebookLM</span>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -416,10 +419,6 @@ export default function SectionPage() {
               <DocumentCard key={doc.id} document={doc} />
             ))}
           </div>
-          
-          <p className="text-xs text-muted-foreground mt-3 text-center">
-            Click "Ask AI" to query all source documents using NotebookLM
-          </p>
         </div>
       )}
 
@@ -542,6 +541,15 @@ export default function SectionPage() {
           {selectedFigure && <FigureCard figure={selectedFigure} />}
         </DialogContent>
       </Dialog>
+
+      {/* Floating AI Help Button */}
+      <Link
+        to={`/chat?section=${sectionId}`}
+        className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all hover:scale-105 z-50"
+      >
+        <MessageCircle className="w-5 h-5" />
+        <span className="text-sm font-medium">Have questions about this section?</span>
+      </Link>
     </div>
   );
 }

@@ -312,7 +312,7 @@ export function AppSidebar() {
                 );
               })}
               
-              {/* Chat with AI */}
+              {/* AI Research Assistant */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
@@ -325,7 +325,7 @@ export function AppSidebar() {
                     )}
                   >
                     <MessageSquare className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span className="text-sm font-medium">Chat with AI</span>}
+                    {!collapsed && <span className="text-sm font-medium">AI Research Assistant</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
