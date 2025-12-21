@@ -12,6 +12,7 @@ import {
   Play,
   MessageSquare,
   Bookmark,
+  Calendar,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,7 @@ const fallbackSections: Section[] = [
 
 const utilityNav = [
   { title: "My Queue", url: "/saved", icon: Bookmark },
+  { title: "Timeline", url: "/timeline", icon: Calendar },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
   { title: "Physics Analysis", url: "/physics", icon: Atom },
