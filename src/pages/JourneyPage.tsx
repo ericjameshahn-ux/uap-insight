@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, X, BookOpen, User, Atom, Video as VideoIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, BookOpen, User, Atom, Video as VideoIcon, Check, Bookmark, SkipForward, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ClaimCard } from "@/components/ClaimCard";
 import { FigureCard } from "@/components/FigureCard";
-import { VideoCard } from "@/components/VideoCard";
-import { supabase, Journey, Claim, Figure, Video, Observable } from "@/lib/supabase";
+import { supabase, Journey, getUserId } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 // Fallback journey data
 const fallbackJourneys: Record<string, Journey> = {
@@ -19,7 +19,6 @@ const fallbackJourneys: Record<string, Journey> = {
     audience: 'Executives, policymakers, and institutional leaders',
     steps: [
       { type: 'narrative', title: 'Introduction', content: 'This journey presents the most credible evidence for UAP reality, curated for institutional professionals.' },
-      { type: 'claim', claim_id: 'a-01' },
       { type: 'narrative', title: 'Key Takeaway', content: 'The evidence base has reached a threshold that warrants serious institutional attention.' }
     ]
   },
@@ -31,21 +30,23 @@ const fallbackJourneys: Record<string, Journey> = {
     description: 'Technical propulsion analysis',
     audience: 'Scientists, engineers, and technical analysts',
     steps: [
-      { type: 'narrative', title: 'The Physics Challenge', content: 'UAP demonstrate capabilities that appear to violate our current understanding of physics.' },
-      { type: 'observable', observable_id: '1' }
+      { type: 'narrative', title: 'The Physics Challenge', content: 'UAP demonstrate capabilities that appear to violate our current understanding of physics.' }
     ]
   }
 };
 
 interface Step {
-  type: 'narrative' | 'claim' | 'figure' | 'observable' | 'video';
+  type: 'narrative' | 'claim' | 'figure' | 'observable' | 'video' | 'section';
   title?: string;
   content?: string;
   claim_id?: string;
   figure_id?: string;
   observable_id?: string;
   video_id?: string;
+  section_id?: string;
 }
+
+type StepStatus = 'viewed' | 'saved' | 'skipped' | null;
 
 export default function JourneyPage() {
   const { journeyId } = useParams<{ journeyId: string }>();
@@ -53,7 +54,9 @@ export default function JourneyPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [stepStatuses, setStepStatuses] = useState<Record<number, StepStatus>>({});
 
+  // Load journey
   useEffect(() => {
     const fetchJourney = async () => {
       if (!journeyId) return;
@@ -66,7 +69,17 @@ export default function JourneyPage() {
         .maybeSingle();
 
       if (data) {
-        setJourney(data);
+        // Parse steps if it's a string
+        let parsedSteps = data.steps;
+        if (typeof parsedSteps === 'string') {
+          try {
+            parsedSteps = JSON.parse(parsedSteps);
+          } catch (e) {
+            console.error('Error parsing journey steps:', e);
+            parsedSteps = [];
+          }
+        }
+        setJourney({ ...data, steps: parsedSteps || [] });
       } else {
         setJourney(fallbackJourneys[journeyId] || null);
       }
@@ -76,9 +89,33 @@ export default function JourneyPage() {
     fetchJourney();
   }, [journeyId]);
 
+  // Load step statuses from localStorage
+  useEffect(() => {
+    if (journeyId) {
+      const saved = localStorage.getItem(`journey-${journeyId}-statuses`);
+      if (saved) {
+        try {
+          setStepStatuses(JSON.parse(saved));
+        } catch (e) {
+          console.error('Error parsing step statuses:', e);
+        }
+      }
+      
+      // Load current step
+      const savedStep = localStorage.getItem(`journey-${journeyId}-progress`);
+      if (savedStep) {
+        setCurrentStep(parseInt(savedStep, 10));
+      }
+    }
+  }, [journeyId]);
+
+  // Fetch step data when step changes
   useEffect(() => {
     const fetchStepData = async () => {
-      if (!journey || !journey.steps[currentStep]) return;
+      if (!journey || !journey.steps || !journey.steps[currentStep]) {
+        setStepData(null);
+        return;
+      }
 
       const step = journey.steps[currentStep] as Step;
       
@@ -123,6 +160,16 @@ export default function JourneyPage() {
             setStepData(data);
           }
           break;
+        case 'section':
+          if (step.section_id) {
+            const { data } = await supabase
+              .from('sections')
+              .select('*')
+              .eq('id', step.section_id)
+              .maybeSingle();
+            setStepData(data);
+          }
+          break;
         default:
           setStepData(null);
       }
@@ -135,18 +182,58 @@ export default function JourneyPage() {
   useEffect(() => {
     if (journeyId) {
       localStorage.setItem(`journey-${journeyId}-progress`, currentStep.toString());
+      localStorage.setItem('uap_journey_step', currentStep.toString());
     }
   }, [journeyId, currentStep]);
 
-  // Load progress on mount
-  useEffect(() => {
+  const setStepStatus = (index: number, status: StepStatus) => {
+    const newStatuses = { ...stepStatuses, [index]: status };
+    setStepStatuses(newStatuses);
+    
+    // Save to localStorage
     if (journeyId) {
-      const saved = localStorage.getItem(`journey-${journeyId}-progress`);
-      if (saved) {
-        setCurrentStep(parseInt(saved, 10));
+      localStorage.setItem(`journey-${journeyId}-statuses`, JSON.stringify(newStatuses));
+    }
+
+    // Also save to user_progress table
+    const userId = getUserId();
+    supabase.from('user_progress').upsert({
+      user_id: userId,
+      journey_id: journeyId,
+      step_index: index,
+      status: status,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,journey_id,step_index' }).then(() => {
+      // Silent save
+    });
+  };
+
+  const getCompletedCount = () => {
+    return Object.values(stepStatuses).filter(s => s === 'viewed').length;
+  };
+
+  const findNextUnviewedStep = () => {
+    if (!journey?.steps) return 0;
+    for (let i = 0; i < journey.steps.length; i++) {
+      if (stepStatuses[i] !== 'viewed' && stepStatuses[i] !== 'skipped') {
+        return i;
       }
     }
-  }, [journeyId]);
+    return journey.steps.length - 1;
+  };
+
+  const getStatusIcon = (status: StepStatus) => {
+    switch (status) {
+      case 'viewed':
+        return <Check className="w-4 h-4 text-green-500" />;
+      case 'saved':
+        return <Bookmark className="w-4 h-4 text-yellow-500 fill-yellow-500" />;
+      case 'skipped':
+        return <SkipForward className="w-4 h-4 text-muted-foreground" />;
+      default:
+        return null;
+    }
+  };
 
   if (loading) {
     return (
@@ -169,9 +256,9 @@ export default function JourneyPage() {
     );
   }
 
-  const steps = journey.steps as Step[];
+  const steps = (journey.steps || []) as Step[];
   const step = steps[currentStep];
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  const progress = steps.length > 0 ? ((getCompletedCount()) / steps.length) * 100 : 0;
 
   const renderStep = () => {
     if (!step) return null;
@@ -235,10 +322,46 @@ export default function JourneyPage() {
 
       case 'video':
         return stepData ? (
-          <VideoCard video={stepData} showEmbed />
+          <div className="card-elevated overflow-hidden animate-fade-in">
+            <div className="aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${getYouTubeId(stepData.url)}`}
+                title={stepData.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold">{stepData.title}</h3>
+              {stepData.description && (
+                <p className="text-sm text-muted-foreground mt-2">{stepData.description}</p>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Loading video...
+          </div>
+        );
+
+      case 'section':
+        return stepData ? (
+          <Link to={`/section/${stepData.letter?.toLowerCase()}`} className="block">
+            <div className="card-elevated p-8 hover:shadow-lg transition-shadow animate-fade-in">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl font-mono font-bold text-primary">{stepData.letter}</span>
+                <h2 className="text-xl font-semibold">{stepData.title}</h2>
+              </div>
+              {stepData.description && (
+                <p className="text-muted-foreground">{stepData.description}</p>
+              )}
+              <p className="text-sm text-primary mt-4">Click to explore this section →</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Loading section...
           </div>
         );
 
@@ -255,7 +378,9 @@ export default function JourneyPage() {
           <span className="text-2xl">{journey.icon}</span>
           <div>
             <h1 className="font-semibold">{journey.title}</h1>
-            <p className="text-sm text-muted-foreground">Step {currentStep + 1} of {steps.length}</p>
+            <p className="text-sm text-muted-foreground">
+              {getCompletedCount()} of {steps.length} steps completed
+            </p>
           </div>
         </div>
         <Link to="/">
@@ -267,11 +392,75 @@ export default function JourneyPage() {
       </div>
 
       {/* Progress Bar */}
-      <Progress value={progress} className="h-1 mb-8" />
+      <div className="mb-8">
+        <Progress value={progress} className="h-2" />
+        <p className="text-xs text-muted-foreground mt-2 text-right">{Math.round(progress)}% complete</p>
+      </div>
+
+      {/* Current Step Indicator */}
+      <div className="text-sm text-muted-foreground mb-4">
+        Step {currentStep + 1} of {steps.length}
+        {step?.title && <span className="ml-2 font-medium text-foreground">• {step.title}</span>}
+      </div>
 
       {/* Step Content */}
-      <div className="mb-8">
+      <div className="mb-6">
         {renderStep()}
+      </div>
+
+      {/* Status Buttons */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <Button
+          variant={stepStatuses[currentStep] === 'viewed' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStepStatus(currentStep, 'viewed')}
+          className={cn(stepStatuses[currentStep] === 'viewed' && 'bg-green-600 hover:bg-green-700')}
+        >
+          <Check className="w-4 h-4 mr-1" />
+          Viewed
+        </Button>
+        <Button
+          variant={stepStatuses[currentStep] === 'saved' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStepStatus(currentStep, 'saved')}
+          className={cn(stepStatuses[currentStep] === 'saved' && 'bg-yellow-600 hover:bg-yellow-700')}
+        >
+          <Bookmark className="w-4 h-4 mr-1" />
+          Save for Later
+        </Button>
+        <Button
+          variant={stepStatuses[currentStep] === 'skipped' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setStepStatus(currentStep, 'skipped')}
+        >
+          <SkipForward className="w-4 h-4 mr-1" />
+          Skip
+        </Button>
+      </div>
+
+      {/* Step Overview (clickable step dots with status) */}
+      <div className="flex flex-wrap gap-2 justify-center mb-8">
+        {steps.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentStep(i)}
+            className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all",
+              i === currentStep 
+                ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2" 
+                : stepStatuses[i] === 'viewed'
+                  ? "bg-green-500/20 text-green-600 border border-green-500/50"
+                  : stepStatuses[i] === 'saved'
+                    ? "bg-yellow-500/20 text-yellow-600 border border-yellow-500/50"
+                    : stepStatuses[i] === 'skipped'
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-muted/50 hover:bg-muted"
+            )}
+            title={`Step ${i + 1}: ${(s as Step).title || (s as Step).type}`}
+          >
+            {getStatusIcon(stepStatuses[i]) || (i + 1)}
+          </button>
+        ))}
       </div>
 
       {/* Navigation */}
@@ -285,27 +474,41 @@ export default function JourneyPage() {
           Previous
         </Button>
 
-        {/* Step indicators */}
-        <div className="flex gap-1">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentStep(i)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                i === currentStep ? 'bg-primary' : i < currentStep ? 'bg-primary/40' : 'bg-muted'
-              }`}
-            />
-          ))}
-        </div>
-
         <Button
-          onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+          onClick={() => {
+            if (currentStep === steps.length - 1) {
+              // Journey complete
+            } else {
+              setCurrentStep(currentStep + 1);
+            }
+          }}
           disabled={currentStep === steps.length - 1}
         >
           Next
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
+
+      {/* Continue to next unviewed */}
+      {getCompletedCount() > 0 && getCompletedCount() < steps.length && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentStep(findNextUnviewedStep())}
+          >
+            <Play className="w-4 h-4 mr-1" />
+            Continue to next unviewed step
+          </Button>
+        </div>
+      )}
     </div>
   );
+}
+
+// Helper to extract YouTube ID from URL
+function getYouTubeId(url: string): string {
+  if (!url) return '';
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
+  return match?.[1] || '';
 }

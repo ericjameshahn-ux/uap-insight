@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Database,
@@ -9,6 +9,8 @@ import {
   Video,
   Sparkles,
   HelpCircle,
+  Play,
+  Map,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,8 +25,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase, Section } from "@/lib/supabase";
+import { supabase, Section, Journey } from "@/lib/supabase";
 
 // Fallback sections data when database isn't connected
 const fallbackSections: Section[] = [
@@ -56,10 +60,13 @@ const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [sections, setSections] = useState<Section[]>(fallbackSections);
   const [personalizedPath, setPersonalizedPath] = useState<string[]>([]);
+  const [activeJourney, setActiveJourney] = useState<Journey | null>(null);
+  const [journeyProgress, setJourneyProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -89,10 +96,59 @@ export function AppSidebar() {
         console.error('Error reading personalized path:', e);
       }
     }
-  }, []);
+
+    // Load active journey
+    const loadActiveJourney = async () => {
+      const journeyId = localStorage.getItem('uap_journey');
+      if (journeyId) {
+        const { data } = await supabase
+          .from('journeys')
+          .select('*')
+          .eq('id', journeyId)
+          .maybeSingle();
+        
+        if (data) {
+          setActiveJourney(data);
+          
+          // Calculate progress
+          const stepStatuses = localStorage.getItem(`journey-${journeyId}-statuses`);
+          let completedCount = 0;
+          if (stepStatuses) {
+            try {
+              const parsed = JSON.parse(stepStatuses);
+              completedCount = Object.values(parsed).filter((s: any) => s === 'viewed').length;
+            } catch (e) {
+              console.error('Error parsing step statuses:', e);
+            }
+          }
+          
+          const steps = typeof data.steps === 'string' ? JSON.parse(data.steps) : (data.steps || []);
+          setJourneyProgress({
+            current: completedCount,
+            total: steps.length
+          });
+        }
+      }
+    };
+    loadActiveJourney();
+
+    // Listen for storage changes (when progress updates on journey page)
+    const handleStorageChange = () => {
+      loadActiveJourney();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [location.pathname]); // Re-run when route changes
 
   const isActive = (path: string) => location.pathname === path;
   const isInPersonalizedPath = (letter: string) => personalizedPath.includes(letter.toLowerCase());
+
+  const progressPercent = journeyProgress.total > 0 
+    ? (journeyProgress.current / journeyProgress.total) * 100 
+    : 0;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -111,6 +167,58 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-thin">
+        {/* Active Journey Section */}
+        {activeJourney && !collapsed && (
+          <SidebarGroup className="border-b border-sidebar-border pb-4">
+            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground px-4 py-2">
+              Your Journey
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="px-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{activeJourney.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{activeJourney.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {journeyProgress.current}/{journeyProgress.total} steps
+                    </p>
+                  </div>
+                </div>
+                <Progress value={progressPercent} className="h-1.5" />
+                <Button 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => navigate(`/journey/${activeJourney.id}`)}
+                >
+                  <Play className="w-3 h-3 mr-1" />
+                  Continue
+                </Button>
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Collapsed state journey indicator */}
+        {activeJourney && collapsed && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to={`/journey/${activeJourney.id}`}
+                      className="flex items-center justify-center p-2 rounded-md bg-primary/10 hover:bg-primary/20"
+                      title={`Continue: ${activeJourney.title}`}
+                    >
+                      <Map className="w-4 h-4 text-primary" />
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground px-4 py-2">
             {!collapsed && "Research Sections"}

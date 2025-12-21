@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, ChevronLeft, ChevronRight, Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { supabase, PersonaQuestion, PersonaArchetype } from "@/lib/supabase";
+import { supabase, PersonaQuestion, PersonaArchetype, getUserId, Journey } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 interface PersonaQuizProps {
@@ -72,13 +73,14 @@ const fallbackArchetypes: PersonaArchetype[] = [
 ];
 
 export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick }: PersonaQuizProps) {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState<PersonaQuestion[]>(fallbackQuestions);
   const [archetypes, setArchetypes] = useState<PersonaArchetype[]>(fallbackArchetypes);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [scores, setScores] = useState<Record<string, number>>({});
-
+  const [recommendedJourney, setRecommendedJourney] = useState<Journey | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       const [questionsRes, archetypesRes] = await Promise.all([
@@ -182,7 +184,7 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     }
   };
 
-  const calculateResults = (finalScores: Record<string, number>) => {
+  const calculateResults = async (finalScores: Record<string, number>) => {
     const sorted = Object.entries(finalScores).sort(([, a], [, b]) => b - a);
     setShowResults(true);
     
@@ -190,6 +192,23 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     const primaryId = sorted[0]?.[0];
     const primaryArchetype = archetypes.find(a => a.id === primaryId);
     const recommendedPath = primaryArchetype?.recommended_sections || [];
+    
+    // Fetch the recommended journey
+    const journeyId = primaryArchetype?.recommended_journey;
+    if (journeyId) {
+      const { data: journeyData } = await supabase
+        .from('journeys')
+        .select('*')
+        .eq('id', journeyId)
+        .maybeSingle();
+      
+      if (journeyData) {
+        setRecommendedJourney(journeyData);
+      }
+    }
+    
+    // Get or create user ID
+    const userId = getUserId();
     
     // Store results in localStorage including the recommended path
     localStorage.setItem('uap-persona-quiz', JSON.stringify({
@@ -201,6 +220,12 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
       primaryName: primaryArchetype?.name || 'Researcher',
       completedAt: new Date().toISOString()
     }));
+    
+    // Store journey info
+    localStorage.setItem('uap_user_id', userId);
+    localStorage.setItem('uap_archetype', primaryId || '');
+    localStorage.setItem('uap_journey', journeyId || '');
+    localStorage.setItem('uap_journey_step', '0');
     
     // Set navigation mode to personalized
     localStorage.setItem('uap_navigation_mode', 'personalized');
@@ -226,6 +251,13 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     onClose();
   };
 
+  const handleStartJourney = () => {
+    const journeyId = localStorage.getItem('uap_journey');
+    onClose();
+    if (journeyId) {
+      navigate(`/journey/${journeyId}`);
+    }
+  };
   const handleExploreFreelyInternal = () => {
     localStorage.setItem('uap_navigation_mode', 'free');
     localStorage.removeItem('uap-persona-quiz');
@@ -339,7 +371,20 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
                 )}
               </div>
               
-              <div className="mb-8">
+              {/* Recommended Journey */}
+              {recommendedJourney && (
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+                  <div className="text-sm text-muted-foreground mb-1">Recommended Journey</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">{recommendedJourney.icon}</span>
+                    <span className="font-semibold">{recommendedJourney.title}</span>
+                    <span className="text-xs text-muted-foreground">• {recommendedJourney.duration}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{recommendedJourney.description}</p>
+                </div>
+              )}
+
+              <div className="mb-6">
                 <h3 className="font-semibold mb-3">Your Recommended Path</h3>
                 <div className="flex items-center gap-2 flex-wrap p-4 bg-muted/50 rounded-lg">
                   {getPrimaryArchetype()?.recommended_sections && getPrimaryArchetype()!.recommended_sections.length > 0 ? (
@@ -357,13 +402,21 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
                 </div>
               </div>
               
-              <div className="flex gap-3">
-                <Button onClick={handleComplete} className="flex-1">
-                  Begin Your Path
-                </Button>
-                <Button variant="outline" onClick={handleExploreFreelyInternal}>
-                  Explore Freely
-                </Button>
+              <div className="flex flex-col gap-3">
+                {recommendedJourney && (
+                  <Button onClick={handleStartJourney} className="w-full" size="lg">
+                    <Play className="w-4 h-4 mr-2" />
+                    Start Your Journey
+                  </Button>
+                )}
+                <div className="flex gap-3">
+                  <Button onClick={handleComplete} variant={recommendedJourney ? "outline" : "default"} className="flex-1">
+                    Begin Your Path
+                  </Button>
+                  <Button variant="ghost" onClick={handleExploreFreelyInternal}>
+                    Explore Freely
+                  </Button>
+                </div>
               </div>
               
               <button
