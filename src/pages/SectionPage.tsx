@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight } from "lucide-react";
+import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
 import { VideoCard } from "@/components/VideoCard";
 import { FigureCard } from "@/components/FigureCard";
-import { supabase, Section, Claim, Video, Figure, SectionContentBlock } from "@/lib/supabase";
+import { DocumentCard } from "@/components/DocumentCard";
+import { supabase, Section, Claim, Video, Figure, SectionContentBlock, Document } from "@/lib/supabase";
+
+const NOTEBOOK_LM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 
@@ -51,6 +54,7 @@ export default function SectionPage() {
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [contentBlocks, setContentBlocks] = useState<SectionContentBlock[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Path state
@@ -152,6 +156,14 @@ export default function SectionPage() {
         .order('block_order', { ascending: true });
       
       setContentBlocks(blocksData || []);
+
+      const { data: docsData } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('section_id', sectionId.toLowerCase())
+        .order('title');
+      
+      setDocuments(docsData || []);
 
       if (claimsData && claimsData.length > 0) {
         const figureIds = [...new Set(claimsData.filter(c => c.figure_id).map(c => c.figure_id))];
@@ -355,6 +367,37 @@ export default function SectionPage() {
           </div>
         </div>
       ) : null}
+
+      {/* Source Documents */}
+      {documents && documents.length > 0 && (
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '75ms' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Source Documents
+            </h3>
+            <a
+              href={NOTEBOOK_LM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <Sparkles className="h-4 w-4" />
+              Ask AI About These Sources
+            </a>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {documents.map((doc) => (
+              <DocumentCard key={doc.id} document={doc} />
+            ))}
+          </div>
+          
+          <p className="text-xs text-muted-foreground mt-3 text-center">
+            Click "Ask AI" to query all source documents using NotebookLM
+          </p>
+        </div>
+      )}
 
       {/* Section Videos */}
       {(() => {
