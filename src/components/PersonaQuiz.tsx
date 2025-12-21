@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, ChevronLeft, ChevronRight, Sparkles, Play } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Sparkles, Play, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase, PersonaQuestion, PersonaArchetype, getUserId } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+
+// Journey path mappings
+const journeyPaths: Record<string, { path: string[]; name: string }> = {
+  executive: { path: ["a", "b", "c", "f"], name: "Executive Brief" },
+  physics: { path: ["c", "j", "l", "g"], name: "Physics Deep Dive" },
+  retrieval: { path: ["b", "g", "k", "f"], name: "Crash Retrieval" },
+  consciousness: { path: ["i", "k", "m"], name: "Consciousness Connection" },
+};
 
 interface PersonaQuizProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => void;
   onExploreFreelyClick?: () => void;
+  selectedJourney?: string | null;
+  onSkipQuizAndStartJourney?: () => void;
 }
 
 // Fallback data when database isn't connected
@@ -72,7 +82,14 @@ const fallbackArchetypes: PersonaArchetype[] = [
   }
 ];
 
-export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick }: PersonaQuizProps) {
+export function PersonaQuiz({ 
+  isOpen, 
+  onClose, 
+  onComplete, 
+  onExploreFreelyClick,
+  selectedJourney,
+  onSkipQuizAndStartJourney
+}: PersonaQuizProps) {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<PersonaQuestion[]>(fallbackQuestions);
   const [archetypes, setArchetypes] = useState<PersonaArchetype[]>(fallbackArchetypes);
@@ -250,6 +267,7 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
 
   const progress = showResults ? 100 : ((currentQuestion + 1) / questions.length) * 100;
   const question = questions[currentQuestion];
+  const selectedJourneyInfo = selectedJourney ? journeyPaths[selectedJourney] : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -309,15 +327,28 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
                 )}
               </div>
               
-              {currentQuestion > 0 && (
-                <button
-                  onClick={() => setCurrentQuestion(currentQuestion - 1)}
-                  className="flex items-center gap-1 mt-6 text-sm text-muted-foreground hover:text-foreground"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous question
-                </button>
-              )}
+              <div className="flex items-center justify-between mt-6">
+                {currentQuestion > 0 ? (
+                  <button
+                    onClick={() => setCurrentQuestion(currentQuestion - 1)}
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous question
+                  </button>
+                ) : <div />}
+                
+                {/* Skip quiz and start journey option */}
+                {selectedJourney && selectedJourneyInfo && onSkipQuizAndStartJourney && (
+                  <button
+                    onClick={onSkipQuizAndStartJourney}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <SkipForward className="w-4 h-4" />
+                    Skip quiz & start {selectedJourneyInfo.name}
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <div className="animate-fade-in">

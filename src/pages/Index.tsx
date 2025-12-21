@@ -15,11 +15,19 @@ const preconceptions = [
   { expectation: "Scientists don't take this seriously", reality: "Stanford, Harvard, and other institutions have active researchers" },
 ];
 
+// Journey definitions with paths
+const journeyPaths: Record<string, { path: string[]; name: string }> = {
+  executive: { path: ["a", "b", "c", "f"], name: "Executive Brief" },
+  physics: { path: ["c", "j", "l", "g"], name: "Physics Deep Dive" },
+  retrieval: { path: ["b", "g", "k", "f"], name: "Crash Retrieval" },
+  consciousness: { path: ["i", "k", "m"], name: "Consciousness Connection" },
+};
+
 const journeys = [
-  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers", suggestedArchetype: "empiricist" },
-  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis", suggestedArchetype: "scientist" },
-  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims", suggestedArchetype: "investigator" },
-  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research", suggestedArchetype: "experiencer" },
+  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers" },
+  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis" },
+  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims" },
+  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research" },
 ];
 
 const featuredAnalysis = [
@@ -77,6 +85,7 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 export default function Index() {
   const navigate = useNavigate();
   const [showQuiz, setShowQuiz] = useState(false);
+  const [selectedJourney, setSelectedJourney] = useState<string | null>(null);
   const [stats, setStats] = useState({ claims: 100, figures: 55, sections: 13, videos: 38 });
   const [hasSeenQuiz, setHasSeenQuiz] = useState(false);
 
@@ -113,6 +122,7 @@ export default function Index() {
 
   const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
     setHasSeenQuiz(true);
+    setSelectedJourney(null);
     if (path.length > 0) {
       navigate(`/section/${path[0].toLowerCase()}`);
     }
@@ -120,11 +130,42 @@ export default function Index() {
 
   const handleExploreFreelyFromQuiz = () => {
     setShowQuiz(false);
+    setSelectedJourney(null);
+  };
+
+  const startJourneyDirectly = (journeyId: string) => {
+    const journey = journeyPaths[journeyId];
+    if (!journey) return;
+
+    // Store path in localStorage
+    localStorage.setItem('uap_path', JSON.stringify(journey.path));
+    localStorage.setItem('uap_path_index', '0');
+    localStorage.setItem('uap_archetype_name', journey.name);
+    localStorage.setItem('uap_archetype_id', journeyId);
+
+    // Navigate to first section
+    navigate(`/section/${journey.path[0]}`);
   };
 
   const handleJourneyClick = (journeyId: string) => {
-    // Open quiz - the journey cards now suggest taking the quiz
-    setShowQuiz(true);
+    // Check if user already has an archetype
+    const existingArchetype = localStorage.getItem('uap_archetype_id');
+    
+    if (existingArchetype) {
+      // User has taken quiz - start journey directly
+      startJourneyDirectly(journeyId);
+    } else {
+      // No archetype - show quiz with skip option
+      setSelectedJourney(journeyId);
+      setShowQuiz(true);
+    }
+  };
+
+  const handleSkipQuizAndStartJourney = () => {
+    if (selectedJourney) {
+      setShowQuiz(false);
+      startJourneyDirectly(selectedJourney);
+    }
   };
 
   return (
@@ -178,7 +219,10 @@ export default function Index() {
         <Button 
           size="lg" 
           className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
-          onClick={() => setShowQuiz(true)}
+          onClick={() => {
+            setSelectedJourney(null);
+            setShowQuiz(true);
+          }}
         >
           <Sparkles className="w-5 h-5 mr-2" />
           Take the Persona Quiz
@@ -274,12 +318,9 @@ export default function Index() {
         </Accordion>
       </div>
 
-      {/* Guided Journeys - Now link to quiz */}
+      {/* Guided Journeys */}
       <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
         <h2 className="text-lg font-semibold mb-4">Guided Journeys</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Take the quiz to get a personalized path through the evidence based on your research style.
-        </p>
         <div className="grid grid-cols-2 gap-4">
           {journeys.map((journey) => (
             <button
@@ -310,9 +351,14 @@ export default function Index() {
       {/* Persona Quiz Modal */}
       <PersonaQuiz 
         isOpen={showQuiz} 
-        onClose={() => setShowQuiz(false)}
+        onClose={() => {
+          setShowQuiz(false);
+          setSelectedJourney(null);
+        }}
         onComplete={handleQuizComplete}
         onExploreFreelyClick={handleExploreFreelyFromQuiz}
+        selectedJourney={selectedJourney}
+        onSkipQuizAndStartJourney={handleSkipQuizAndStartJourney}
       />
     </div>
   );
