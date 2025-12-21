@@ -266,7 +266,7 @@ export default function SectionPage() {
 
       {/* Content Blocks (Video Context) - Side-by-side layout */}
       {contentBlocks.length > 0 ? (
-        <div className="mb-8 space-y-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <div className="space-y-6 mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
           {contentBlocks.map((block, index) => {
             const embedUrl = block.video_url ? getYouTubeEmbedUrl(block.video_url) : null;
             return (
@@ -275,21 +275,19 @@ export default function SectionPage() {
                 className="bg-card rounded-xl shadow-md overflow-hidden animate-fade-in"
                 style={{ animationDelay: `${(index + 1) * 75}ms` }}
               >
-                <div className="flex flex-col md:flex-row">
+                <div className="grid grid-cols-1 md:grid-cols-2">
                   {/* Video on left (desktop) / top (mobile) */}
-                  <div className="md:w-1/2 flex-shrink-0">
+                  <div className="aspect-video overflow-hidden">
                     {embedUrl ? (
-                      <div className="aspect-video h-full">
-                        <iframe
-                          src={embedUrl}
-                          title={block.title}
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
+                      <iframe
+                        src={embedUrl}
+                        title={block.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
                     ) : block.video_url ? (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
                         <a 
                           href={block.video_url} 
                           target="_blank" 
@@ -299,12 +297,14 @@ export default function SectionPage() {
                           <Play className="w-5 h-5" /> Watch Video
                         </a>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="w-full h-full bg-muted" />
+                    )}
                   </div>
                   
                   {/* Text on right (desktop) / bottom (mobile) */}
-                  <div className="md:w-1/2 p-6 flex flex-col justify-center">
-                    <h3 className="font-bold text-lg mb-3">{block.title}</h3>
+                  <div className="p-6 flex flex-col justify-center">
+                    <h3 className="text-xl font-bold mb-3">{block.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">
                       {renderBoldText(block.content)}
                     </p>
