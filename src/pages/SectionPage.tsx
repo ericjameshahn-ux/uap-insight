@@ -62,27 +62,55 @@ export default function SectionPage() {
     if (!sectionId) return;
 
     // Load path from localStorage
-    try {
-      const pathData = localStorage.getItem('uap_path');
-      const indexData = localStorage.getItem('uap_path_index');
-      const nameData = localStorage.getItem('uap_archetype_name');
-      
-      if (pathData) {
-        const path = JSON.parse(pathData);
-        setUserPath(path);
-        setPathIndex(parseInt(indexData || '0', 10));
-        setArchetypeName(nameData || '');
+    const loadPathData = () => {
+      try {
+        const pathData = localStorage.getItem('uap_path');
+        const indexData = localStorage.getItem('uap_path_index');
+        const nameData = localStorage.getItem('uap_archetype_name');
         
-        // Update path index if we're on a path section
-        const currentPathIndex = path.indexOf(sectionId.toLowerCase());
-        if (currentPathIndex !== -1 && currentPathIndex !== parseInt(indexData || '0', 10)) {
-          localStorage.setItem('uap_path_index', currentPathIndex.toString());
-          setPathIndex(currentPathIndex);
+        console.log('🔍 SectionPage loading path data:');
+        console.log('  Raw uap_path:', pathData);
+        console.log('  Raw uap_path_index:', indexData);
+        console.log('  Raw uap_archetype_name:', nameData);
+        
+        if (pathData && pathData !== 'null' && pathData !== '[]') {
+          const path = JSON.parse(pathData);
+          if (Array.isArray(path) && path.length > 0) {
+            console.log('  Parsed path:', path);
+            setUserPath(path);
+            setPathIndex(parseInt(indexData || '0', 10));
+            setArchetypeName(nameData || '');
+            
+            // Update path index if we're on a path section
+            const currentPathIndex = path.indexOf(sectionId.toLowerCase());
+            if (currentPathIndex !== -1 && currentPathIndex !== parseInt(indexData || '0', 10)) {
+              localStorage.setItem('uap_path_index', currentPathIndex.toString());
+              setPathIndex(currentPathIndex);
+            }
+          } else {
+            console.log('  Path is empty array, clearing state');
+            setUserPath([]);
+          }
+        } else {
+          console.log('  No valid path data found');
+          setUserPath([]);
+          setPathIndex(0);
+          setArchetypeName('');
         }
+      } catch (e) {
+        console.error('❌ Error loading path:', e);
+        setUserPath([]);
       }
-    } catch (e) {
-      console.error('Error loading path:', e);
-    }
+    };
+    
+    loadPathData();
+    
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      console.log('📦 Storage event received, reloading path data');
+      loadPathData();
+    };
+    window.addEventListener('storage', handleStorageChange);
 
     const fetchData = async () => {
       setLoading(true);

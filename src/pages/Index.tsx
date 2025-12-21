@@ -135,20 +135,33 @@ export default function Index() {
 
   const startJourneyDirectly = (journeyId: string) => {
     const journey = journeyPaths[journeyId];
-    if (!journey) return;
-
+    
     console.log('🔵 Starting journey directly:');
-    console.log('  Journey:', journeyId);
+    console.log('  Journey ID:', journeyId);
+    console.log('  Journey object:', journey);
+    
+    if (!journey) {
+      console.error('❌ Journey not found for ID:', journeyId);
+      console.log('  Available journeys:', Object.keys(journeyPaths));
+      return;
+    }
+
     console.log('  Path:', journey.path);
+    console.log('  Name:', journey.name);
 
-    // Store path in localStorage
-    localStorage.setItem('uap_path', JSON.stringify(journey.path));
-    localStorage.setItem('uap_path_index', '0');
-    localStorage.setItem('uap_archetype_name', journey.name);
-    localStorage.setItem('uap_archetype_id', journeyId);
+    try {
+      // Store path in localStorage
+      localStorage.setItem('uap_path', JSON.stringify(journey.path));
+      localStorage.setItem('uap_path_index', '0');
+      localStorage.setItem('uap_archetype_name', journey.name);
+      localStorage.setItem('uap_archetype_id', journeyId);
 
-    // Verify saved data
-    console.log('  Verify - uap_path:', localStorage.getItem('uap_path'));
+      // Verify saved data
+      console.log('✅ Verify saved - uap_path:', localStorage.getItem('uap_path'));
+      console.log('✅ Verify saved - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
+    } catch (e) {
+      console.error('❌ Error saving to localStorage:', e);
+    }
     
     // Dispatch storage event to notify other components
     window.dispatchEvent(new StorageEvent('storage', { key: 'uap_path' }));

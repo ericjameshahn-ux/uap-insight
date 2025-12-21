@@ -199,25 +199,37 @@ export function PersonaQuiz({
     
     const primaryId = sorted[0]?.[0];
     const primaryArchetype = archetypes.find(a => a.id === primaryId);
-    const recommendedPath = primaryArchetype?.recommended_sections || [];
+    
+    // Use archetype's recommended sections, or fallback to executive brief path
+    let recommendedPath = primaryArchetype?.recommended_sections || [];
+    if (!recommendedPath || recommendedPath.length === 0) {
+      console.warn('No recommended_sections found for archetype, using fallback path');
+      recommendedPath = ["a", "b", "c", "f"]; // Fallback to executive brief
+    }
     
     // Get or create user ID
     const userId = getUserId();
     
     // Store SIMPLIFIED path data in localStorage
     console.log('🔵 Quiz Complete - Saving path data:');
+    console.log('  Primary archetype ID:', primaryId);
+    console.log('  Primary archetype:', primaryArchetype);
     console.log('  Path:', recommendedPath);
-    console.log('  Archetype:', primaryArchetype?.name);
+    console.log('  Archetype name:', primaryArchetype?.name);
     
-    localStorage.setItem('uap_user_id', userId);
-    localStorage.setItem('uap_archetype_id', primaryId || '');
-    localStorage.setItem('uap_archetype_name', primaryArchetype?.name || '');
-    localStorage.setItem('uap_path', JSON.stringify(recommendedPath));
-    localStorage.setItem('uap_path_index', '0');
-    
-    // Verify saved data
-    console.log('  Verify - uap_path:', localStorage.getItem('uap_path'));
-    console.log('  Verify - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
+    try {
+      localStorage.setItem('uap_user_id', userId);
+      localStorage.setItem('uap_archetype_id', primaryId || 'unknown');
+      localStorage.setItem('uap_archetype_name', primaryArchetype?.name || 'Researcher');
+      localStorage.setItem('uap_path', JSON.stringify(recommendedPath));
+      localStorage.setItem('uap_path_index', '0');
+      
+      // Verify saved data
+      console.log('✅ Verify saved - uap_path:', localStorage.getItem('uap_path'));
+      console.log('✅ Verify saved - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
+    } catch (e) {
+      console.error('❌ Error saving to localStorage:', e);
+    }
     
     // Dispatch storage event to notify other components
     window.dispatchEvent(new StorageEvent('storage', { key: 'uap_path' }));
