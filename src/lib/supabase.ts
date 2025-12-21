@@ -100,3 +100,22 @@ export interface SectionContentBlock {
   content: string;
   video_url?: string;
 }
+
+export interface UserProgress {
+  id?: string;
+  user_id: string;
+  journey_id: string;
+  step_index: number;
+  status: 'viewed' | 'saved' | 'skipped';
+  updated_at?: string;
+}
+
+// Helper to get or create user ID
+export function getUserId(): string {
+  let userId = localStorage.getItem('uap_user_id');
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem('uap_user_id', userId);
+  }
+  return userId;
+}
