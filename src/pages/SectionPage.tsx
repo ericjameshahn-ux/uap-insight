@@ -264,8 +264,58 @@ export default function SectionPage() {
         <p className="text-muted-foreground leading-relaxed">{section.description}</p>
       </div>
 
-      {/* Intro Content */}
-      {(section as any).intro_content && (
+      {/* Content Blocks (Video Context) - Side-by-side layout */}
+      {contentBlocks.length > 0 ? (
+        <div className="mb-8 space-y-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
+          {contentBlocks.map((block, index) => {
+            const embedUrl = block.video_url ? getYouTubeEmbedUrl(block.video_url) : null;
+            return (
+              <div 
+                key={block.id} 
+                className="bg-card rounded-xl shadow-md overflow-hidden animate-fade-in"
+                style={{ animationDelay: `${(index + 1) * 75}ms` }}
+              >
+                <div className="flex flex-col md:flex-row">
+                  {/* Video on left (desktop) / top (mobile) */}
+                  <div className="md:w-1/2 flex-shrink-0">
+                    {embedUrl ? (
+                      <div className="aspect-video h-full">
+                        <iframe
+                          src={embedUrl}
+                          title={block.title}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : block.video_url ? (
+                      <div className="aspect-video bg-muted flex items-center justify-center">
+                        <a 
+                          href={block.video_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline flex items-center gap-2"
+                        >
+                          <Play className="w-5 h-5" /> Watch Video
+                        </a>
+                      </div>
+                    ) : null}
+                  </div>
+                  
+                  {/* Text on right (desktop) / bottom (mobile) */}
+                  <div className="md:w-1/2 p-6 flex flex-col justify-center">
+                    <h3 className="font-bold text-lg mb-3">{block.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {renderBoldText(block.content)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (section as any).intro_content ? (
+        /* Fallback: Intro Content if no content blocks */
         <div className="mb-8 p-6 bg-muted/50 rounded-lg animate-fade-in" style={{ animationDelay: '50ms' }}>
           <div className="prose prose-sm max-w-none text-foreground leading-relaxed space-y-4">
             {((section as any).intro_content as string).split('\n\n').map((paragraph, i) => (
@@ -273,54 +323,7 @@ export default function SectionPage() {
             ))}
           </div>
         </div>
-      )}
-
-      {/* Content Blocks (Video Context) */}
-      {contentBlocks.length > 0 && (
-        <div className="mb-8 space-y-6 animate-fade-in" style={{ animationDelay: '75ms' }}>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <VideoIcon className="w-5 h-5 text-primary" />
-            Key Video Sources ({contentBlocks.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {contentBlocks.map((block) => {
-              const embedUrl = block.video_url ? getYouTubeEmbedUrl(block.video_url) : null;
-              return (
-                <div key={block.id} className="card-elevated overflow-hidden">
-                  {embedUrl ? (
-                    <div className="aspect-video">
-                      <iframe
-                        src={embedUrl}
-                        title={block.title}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : block.video_url ? (
-                    <div className="aspect-video bg-muted flex items-center justify-center">
-                      <a 
-                        href={block.video_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline flex items-center gap-2"
-                      >
-                        <Play className="w-5 h-5" /> Watch Video
-                      </a>
-                    </div>
-                  ) : null}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-sm mb-2">{block.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {renderBoldText(block.content)}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      ) : null}
 
       {/* Section Videos */}
       {sectionVideos.length > 0 && (
