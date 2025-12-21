@@ -429,7 +429,7 @@ export default function Index() {
             </div>
             <div className="text-left">
               <div className="font-semibold text-lg text-foreground">Chat with UAP Navigator AI</div>
-              <div className="text-sm text-muted-foreground">Personalized to your research profile</div>
+              <div className="text-sm text-muted-foreground">Powered by Claude • Personalized to your profile</div>
             </div>
           </Link>
         </div>
