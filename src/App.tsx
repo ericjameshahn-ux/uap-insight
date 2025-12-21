@@ -15,6 +15,7 @@ import AboutQuiz from "./pages/AboutQuiz";
 import ChatPage from "./pages/ChatPage";
 import SavedItems from "./pages/SavedItems";
 import MyPath from "./pages/MyPath";
+import TimelinePage from "./pages/TimelinePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/my-path" element={<MyPath />} />
+            <Route path="/timeline" element={<TimelinePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

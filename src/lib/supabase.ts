@@ -110,6 +110,24 @@ export interface UserProgress {
   updated_at?: string;
 }
 
+export interface TimelineEvent {
+  id: string;
+  year: number;
+  month: number | null;
+  day: number | null;
+  date_display: string;
+  title: string;
+  description: string;
+  tier: 'HIGH' | 'MEDIUM' | 'LOWER';
+  category: string;
+  related_sections: string[] | null;
+  key_figures: string[] | null;
+  source: string | null;
+  source_url: string | null;
+  is_milestone: boolean;
+  created_at?: string;
+}
+
 // Helper to get or create user ID
 export function getUserId(): string {
   let userId = localStorage.getItem('uap_user_id');
