@@ -376,15 +376,13 @@ export default function SectionPage() {
               <FileText className="h-5 w-5 text-primary" />
               Source Documents
             </h3>
-            <a
-              href={NOTEBOOK_LM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            <Button
+              onClick={() => window.open(NOTEBOOK_LM_URL, '_blank', 'noopener,noreferrer')}
+              className="inline-flex items-center gap-2"
             >
               <Sparkles className="h-4 w-4" />
               Ask AI About These Sources
-            </a>
+            </Button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
