@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Send, ExternalLink, Bot, User, Sparkles } from "lucide-react";
+import { Send, ExternalLink, Bot, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +33,22 @@ const archetypeInfo: Record<string, { name: string; icon: string }> = {
   meaning_seeker: { name: "The Meaning Seeker", icon: "🌌" },
   debunker: { name: "The Debunker", icon: "🎯" },
   experiencer: { name: "The Experiencer", icon: "✨" },
+  scientist: { name: "The Scientist", icon: "⚛️" },
+  policymaker: { name: "The Policymaker", icon: "🏛️" },
+  philosopher: { name: "The Philosopher", icon: "💭" },
+  skeptic: { name: "The Skeptic", icon: "🤔" },
+  executive: { name: "Executive Brief", icon: "📊" },
+  physics: { name: "Physics Deep Dive", icon: "⚛️" },
+  retrieval: { name: "Crash Retrieval", icon: "🛸" },
+  consciousness: { name: "Consciousness Connection", icon: "🧠" },
 };
+
+const suggestedQuestions = [
+  "Isn't this all misidentified aircraft?",
+  "Why hasn't evidence leaked?",
+  "What physical evidence exists?",
+  "How can craft violate physics?",
+];
 
 const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
 
@@ -43,13 +57,13 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [faqResponses, setFaqResponses] = useState<FAQResponse[]>([]);
-  const [userArchetype, setUserArchetype] = useState<string | null>(null);
+  const [userArchetype, setUserArchetype] = useState<string>("empiricist");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Get user archetype from localStorage
-    const archetype = localStorage.getItem("uap_archetype");
+    // Get user archetype from localStorage (use uap_archetype_id)
+    const archetype = localStorage.getItem("uap_archetype_id") || "empiricist";
     setUserArchetype(archetype);
 
     // Fetch FAQ responses
@@ -59,20 +73,24 @@ export default function ChatPage() {
         .select("*");
       
       if (data && !error) {
-        setFaqResponses(data);
+        // Parse sources if stored as JSON string
+        const parsed = data.map((faq: any) => ({
+          ...faq,
+          sources: typeof faq.sources === 'string' ? JSON.parse(faq.sources) : faq.sources || [],
+          persona_tags: typeof faq.persona_tags === 'string' ? JSON.parse(faq.persona_tags) : faq.persona_tags || [],
+        }));
+        setFaqResponses(parsed);
       }
     };
     fetchFAQs();
 
     // Add welcome message
-    const archetypeDisplay = archetype ? archetypeInfo[archetype] : null;
+    const archetypeDisplay = archetypeInfo[archetype] || archetypeInfo.empiricist;
     setMessages([
       {
         id: "welcome",
         role: "assistant",
-        content: archetypeDisplay 
-          ? `Welcome! I'm your research assistant, tailored for ${archetypeDisplay.name} ${archetypeDisplay.icon}. Ask me common skeptical questions about UAP research, and I'll provide evidence-based responses with sources.`
-          : `Welcome! Ask me common skeptical questions about UAP research, and I'll provide evidence-based responses with sources. Take the persona quiz to get personalized responses!`,
+        content: `Welcome! I'm your research assistant, tailored for ${archetypeDisplay.name} ${archetypeDisplay.icon}. Ask me common skeptical questions about UAP research, and I'll provide evidence-based responses with sources.`,
       },
     ]);
   }, []);
@@ -122,13 +140,14 @@ export default function ChatPage() {
     return bestMatch;
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (messageText?: string) => {
+    const text = messageText || input.trim();
+    if (!text || isLoading) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: text,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -144,7 +163,7 @@ export default function ChatPage() {
     const assistantMessage: ChatMessage = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
-      content: match ? "" : "I couldn't find a pre-built response for that specific question.",
+      content: match ? "" : "I don't have a pre-built answer for that specific question. Try rephrasing, or explore the AI Research Assistant for deeper research.",
       faqMatch: match || undefined,
       isNoMatch: !match,
     };
@@ -161,7 +180,11 @@ export default function ChatPage() {
     }
   };
 
-  const archetypeDisplay = userArchetype ? archetypeInfo[userArchetype] : null;
+  const handleSuggestedQuestion = (question: string) => {
+    handleSend(question);
+  };
+
+  const archetypeDisplay = archetypeInfo[userArchetype] || archetypeInfo.empiricist;
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-w-4xl mx-auto">
@@ -176,12 +199,10 @@ export default function ChatPage() {
             <p className="text-xs text-muted-foreground">FAQ-based responses with sources</p>
           </div>
         </div>
-        {archetypeDisplay && (
-          <Badge variant="secondary" className="gap-1.5">
-            <span>{archetypeDisplay.icon}</span>
-            <span>Chatting as: {archetypeDisplay.name}</span>
-          </Badge>
-        )}
+        <Badge variant="secondary" className="gap-1.5">
+          <span>{archetypeDisplay.icon}</span>
+          <span>{archetypeDisplay.name}</span>
+        </Badge>
       </div>
 
       {/* Messages */}
@@ -221,17 +242,11 @@ export default function ChatPage() {
                         <p className="text-xs font-medium text-muted-foreground mb-1.5">
                           Explore Further:
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground">
                           {message.faqMatch.sources.map((source, idx) => (
-                            <Badge
-                              key={idx}
-                              variant="outline"
-                              className="text-xs cursor-pointer hover:bg-primary/10"
-                            >
-                              {source}
-                            </Badge>
+                            <li key={idx}>{source}</li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     )}
                   </div>
@@ -242,19 +257,22 @@ export default function ChatPage() {
                   <div className="space-y-3">
                     <p className="text-sm">{message.content}</p>
                     <div className="pt-2 border-t border-border/50">
-                      <p className="text-xs text-muted-foreground mb-2">
-                        For questions beyond our FAQ, try the AI Research Assistant:
-                      </p>
-                      <a
-                        href={AI_ASSISTANT_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="gap-1.5"
                       >
-                        <Sparkles className="w-3 h-3" />
-                        Open NotebookLM Assistant
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
+                        <a
+                          href={AI_ASSISTANT_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          Open NotebookLM
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -277,6 +295,22 @@ export default function ChatPage() {
         </div>
       </ScrollArea>
 
+      {/* Suggested Questions */}
+      <div className="px-4 py-2 border-t border-border">
+        <div className="flex flex-wrap gap-2">
+          {suggestedQuestions.map((question, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSuggestedQuestion(question)}
+              disabled={isLoading}
+              className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors disabled:opacity-50"
+            >
+              {question}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Input */}
       <div className="p-4 border-t border-border">
         <div className="flex gap-2">
@@ -289,7 +323,7 @@ export default function ChatPage() {
             className="flex-1"
             disabled={isLoading}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
+          <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading}>
             <Send className="w-4 h-4" />
           </Button>
         </div>
