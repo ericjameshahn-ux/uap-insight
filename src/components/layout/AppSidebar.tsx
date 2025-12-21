@@ -312,7 +312,7 @@ export function AppSidebar() {
                 );
               })}
               
-              {/* AI Research Assistant */}
+              {/* UAP Navigator AI */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
@@ -325,7 +325,12 @@ export function AppSidebar() {
                     )}
                   >
                     <MessageSquare className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span className="text-sm font-medium">AI Research Assistant</span>}
+                    {!collapsed && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">UAP Navigator AI</span>
+                        <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded font-semibold">NEW</span>
+                      </div>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

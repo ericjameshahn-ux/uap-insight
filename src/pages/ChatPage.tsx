@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Bot, Loader2 } from "lucide-react";
+import { Send, Bot, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -12,6 +11,8 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
+
+const DAILY_LIMIT = 20;
 
 // Archetype display names, icons, and descriptions
 const archetypeInfo: Record<string, { name: string; icon: string; description: string }> = {
@@ -87,6 +88,25 @@ const getImplications = (responseText: string): string => {
   return "this research area carries implications for aerospace, defense, energy, and emerging technology sectors. Information asymmetry creates both risks and opportunities for stakeholders tracking these developments.";
 };
 
+// Usage tracking helpers
+const getTodayKey = () => {
+  const today = new Date();
+  return `uap_chat_usage_${today.toISOString().split('T')[0]}`;
+};
+
+const getMessageCount = (): number => {
+  const key = getTodayKey();
+  const count = localStorage.getItem(key);
+  return count ? parseInt(count, 10) : 0;
+};
+
+const incrementMessageCount = (): number => {
+  const key = getTodayKey();
+  const newCount = getMessageCount() + 1;
+  localStorage.setItem(key, newCount.toString());
+  return newCount;
+};
+
 const suggestedQuestions = [
   "What physical evidence exists for UAPs?",
   "Who are the key whistleblowers?",
@@ -99,6 +119,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userArchetype, setUserArchetype] = useState<string>("empiricist");
+  const [messageCount, setMessageCount] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +127,9 @@ export default function ChatPage() {
     // Get user archetype from localStorage
     const archetype = localStorage.getItem("uap_archetype_id") || "empiricist";
     setUserArchetype(archetype);
+
+    // Get current message count
+    setMessageCount(getMessageCount());
 
     // Add welcome message
     const archetypeDisplay = archetypeInfo[archetype] || archetypeInfo.empiricist;
@@ -125,9 +149,17 @@ export default function ChatPage() {
     }
   }, [messages]);
 
+  const canSendMessage = messageCount < DAILY_LIMIT;
+
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
+
+    // Check usage limit
+    if (!canSendMessage) {
+      toast.error("Daily limit reached. Try again tomorrow or use Query Source Documents for unlimited access.");
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -169,6 +201,10 @@ export default function ChatPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      
+      // Increment usage count on successful response
+      const newCount = incrementMessageCount();
+      setMessageCount(newCount);
     } catch (error) {
       console.error("Chat error:", error);
       toast.error("Failed to get AI response. Please try again.");
@@ -193,25 +229,46 @@ export default function ChatPage() {
   };
 
   const archetypeDisplay = archetypeInfo[userArchetype] || archetypeInfo.empiricist;
+  const remainingMessages = DAILY_LIMIT - messageCount;
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-3">
+      <div className="text-center py-6 border-b border-border">
+        <div className="flex items-center justify-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
             <Bot className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h1 className="font-semibold">UAP Navigator AI</h1>
-            <p className="text-xs text-muted-foreground">Powered by Claude • Personalized for {archetypeDisplay.name}</p>
-          </div>
+          <h1 className="text-2xl font-bold">UAP Navigator AI</h1>
         </div>
-        <Badge variant="secondary" className="gap-1.5">
-          <span>{archetypeDisplay.icon}</span>
-          <span>{archetypeDisplay.name}</span>
-        </Badge>
+        <p className="text-sm text-muted-foreground">
+          Powered by Claude Sonnet 4 (Anthropic's latest)
+        </p>
+        {userArchetype && (
+          <p className="text-sm text-primary mt-1">
+            Personalized for: {archetypeDisplay.name} {archetypeDisplay.icon}
+          </p>
+        )}
       </div>
+
+      {/* Usage Warning */}
+      {messageCount >= 15 && messageCount < DAILY_LIMIT && (
+        <div className="mx-4 mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>⚠️ You have {remainingMessages} messages remaining today</span>
+        </div>
+      )}
+
+      {/* Limit Reached */}
+      {messageCount >= DAILY_LIMIT && (
+        <div className="mx-4 mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-800 dark:text-red-200">
+          <p className="font-medium">Daily limit reached.</p>
+          <p className="mt-1">Your limit resets at midnight UTC.</p>
+          <p className="text-xs mt-2 opacity-80">
+            Need more? Use "Query Source Documents" on any section page for unlimited NotebookLM access.
+          </p>
+        </div>
+      )}
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
@@ -271,7 +328,7 @@ export default function ChatPage() {
             <button
               key={idx}
               onClick={() => handleSuggestedQuestion(question)}
-              disabled={isLoading}
+              disabled={isLoading || !canSendMessage}
               className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors disabled:opacity-50"
             >
               {question}
@@ -288,14 +345,19 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about UAP evidence, key figures, or recent developments..."
+            placeholder={canSendMessage ? "Ask about UAP evidence, key figures, or recent developments..." : "Daily limit reached..."}
             className="flex-1"
-            disabled={isLoading}
+            disabled={isLoading || !canSendMessage}
           />
-          <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading}>
+          <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading || !canSendMessage}>
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        {canSendMessage && (
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            {remainingMessages} of {DAILY_LIMIT} messages remaining today
+          </p>
+        )}
       </div>
     </div>
   );
