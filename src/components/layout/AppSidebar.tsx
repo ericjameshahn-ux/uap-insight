@@ -11,6 +11,7 @@ import {
   HelpCircle,
   Play,
   Map,
+  MessageSquare,
 } from "lucide-react";
 import {
   Sidebar,
@@ -295,17 +296,35 @@ export function AppSidebar() {
                 );
               })}
               
-              {/* AI Research Assistant */}
+              {/* Chat with AI */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    to="/chat"
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md transition-colors",
+                      isActive('/chat')
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        : "hover:bg-sidebar-accent/50 text-primary"
+                    )}
+                  >
+                    <MessageSquare className="w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="text-sm font-medium">Chat with AI</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* AI Research Assistant (External) */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <a
                     href={AI_ASSISTANT_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-sidebar-accent/50 text-primary"
+                    className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-sidebar-accent/50 text-muted-foreground"
                   >
                     <Sparkles className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span className="text-sm font-medium">AI Research Assistant</span>}
+                    {!collapsed && <span className="text-sm">NotebookLM Assistant</span>}
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
