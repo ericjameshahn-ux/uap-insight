@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowRight, X, Play, Video as VideoIcon } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
@@ -33,11 +33,9 @@ const defaultSectionOrder = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', '
 function getYouTubeEmbedUrl(url: string): string | null {
   if (!url) return null;
   
-  // Handle youtube.com/watch?v=XXX
   const watchMatch = url.match(/youtube\.com\/watch\?v=([^&]+)/);
   if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
   
-  // Handle youtu.be/XXX
   const shortMatch = url.match(/youtu\.be\/([^?]+)/);
   if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
   
@@ -46,6 +44,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
 
 export default function SectionPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
+  const navigate = useNavigate();
   const [section, setSection] = useState<Section | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [sectionVideos, setSectionVideos] = useState<Video[]>([]);
@@ -54,37 +53,40 @@ export default function SectionPage() {
   const [contentBlocks, setContentBlocks] = useState<SectionContentBlock[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Navigation state
-  const [navigationMode, setNavigationMode] = useState<'free' | 'personalized'>('free');
-  const [personalizedPath, setPersonalizedPath] = useState<string[]>([]);
-  const [pathName, setPathName] = useState<string>('');
+  // Path state
+  const [userPath, setUserPath] = useState<string[]>([]);
+  const [pathIndex, setPathIndex] = useState(0);
+  const [archetypeName, setArchetypeName] = useState('');
 
   useEffect(() => {
     if (!sectionId) return;
 
-    // Load navigation preferences from localStorage
-    const mode = localStorage.getItem('uap_navigation_mode') as 'free' | 'personalized' || 'free';
-    setNavigationMode(mode);
-    
-    if (mode === 'personalized') {
-      try {
-        const quizData = localStorage.getItem('uap-persona-quiz');
-        if (quizData) {
-          const parsed = JSON.parse(quizData);
-          if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
-            setPersonalizedPath(parsed.recommendedPath.map((s: string) => s.toLowerCase()));
-            setPathName(parsed.primaryName || 'Personalized');
-          }
+    // Load path from localStorage
+    try {
+      const pathData = localStorage.getItem('uap_path');
+      const indexData = localStorage.getItem('uap_path_index');
+      const nameData = localStorage.getItem('uap_archetype_name');
+      
+      if (pathData) {
+        const path = JSON.parse(pathData);
+        setUserPath(path);
+        setPathIndex(parseInt(indexData || '0', 10));
+        setArchetypeName(nameData || '');
+        
+        // Update path index if we're on a path section
+        const currentPathIndex = path.indexOf(sectionId.toLowerCase());
+        if (currentPathIndex !== -1 && currentPathIndex !== parseInt(indexData || '0', 10)) {
+          localStorage.setItem('uap_path_index', currentPathIndex.toString());
+          setPathIndex(currentPathIndex);
         }
-      } catch (e) {
-        console.error('Error reading personalized path:', e);
       }
+    } catch (e) {
+      console.error('Error loading path:', e);
     }
 
     const fetchData = async () => {
       setLoading(true);
       
-      // Fetch section
       const { data: sectionData } = await supabase
         .from('sections')
         .select('*')
@@ -97,7 +99,6 @@ export default function SectionPage() {
         setSection(fallbackSections[sectionId.toLowerCase()] || null);
       }
 
-      // Fetch ALL claims for this section (no limit!)
       const queryId = sectionId.toLowerCase();
       
       const { data: claimsData } = await supabase
@@ -108,7 +109,6 @@ export default function SectionPage() {
       
       setClaims(claimsData || []);
 
-      // Fetch ALL videos for this section (ordered by recommended first)
       const { data: videosData } = await supabase
         .from('videos')
         .select('*')
@@ -117,7 +117,6 @@ export default function SectionPage() {
       
       setSectionVideos(videosData || []);
 
-      // Fetch content blocks for this section
       const { data: blocksData } = await supabase
         .from('section_content_blocks')
         .select('*')
@@ -126,7 +125,6 @@ export default function SectionPage() {
       
       setContentBlocks(blocksData || []);
 
-      // Fetch related figures (from claims with figure_ids)
       if (claimsData && claimsData.length > 0) {
         const figureIds = [...new Set(claimsData.filter(c => c.figure_id).map(c => c.figure_id))];
         if (figureIds.length > 0) {
@@ -157,27 +155,34 @@ export default function SectionPage() {
     }
   };
 
-  const handleExitPersonalizedPath = () => {
-    localStorage.setItem('uap_navigation_mode', 'free');
-    setNavigationMode('free');
-    setPersonalizedPath([]);
-    setPathName('');
+  const handleExitPath = () => {
+    localStorage.removeItem('uap_path');
+    localStorage.removeItem('uap_path_index');
+    localStorage.removeItem('uap_archetype_id');
+    localStorage.removeItem('uap_archetype_name');
+    setUserPath([]);
+    setPathIndex(0);
+    setArchetypeName('');
   };
 
-  // Calculate navigation based on mode
-  const activePath = navigationMode === 'personalized' && personalizedPath.length > 0 
-    ? personalizedPath 
-    : defaultSectionOrder;
+  const handleNextSection = () => {
+    if (pathIndex < userPath.length - 1) {
+      const nextSection = userPath[pathIndex + 1];
+      localStorage.setItem('uap_path_index', (pathIndex + 1).toString());
+      navigate(`/section/${nextSection}`);
+    }
+  };
+
+  // Check if current section is in the path
+  const currentSectionLower = sectionId?.toLowerCase() || '';
+  const isInPath = userPath.includes(currentSectionLower);
+  const currentPathPosition = userPath.indexOf(currentSectionLower);
+  const isLastInPath = currentPathPosition === userPath.length - 1;
+  const nextSection = !isLastInPath && currentPathPosition >= 0 ? userPath[currentPathPosition + 1] : null;
   
-  const currentIndex = activePath.indexOf(sectionId?.toLowerCase() || '');
-  const nextSection = currentIndex >= 0 && currentIndex < activePath.length - 1 
-    ? activePath[currentIndex + 1] 
-    : null;
-  const prevSection = currentIndex > 0 ? activePath[currentIndex - 1] : null;
-  
-  // Progress calculation for personalized path
-  const pathProgress = navigationMode === 'personalized' && personalizedPath.length > 0
-    ? ((currentIndex + 1) / personalizedPath.length) * 100
+  // Progress calculation
+  const pathProgress = userPath.length > 0 && currentPathPosition >= 0
+    ? ((currentPathPosition + 1) / userPath.length) * 100
     : 0;
 
   if (loading) {
@@ -212,36 +217,37 @@ export default function SectionPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      {/* Personalized Path Progress Banner */}
-      {navigationMode === 'personalized' && personalizedPath.length > 0 && currentIndex >= 0 && (
+      {/* Path Progress Banner */}
+      {userPath.length > 0 && isInPath && (
         <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-primary">
-              Part {currentIndex + 1} of {personalizedPath.length} in your {pathName} path
+              Part {currentPathPosition + 1} of {userPath.length} in your {archetypeName} path
             </span>
             <button 
-              onClick={handleExitPersonalizedPath}
+              onClick={handleExitPath}
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
               <X className="w-3 h-3" />
-              Exit personalized path
+              Exit path
             </button>
           </div>
           <Progress value={pathProgress} className="h-2" />
           <div className="flex items-center gap-1 mt-2 flex-wrap">
-            {personalizedPath.map((s, i) => (
-              <span 
-                key={s} 
-                className={`px-2 py-0.5 rounded text-xs font-mono ${
-                  s === sectionId?.toLowerCase() 
+            {userPath.map((s, i) => (
+              <Link
+                key={s}
+                to={`/section/${s}`}
+                className={`px-2 py-0.5 rounded text-xs font-mono uppercase transition-colors ${
+                  s === currentSectionLower 
                     ? 'bg-primary text-primary-foreground' 
-                    : i < currentIndex 
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-muted text-muted-foreground'
+                    : i < currentPathPosition 
+                      ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
-                {s.toUpperCase()}
-              </span>
+                {s}
+              </Link>
             ))}
           </div>
         </div>
@@ -276,7 +282,6 @@ export default function SectionPage() {
                 style={{ animationDelay: `${(index + 1) * 75}ms` }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2">
-                  {/* Video on left (desktop) / top (mobile) */}
                   <div className="aspect-video overflow-hidden">
                     {embedUrl ? (
                       <iframe
@@ -302,7 +307,6 @@ export default function SectionPage() {
                     )}
                   </div>
                   
-                  {/* Text on right (desktop) / bottom (mobile) */}
                   <div className="p-6 flex flex-col justify-center">
                     <h3 className="text-xl font-bold mb-3">{block.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">
@@ -315,7 +319,6 @@ export default function SectionPage() {
           })}
         </div>
       ) : (section as any).intro_content ? (
-        /* Fallback: Intro Content if no content blocks */
         <div className="mb-8 p-6 bg-muted/50 rounded-lg animate-fade-in" style={{ animationDelay: '50ms' }}>
           <div className="prose prose-sm max-w-none text-foreground leading-relaxed space-y-4">
             {((section as any).intro_content as string).split('\n\n').map((paragraph, i) => (
@@ -325,9 +328,8 @@ export default function SectionPage() {
         </div>
       ) : null}
 
-      {/* Section Videos - exclude videos already in content blocks */}
+      {/* Section Videos */}
       {(() => {
-        // Get video URLs from content blocks to filter duplicates
         const contentBlockUrls = new Set(
           contentBlocks.map(block => block.video_url).filter(Boolean)
         );
@@ -342,44 +344,9 @@ export default function SectionPage() {
               Additional Videos ({filteredVideos.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredVideos.map((video) => {
-                const embedUrl = getYouTubeEmbedUrl(video.url);
-                return (
-                  <div key={video.id} className="card-elevated overflow-hidden">
-                    {embedUrl ? (
-                      <div className="aspect-video">
-                        <iframe
-                          src={embedUrl}
-                          title={video.title}
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
-                        <a 
-                          href={video.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          Watch Video
-                        </a>
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-sm">{video.title}</h3>
-                      {video.duration && (
-                        <span className="text-xs text-muted-foreground">{video.duration}</span>
-                      )}
-                      {video.description && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{video.description}</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {filteredVideos.map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))}
             </div>
           </div>
         );
@@ -401,60 +368,83 @@ export default function SectionPage() {
             />
           </div>
         ))}
-        
-        {claims.length === 0 && (
-          <div className="card-elevated p-8 text-center text-muted-foreground">
-            No claims available for this section yet. Connect your Supabase database to load data.
-          </div>
-        )}
       </div>
 
       {/* Related Figures */}
       {relatedFigures.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">Related Figures</h2>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <h2 className="text-lg font-semibold mb-4">Key Figures in this Section</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {relatedFigures.map((figure) => (
-              <FigureCard 
-                key={figure.id} 
-                figure={figure} 
-                compact
-                onClick={() => setSelectedFigure(figure)}
-              />
+              <FigureCard key={figure.id} figure={figure} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Section Navigation */}
-      <div className="flex items-center justify-between pt-8 border-t border-border">
-        {prevSection ? (
-          <Link to={`/section/${prevSection}`}>
-            <Button variant="ghost">← Previous Section</Button>
-          </Link>
-        ) : <div />}
-        
-        {nextSection ? (
-          <Link to={`/section/${nextSection}`}>
-            <Button className="shadow-md">
-              Continue to Section {nextSection.toUpperCase()}
-              <ArrowRight className="w-4 h-4 ml-2" />
+      {/* Path Next Button OR Standard Navigation */}
+      {userPath.length > 0 && isInPath ? (
+        <div className="mt-12 pt-8 border-t border-border">
+          {isLastInPath ? (
+            <div className="text-center p-6 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <div className="text-3xl mb-2">🎉</div>
+              <h3 className="text-xl font-semibold text-green-600 mb-2">Path Complete!</h3>
+              <p className="text-muted-foreground mb-4">
+                You've completed your {archetypeName} journey through the evidence.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button variant="outline" onClick={handleExitPath}>
+                  Explore All Sections
+                </Button>
+                <Button asChild>
+                  <Link to="/">Back to Home</Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button 
+              onClick={handleNextSection}
+              size="lg"
+              className="w-full"
+            >
+              Next: Section {nextSection?.toUpperCase()}
+              <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
-          </Link>
-        ) : navigationMode === 'personalized' && currentIndex === personalizedPath.length - 1 ? (
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-2">🎉 Path Complete!</p>
-            <Link to="/">
-              <Button variant="outline">Return to Home</Button>
-            </Link>
-          </div>
-        ) : null}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex justify-between items-center mt-12 pt-8 border-t border-border">
+          {(() => {
+            const currentIndex = defaultSectionOrder.indexOf(sectionId?.toLowerCase() || '');
+            const prev = currentIndex > 0 ? defaultSectionOrder[currentIndex - 1] : null;
+            const next = currentIndex < defaultSectionOrder.length - 1 ? defaultSectionOrder[currentIndex + 1] : null;
+            
+            return (
+              <>
+                {prev ? (
+                  <Link to={`/section/${prev}`}>
+                    <Button variant="outline">
+                      ← Section {prev.toUpperCase()}
+                    </Button>
+                  </Link>
+                ) : <div />}
+                {next && (
+                  <Link to={`/section/${next}`}>
+                    <Button>
+                      Section {next.toUpperCase()} →
+                    </Button>
+                  </Link>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Figure Modal */}
       <Dialog open={!!selectedFigure} onOpenChange={() => setSelectedFigure(null)}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          {selectedFigure && <FigureCard figure={selectedFigure} showFullDetails />}
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {selectedFigure && <FigureCard figure={selectedFigure} />}
         </DialogContent>
       </Dialog>
     </div>

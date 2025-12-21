@@ -10,8 +10,8 @@ import {
   Sparkles,
   HelpCircle,
   Play,
-  Map,
   MessageSquare,
+  ChevronRight,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,7 +29,7 @@ import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase, Section, Journey } from "@/lib/supabase";
+import { supabase, Section } from "@/lib/supabase";
 
 // Fallback sections data when database isn't connected
 const fallbackSections: Section[] = [
@@ -65,9 +65,11 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [sections, setSections] = useState<Section[]>(fallbackSections);
-  const [personalizedPath, setPersonalizedPath] = useState<string[]>([]);
-  const [activeJourney, setActiveJourney] = useState<Journey | null>(null);
-  const [journeyProgress, setJourneyProgress] = useState({ current: 0, total: 0 });
+  
+  // Path state
+  const [userPath, setUserPath] = useState<string[]>([]);
+  const [pathIndex, setPathIndex] = useState(0);
+  const [archetypeName, setArchetypeName] = useState('');
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -82,74 +84,52 @@ export function AppSidebar() {
     };
     fetchSections();
 
-    // Load personalized path for highlighting
-    const mode = localStorage.getItem('uap_navigation_mode');
-    if (mode === 'personalized') {
+    // Load path from localStorage
+    const loadPath = () => {
       try {
-        const quizData = localStorage.getItem('uap-persona-quiz');
-        if (quizData) {
-          const parsed = JSON.parse(quizData);
-          if (parsed.recommendedPath && Array.isArray(parsed.recommendedPath)) {
-            setPersonalizedPath(parsed.recommendedPath.map((s: string) => s.toLowerCase()));
-          }
+        const pathData = localStorage.getItem('uap_path');
+        const indexData = localStorage.getItem('uap_path_index');
+        const nameData = localStorage.getItem('uap_archetype_name');
+        
+        if (pathData) {
+          setUserPath(JSON.parse(pathData));
+          setPathIndex(parseInt(indexData || '0', 10));
+          setArchetypeName(nameData || '');
+        } else {
+          setUserPath([]);
+          setPathIndex(0);
+          setArchetypeName('');
         }
       } catch (e) {
-        console.error('Error reading personalized path:', e);
-      }
-    }
-
-    // Load active journey
-    const loadActiveJourney = async () => {
-      const journeyId = localStorage.getItem('uap_journey');
-      if (journeyId) {
-        const { data } = await supabase
-          .from('journeys')
-          .select('*')
-          .eq('id', journeyId)
-          .maybeSingle();
-        
-        if (data) {
-          setActiveJourney(data);
-          
-          // Calculate progress
-          const stepStatuses = localStorage.getItem(`journey-${journeyId}-statuses`);
-          let completedCount = 0;
-          if (stepStatuses) {
-            try {
-              const parsed = JSON.parse(stepStatuses);
-              completedCount = Object.values(parsed).filter((s: any) => s === 'viewed').length;
-            } catch (e) {
-              console.error('Error parsing step statuses:', e);
-            }
-          }
-          
-          const steps = typeof data.steps === 'string' ? JSON.parse(data.steps) : (data.steps || []);
-          setJourneyProgress({
-            current: completedCount,
-            total: steps.length
-          });
-        }
+        console.error('Error loading path:', e);
       }
     };
-    loadActiveJourney();
+    
+    loadPath();
 
-    // Listen for storage changes (when progress updates on journey page)
+    // Listen for storage changes
     const handleStorageChange = () => {
-      loadActiveJourney();
+      loadPath();
     };
     window.addEventListener('storage', handleStorageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [location.pathname]); // Re-run when route changes
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
-  const isInPersonalizedPath = (letter: string) => personalizedPath.includes(letter.toLowerCase());
+  const isInPath = (letter: string) => userPath.includes(letter.toLowerCase());
 
-  const progressPercent = journeyProgress.total > 0 
-    ? (journeyProgress.current / journeyProgress.total) * 100 
+  const progressPercent = userPath.length > 0 
+    ? ((pathIndex + 1) / userPath.length) * 100 
     : 0;
+
+  const handleContinuePath = () => {
+    if (userPath.length > 0 && pathIndex < userPath.length) {
+      navigate(`/section/${userPath[pathIndex]}`);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -168,28 +148,45 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-thin">
-        {/* Active Journey Section */}
-        {activeJourney && !collapsed && (
+        {/* YOUR PATH Section */}
+        {userPath.length > 0 && !collapsed && (
           <SidebarGroup className="border-b border-sidebar-border pb-4">
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground px-4 py-2">
-              Your Journey
+            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-primary px-4 py-2 font-semibold">
+              Your Path
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <div className="px-4 space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{activeJourney.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{activeJourney.title}</p>
+                    <p className="text-sm font-medium truncate">{archetypeName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {journeyProgress.current}/{journeyProgress.total} steps
+                      {pathIndex + 1}/{userPath.length} sections
                     </p>
                   </div>
                 </div>
                 <Progress value={progressPercent} className="h-1.5" />
+                <div className="flex items-center gap-1 flex-wrap">
+                  {userPath.map((s, i) => (
+                    <Link
+                      key={s}
+                      to={`/section/${s}`}
+                      className={cn(
+                        "px-1.5 py-0.5 rounded text-[10px] font-mono uppercase transition-colors",
+                        i === pathIndex
+                          ? "bg-primary text-primary-foreground"
+                          : i < pathIndex
+                            ? "bg-primary/20 text-primary"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      {s}
+                    </Link>
+                  ))}
+                </div>
                 <Button 
                   size="sm" 
                   className="w-full"
-                  onClick={() => navigate(`/journey/${activeJourney.id}`)}
+                  onClick={handleContinuePath}
                 >
                   <Play className="w-3 h-3 mr-1" />
                   Continue
@@ -199,20 +196,20 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Collapsed state journey indicator */}
-        {activeJourney && collapsed && (
+        {/* Collapsed state path indicator */}
+        {userPath.length > 0 && collapsed && (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link
-                      to={`/journey/${activeJourney.id}`}
+                    <button
+                      onClick={handleContinuePath}
                       className="flex items-center justify-center p-2 rounded-md bg-primary/10 hover:bg-primary/20"
-                      title={`Continue: ${activeJourney.title}`}
+                      title={`Continue: ${archetypeName}`}
                     >
-                      <Map className="w-4 h-4 text-primary" />
-                    </Link>
+                      <Play className="w-4 h-4 text-primary" />
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -229,7 +226,7 @@ export function AppSidebar() {
               {sections.filter(section => section.letter != null).map((section) => {
                 const path = section.letter === 'INTRO' ? '/' : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
-                const inPath = isInPersonalizedPath(section.letter);
+                const inPath = isInPath(section.letter);
                 
                 return (
                   <SidebarMenuItem key={section.id}>
@@ -243,9 +240,9 @@ export function AppSidebar() {
                             : "hover:bg-sidebar-accent/50"
                         )}
                       >
-                        {/* Personalized path indicator */}
+                        {/* Path indicator dot */}
                         {inPath && !collapsed && (
-                          <span className="absolute left-1 w-1 h-4 bg-primary rounded-full" />
+                          <span className="absolute left-1 w-1.5 h-1.5 bg-primary rounded-full" />
                         )}
                         <span className={cn(
                           "font-mono font-medium text-xs w-8 shrink-0",

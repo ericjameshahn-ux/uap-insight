@@ -16,10 +16,10 @@ const preconceptions = [
 ];
 
 const journeys = [
-  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers" },
-  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis" },
-  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims" },
-  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research" },
+  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers", suggestedArchetype: "empiricist" },
+  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis", suggestedArchetype: "scientist" },
+  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims", suggestedArchetype: "investigator" },
+  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research", suggestedArchetype: "experiencer" },
 ];
 
 const featuredAnalysis = [
@@ -82,8 +82,8 @@ export default function Index() {
 
   useEffect(() => {
     // Check if user has already taken the quiz
-    const quizData = localStorage.getItem('uap-persona-quiz');
-    if (quizData) {
+    const pathData = localStorage.getItem('uap_path');
+    if (pathData) {
       setHasSeenQuiz(true);
     } else {
       // Show quiz on first visit after a short delay
@@ -113,17 +113,18 @@ export default function Index() {
 
   const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
     setHasSeenQuiz(true);
-    // Store navigation mode for personalized path
-    localStorage.setItem('uap_navigation_mode', 'personalized');
-    localStorage.setItem('uap_current_path_index', '0');
     if (path.length > 0) {
       navigate(`/section/${path[0].toLowerCase()}`);
     }
   };
 
   const handleExploreFreelyFromQuiz = () => {
-    localStorage.setItem('uap_navigation_mode', 'free');
     setShowQuiz(false);
+  };
+
+  const handleJourneyClick = (journeyId: string) => {
+    // Open quiz - the journey cards now suggest taking the quiz
+    setShowQuiz(true);
   };
 
   return (
@@ -273,15 +274,18 @@ export default function Index() {
         </Accordion>
       </div>
 
-      {/* Guided Journeys */}
+      {/* Guided Journeys - Now link to quiz */}
       <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
         <h2 className="text-lg font-semibold mb-4">Guided Journeys</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Take the quiz to get a personalized path through the evidence based on your research style.
+        </p>
         <div className="grid grid-cols-2 gap-4">
           {journeys.map((journey) => (
-            <Link
+            <button
               key={journey.id}
-              to={`/journey/${journey.id}`}
-              className="card-elevated p-5 hover:shadow-md transition-all group"
+              onClick={() => handleJourneyClick(journey.id)}
+              className="card-elevated p-5 hover:shadow-md transition-all group text-left"
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -298,7 +302,7 @@ export default function Index() {
                   </div>
                 </div>
               </div>
-            </Link>
+            </button>
           ))}
         </div>
       </div>
