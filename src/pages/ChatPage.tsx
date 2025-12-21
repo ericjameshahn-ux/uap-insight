@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, ExternalLink, Bot, Sparkles } from "lucide-react";
+import { Send, ExternalLink, Bot, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface FAQResponse {
   id: string;
@@ -21,26 +22,27 @@ interface ChatMessage {
   content: string;
   faqMatch?: FAQResponse;
   isNoMatch?: boolean;
+  generatedPrompt?: string;
 }
 
-// Archetype display names and icons
-const archetypeInfo: Record<string, { name: string; icon: string }> = {
-  empiricist: { name: "The Empiricist", icon: "🔬" },
-  investigator: { name: "The Investigator", icon: "🔍" },
-  strategist: { name: "The Strategist", icon: "♟️" },
-  technologist: { name: "The Technologist", icon: "⚙️" },
-  historian: { name: "The Historian", icon: "📜" },
-  meaning_seeker: { name: "The Meaning Seeker", icon: "🌌" },
-  debunker: { name: "The Debunker", icon: "🎯" },
-  experiencer: { name: "The Experiencer", icon: "✨" },
-  scientist: { name: "The Scientist", icon: "⚛️" },
-  policymaker: { name: "The Policymaker", icon: "🏛️" },
-  philosopher: { name: "The Philosopher", icon: "💭" },
-  skeptic: { name: "The Skeptic", icon: "🤔" },
-  executive: { name: "Executive Brief", icon: "📊" },
-  physics: { name: "Physics Deep Dive", icon: "⚛️" },
-  retrieval: { name: "Crash Retrieval", icon: "🛸" },
-  consciousness: { name: "Consciousness Connection", icon: "🧠" },
+// Archetype display names, icons, and descriptions
+const archetypeInfo: Record<string, { name: string; icon: string; description: string }> = {
+  empiricist: { name: "The Empiricist", icon: "🔬", description: "rigorous scientific methodology and measurable data" },
+  investigator: { name: "The Investigator", icon: "🔍", description: "detailed forensic analysis and evidence chains" },
+  strategist: { name: "The Strategist", icon: "♟️", description: "geopolitical implications and institutional dynamics" },
+  technologist: { name: "The Technologist", icon: "⚙️", description: "engineering analysis and propulsion systems" },
+  historian: { name: "The Historian", icon: "📜", description: "historical patterns and documented cases over time" },
+  meaning_seeker: { name: "The Meaning Seeker", icon: "🌌", description: "deeper implications for humanity and consciousness" },
+  debunker: { name: "The Debunker", icon: "🎯", description: "critical evaluation and identifying conventional explanations" },
+  experiencer: { name: "The Experiencer", icon: "✨", description: "firsthand accounts and phenomenological evidence" },
+  scientist: { name: "The Scientist", icon: "⚛️", description: "theoretical physics and scientific anomalies" },
+  policymaker: { name: "The Policymaker", icon: "🏛️", description: "policy implications and government accountability" },
+  philosopher: { name: "The Philosopher", icon: "💭", description: "epistemological questions and paradigm implications" },
+  skeptic: { name: "The Skeptic", icon: "🤔", description: "demanding extraordinary evidence for extraordinary claims" },
+  executive: { name: "Executive Brief", icon: "📊", description: "high-level summaries and key takeaways" },
+  physics: { name: "Physics Deep Dive", icon: "⚛️", description: "theoretical physics implications" },
+  retrieval: { name: "Crash Retrieval", icon: "🛸", description: "crash retrieval program claims" },
+  consciousness: { name: "Consciousness Connection", icon: "🧠", description: "consciousness and non-human intelligence connections" },
 };
 
 const suggestedQuestions = [
@@ -58,8 +60,35 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [faqResponses, setFaqResponses] = useState<FAQResponse[]>([]);
   const [userArchetype, setUserArchetype] = useState<string>("empiricist");
+  const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Generate a research prompt for unmatched questions
+  const generatePrompt = (userQuestion: string, archetypeName: string, description: string) => {
+    return `I'm researching UAP/UFO phenomena as someone with a ${archetypeName} approach (focused on ${description}).
+
+My question: ${userQuestion}
+
+Please provide:
+1. A balanced assessment acknowledging both skeptical and supportive perspectives
+2. The strongest publicly available evidence relevant to this question
+3. Key credentialed sources I should investigate
+4. What would change your assessment (falsifiability)
+
+Be specific about evidence tiers: distinguish between official government acknowledgment, credentialed witness testimony, and unverified claims.`;
+  };
+
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedPromptId(messageId);
+      toast.success("Prompt copied to clipboard!");
+      setTimeout(() => setCopiedPromptId(null), 2000);
+    } catch (err) {
+      toast.error("Failed to copy prompt");
+    }
+  };
 
   useEffect(() => {
     // Get user archetype from localStorage (use uap_archetype_id)
@@ -160,12 +189,18 @@ export default function ChatPage() {
     // Find matching FAQ
     const match = findMatchingFAQ(userMessage.content);
 
+    const archetypeData = archetypeInfo[userArchetype] || archetypeInfo.empiricist;
+    const generatedPrompt = !match 
+      ? generatePrompt(userMessage.content, archetypeData.name, archetypeData.description)
+      : undefined;
+
     const assistantMessage: ChatMessage = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
-      content: match ? "" : "I don't have a pre-built answer for that specific question. Try rephrasing, or explore the AI Research Assistant for deeper research.",
+      content: match ? "" : "I don't have a pre-researched answer for that specific question.",
       faqMatch: match || undefined,
       isNoMatch: !match,
+      generatedPrompt,
     };
 
     setMessages((prev) => [...prev, assistantMessage]);
@@ -252,24 +287,56 @@ export default function ChatPage() {
                   </div>
                 )}
 
-                {/* No Match Response */}
+                {/* No Match Response with Generated Prompt */}
                 {message.isNoMatch && (
-                  <div className="space-y-3">
-                    <p className="text-sm">{message.content}</p>
-                    <div className="pt-2 border-t border-border/50">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="gap-1.5"
-                      >
-                        <a
-                          href={AI_ASSISTANT_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          Open NotebookLM
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">{message.content}</p>
+                    
+                    {message.generatedPrompt && (
+                      <div className="bg-background/50 p-4 rounded-lg border border-border/50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Ready-to-use prompt:</span>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => copyToClipboard(message.generatedPrompt!, message.id)}
+                            className="gap-1.5 h-7"
+                          >
+                            {copiedPromptId === message.id ? (
+                              <>
+                                <Check className="w-3 h-3" />
+                                Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                Copy
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <pre className="text-xs whitespace-pre-wrap bg-muted p-3 rounded border border-border/30 max-h-40 overflow-y-auto">
+                          {message.generatedPrompt}
+                        </pre>
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                      <Button variant="outline" size="sm" asChild className="gap-1.5">
+                        <a href={AI_ASSISTANT_URL} target="_blank" rel="noopener noreferrer">
+                          NotebookLM
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild className="gap-1.5">
+                        <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">
+                          Claude
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild className="gap-1.5">
+                        <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+                          ChatGPT
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </Button>
