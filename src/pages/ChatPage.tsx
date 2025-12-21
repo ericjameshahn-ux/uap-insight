@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, ExternalLink, Bot, Copy, Check } from "lucide-react";
+import { Send, Bot, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -7,22 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
-interface FAQResponse {
-  id: string;
-  question: string;
-  acknowledgment: string;
-  evidence: string;
-  sources: string[];
-  persona_tags: string[];
-}
-
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  faqMatch?: FAQResponse;
-  isNoMatch?: boolean;
-  generatedPrompt?: string;
 }
 
 // Archetype display names, icons, and descriptions
@@ -39,79 +27,27 @@ const archetypeInfo: Record<string, { name: string; icon: string; description: s
   policymaker: { name: "The Policymaker", icon: "🏛️", description: "policy implications and government accountability" },
   philosopher: { name: "The Philosopher", icon: "💭", description: "epistemological questions and paradigm implications" },
   skeptic: { name: "The Skeptic", icon: "🤔", description: "demanding extraordinary evidence for extraordinary claims" },
-  executive: { name: "Executive Brief", icon: "📊", description: "high-level summaries and key takeaways" },
-  physics: { name: "Physics Deep Dive", icon: "⚛️", description: "theoretical physics implications" },
-  retrieval: { name: "Crash Retrieval", icon: "🛸", description: "crash retrieval program claims" },
-  consciousness: { name: "Consciousness Connection", icon: "🧠", description: "consciousness and non-human intelligence connections" },
 };
 
 const suggestedQuestions = [
-  "Isn't this all misidentified aircraft?",
-  "Why hasn't evidence leaked?",
-  "What physical evidence exists?",
-  "How can craft violate physics?",
+  "What physical evidence exists for UAPs?",
+  "Who are the key whistleblowers?",
+  "What did Congress learn in 2023?",
+  "How credible is David Grusch?",
 ];
-
-const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [faqResponses, setFaqResponses] = useState<FAQResponse[]>([]);
   const [userArchetype, setUserArchetype] = useState<string>("empiricist");
-  const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Generate a research prompt for unmatched questions
-  const generatePrompt = (userQuestion: string, archetypeName: string, description: string) => {
-    return `I'm researching UAP/UFO phenomena as someone with a ${archetypeName} approach (focused on ${description}).
-
-My question: ${userQuestion}
-
-Please provide:
-1. A balanced assessment acknowledging both skeptical and supportive perspectives
-2. The strongest publicly available evidence relevant to this question
-3. Key credentialed sources I should investigate
-4. What would change your assessment (falsifiability)
-
-Be specific about evidence tiers: distinguish between official government acknowledgment, credentialed witness testimony, and unverified claims.`;
-  };
-
-  const copyToClipboard = async (text: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedPromptId(messageId);
-      toast.success("Prompt copied to clipboard!");
-      setTimeout(() => setCopiedPromptId(null), 2000);
-    } catch (err) {
-      toast.error("Failed to copy prompt");
-    }
-  };
-
   useEffect(() => {
-    // Get user archetype from localStorage (use uap_archetype_id)
+    // Get user archetype from localStorage
     const archetype = localStorage.getItem("uap_archetype_id") || "empiricist";
     setUserArchetype(archetype);
-
-    // Fetch FAQ responses
-    const fetchFAQs = async () => {
-      const { data, error } = await supabase
-        .from("faq_responses")
-        .select("*");
-      
-      if (data && !error) {
-        // Parse sources if stored as JSON string
-        const parsed = data.map((faq: any) => ({
-          ...faq,
-          sources: typeof faq.sources === 'string' ? JSON.parse(faq.sources) : faq.sources || [],
-          persona_tags: typeof faq.persona_tags === 'string' ? JSON.parse(faq.persona_tags) : faq.persona_tags || [],
-        }));
-        setFaqResponses(parsed);
-      }
-    };
-    fetchFAQs();
 
     // Add welcome message
     const archetypeDisplay = archetypeInfo[archetype] || archetypeInfo.empiricist;
@@ -119,7 +55,7 @@ Be specific about evidence tiers: distinguish between official government acknow
       {
         id: "welcome",
         role: "assistant",
-        content: `Welcome! I'm your research assistant, tailored for ${archetypeDisplay.name} ${archetypeDisplay.icon}. Ask me common skeptical questions about UAP research, and I'll provide evidence-based responses with sources.`,
+        content: `Welcome! I'm your UAP research assistant, tailored for ${archetypeDisplay.name} ${archetypeDisplay.icon}. Ask me anything about UAP phenomena, evidence, key figures, or recent developments.`,
       },
     ]);
   }, []);
@@ -130,44 +66,6 @@ Be specific about evidence tiers: distinguish between official government acknow
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
-
-  // Find matching FAQ using keyword similarity
-  const findMatchingFAQ = (query: string): FAQResponse | null => {
-    const queryLower = query.toLowerCase();
-    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 3);
-
-    let bestMatch: FAQResponse | null = null;
-    let bestScore = 0;
-
-    for (const faq of faqResponses) {
-      const questionLower = faq.question.toLowerCase();
-      
-      // Check for direct substring match
-      if (questionLower.includes(queryLower) || queryLower.includes(questionLower.slice(0, 30))) {
-        return faq;
-      }
-
-      // Count matching keywords
-      let score = 0;
-      for (const word of queryWords) {
-        if (questionLower.includes(word)) {
-          score += 1;
-        }
-      }
-
-      // Prioritize FAQs matching user's archetype
-      if (userArchetype && faq.persona_tags?.includes(userArchetype)) {
-        score += 0.5;
-      }
-
-      if (score > bestScore && score >= 2) {
-        bestScore = score;
-        bestMatch = faq;
-      }
-    }
-
-    return bestMatch;
-  };
 
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
@@ -183,29 +81,46 @@ Be specific about evidence tiers: distinguish between official government acknow
     setInput("");
     setIsLoading(true);
 
-    // Simulate thinking delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      // Build conversation history for context
+      const conversationHistory = messages
+        .filter((m) => m.id !== "welcome")
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
 
-    // Find matching FAQ
-    const match = findMatchingFAQ(userMessage.content);
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke("chat", {
+        body: {
+          message: text,
+          archetype: userArchetype,
+          conversationHistory,
+        },
+      });
 
-    const archetypeData = archetypeInfo[userArchetype] || archetypeInfo.empiricist;
-    const generatedPrompt = !match 
-      ? generatePrompt(userMessage.content, archetypeData.name, archetypeData.description)
-      : undefined;
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to get response");
+      }
 
-    const assistantMessage: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: match ? "" : "I don't have a pre-researched answer for that specific question.",
-      faqMatch: match || undefined,
-      isNoMatch: !match,
-      generatedPrompt,
-    };
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data?.response || data?.message || "I couldn't generate a response. Please try again.",
+      };
 
-    setMessages((prev) => [...prev, assistantMessage]);
-    setIsLoading(false);
-    inputRef.current?.focus();
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast.error("Failed to get AI response. Please try again.");
+      
+      // Remove the user message if the request failed
+      setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+    } finally {
+      setIsLoading(false);
+      inputRef.current?.focus();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -230,8 +145,8 @@ Be specific about evidence tiers: distinguish between official government acknow
             <Bot className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="font-semibold">Research Assistant</h1>
-            <p className="text-xs text-muted-foreground">FAQ-based responses with sources</p>
+            <h1 className="font-semibold">UAP Research Assistant</h1>
+            <p className="text-xs text-muted-foreground">AI-powered responses with sources</p>
           </div>
         </div>
         <Badge variant="secondary" className="gap-1.5">
@@ -255,94 +170,7 @@ Be specific about evidence tiers: distinguish between official government acknow
                     : "bg-muted"
                 }`}
               >
-                {/* Simple text message */}
-                {message.content && !message.faqMatch && !message.isNoMatch && (
-                  <p className="text-sm">{message.content}</p>
-                )}
-
-                {/* FAQ Match Response */}
-                {message.faqMatch && (
-                  <div className="space-y-3">
-                    {/* Acknowledgment */}
-                    <p className="text-sm italic text-muted-foreground">
-                      {message.faqMatch.acknowledgment}
-                    </p>
-                    
-                    {/* Evidence */}
-                    <p className="text-sm">{message.faqMatch.evidence}</p>
-                    
-                    {/* Sources */}
-                    {message.faqMatch.sources && message.faqMatch.sources.length > 0 && (
-                      <div className="pt-2 border-t border-border/50">
-                        <p className="text-xs font-medium text-muted-foreground mb-1.5">
-                          Explore Further:
-                        </p>
-                        <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground">
-                          {message.faqMatch.sources.map((source, idx) => (
-                            <li key={idx}>{source}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* No Match Response with Generated Prompt */}
-                {message.isNoMatch && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">{message.content}</p>
-                    
-                    {message.generatedPrompt && (
-                      <div className="bg-background/50 p-4 rounded-lg border border-border/50">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Ready-to-use prompt:</span>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => copyToClipboard(message.generatedPrompt!, message.id)}
-                            className="gap-1.5 h-7"
-                          >
-                            {copiedPromptId === message.id ? (
-                              <>
-                                <Check className="w-3 h-3" />
-                                Copied
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3 h-3" />
-                                Copy
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                        <pre className="text-xs whitespace-pre-wrap bg-muted p-3 rounded border border-border/30 max-h-40 overflow-y-auto">
-                          {message.generatedPrompt}
-                        </pre>
-                      </div>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-                      <Button variant="outline" size="sm" asChild className="gap-1.5">
-                        <a href={AI_ASSISTANT_URL} target="_blank" rel="noopener noreferrer">
-                          NotebookLM
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </Button>
-                      <Button variant="outline" size="sm" asChild className="gap-1.5">
-                        <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">
-                          Claude
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </Button>
-                      <Button variant="outline" size="sm" asChild className="gap-1.5">
-                        <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
-                          ChatGPT
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </div>
             </div>
           ))}
@@ -351,10 +179,9 @@ Be specific about evidence tiers: distinguish between official government acknow
           {isLoading && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl px-4 py-3">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Thinking...</span>
                 </div>
               </div>
             </div>
@@ -386,7 +213,7 @@ Be specific about evidence tiers: distinguish between official government acknow
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask a skeptical question about UAP research..."
+            placeholder="Ask about UAP evidence, key figures, or recent developments..."
             className="flex-1"
             disabled={isLoading}
           />
@@ -394,18 +221,6 @@ Be specific about evidence tiers: distinguish between official government acknow
             <Send className="w-4 h-4" />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Responses are matched from our FAQ database. For deeper research, use the{" "}
-          <a
-            href={AI_ASSISTANT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            AI Research Assistant
-          </a>
-          .
-        </p>
       </div>
     </div>
   );
