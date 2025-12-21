@@ -7,12 +7,20 @@ import { supabase, PersonaQuestion, PersonaArchetype, getUserId } from "@/lib/su
 import { cn } from "@/lib/utils";
 
 // Journey path mappings
-const journeyPaths: Record<string, { path: string[]; name: string }> = {
+const journeyPaths: Record<string, { path: string[], name: string }> = {
   executive: { path: ["a", "b", "c", "f"], name: "Executive Brief" },
   physics: { path: ["c", "j", "l", "g"], name: "Physics Deep Dive" },
   retrieval: { path: ["b", "g", "k", "f"], name: "Crash Retrieval" },
   consciousness: { path: ["i", "k", "m"], name: "Consciousness Connection" },
 };
+
+// CONDENSED QUIZ: Only use these 5 high-signal questions
+// Q1: Why exploring (motivation)
+// Q2: Evidence type (learning style)
+// Q3: Current stance (belief spectrum)
+// Q7: STEM comfort (technical routing)
+// Q10: What you want (outcome)
+const CONDENSED_QUESTION_NUMBERS = [1, 2, 3, 7, 10];
 
 interface PersonaQuizProps {
   isOpen: boolean;
@@ -23,40 +31,103 @@ interface PersonaQuizProps {
   onSkipQuizAndStartJourney?: () => void;
 }
 
-// Fallback data when database isn't connected
+// Fallback questions for condensed quiz (5 questions)
 const fallbackQuestions: PersonaQuestion[] = [
   {
     id: '1',
     question_number: 1,
-    question_text: "What's your primary interest in the UAP topic?",
+    question_text: "Why are you exploring UAP?",
     options: [
-      { label: "Hard evidence and data", value: "evidence" },
-      { label: "Policy implications", value: "policy" },
-      { label: "Scientific explanations", value: "science" },
-      { label: "Personal experiences", value: "experience" }
+      { label: "Curiosity / I heard something interesting", value: "curiosity" },
+      { label: "Personal experience I want to understand", value: "experience" },
+      { label: "National security & policy implications", value: "security" },
+      { label: "Science/physics interest", value: "science" },
+      { label: "Investment/tech scouting", value: "investment" },
+      { label: "Spiritual/metaphysical questions", value: "spiritual" }
     ],
     scoring_map: {
-      evidence: ["empiricist", "investigator"],
-      policy: ["policymaker", "skeptic"],
-      science: ["scientist", "empiricist"],
-      experience: ["experiencer", "philosopher"]
+      curiosity: ["empiricist", "historian"],
+      experience: ["experiencer"],
+      security: ["strategist"],
+      science: ["empiricist", "technologist"],
+      investment: ["technologist"],
+      spiritual: ["meaning_seeker", "experiencer"]
     }
   },
   {
     id: '2',
     question_number: 2,
-    question_text: "How would you describe your current stance on UAP?",
+    question_text: "What type of evidence moves you most?",
     options: [
-      { label: "Need more evidence", value: "skeptical" },
-      { label: "Convinced by existing data", value: "convinced" },
-      { label: "Focused on implications", value: "implications" },
-      { label: "Open but cautious", value: "open" }
+      { label: "Sensor/instrument data (radar, infrared, etc.)", value: "sensor" },
+      { label: "Official documents and reports", value: "documents" },
+      { label: "Multiple independent witnesses", value: "witnesses" },
+      { label: "Patterns across history and cultures", value: "patterns" },
+      { label: "First-person experiencer accounts", value: "experiencer" },
+      { label: "Big picture plausibility arguments", value: "bigpicture" }
     ],
     scoring_map: {
-      skeptical: ["skeptic", "empiricist"],
-      convinced: ["investigator", "experiencer"],
-      implications: ["policymaker", "scientist"],
-      open: ["philosopher", "empiricist"]
+      sensor: ["empiricist"],
+      documents: ["empiricist", "strategist"],
+      witnesses: ["investigator"],
+      patterns: ["historian"],
+      experiencer: ["experiencer"],
+      bigpicture: ["meaning_seeker", "strategist"]
+    }
+  },
+  {
+    id: '3',
+    question_number: 3,
+    question_text: "Your current stance on UAP:",
+    options: [
+      { label: "Strong skeptic - probably all misidentification", value: "strong_skeptic" },
+      { label: "Skeptical but genuinely open", value: "open_skeptic" },
+      { label: "Agnostic - truly uncertain", value: "agnostic" },
+      { label: "Leaning toward something real and anomalous", value: "leaning_real" },
+      { label: "Convinced non-human intelligence is involved", value: "convinced" }
+    ],
+    scoring_map: {
+      strong_skeptic: ["debunker"],
+      open_skeptic: ["debunker", "empiricist"],
+      agnostic: ["empiricist", "investigator"],
+      leaning_real: ["investigator", "technologist"],
+      convinced: ["experiencer", "meaning_seeker"]
+    }
+  },
+  {
+    id: '7',
+    question_number: 7,
+    question_text: "Your physics/STEM comfort level:",
+    options: [
+      { label: "Minimal - keep it simple", value: "minimal" },
+      { label: "Basic - I understand fundamentals", value: "basic" },
+      { label: "Strong STEM background", value: "strong" },
+      { label: "Expert-level technical capability", value: "expert" }
+    ],
+    scoring_map: {
+      minimal: ["historian", "meaning_seeker"],
+      basic: ["strategist", "investigator"],
+      strong: ["technologist", "empiricist"],
+      expert: ["technologist", "empiricist"]
+    }
+  },
+  {
+    id: '10',
+    question_number: 10,
+    question_text: "What do you actually want from this?",
+    options: [
+      { label: "A balanced mental model I can defend", value: "balanced" },
+      { label: "A strong conclusion one way or another", value: "conclusion" },
+      { label: "A short briefing I can share with others", value: "briefing" },
+      { label: "A research plan for deeper investigation", value: "research" },
+      { label: "A personal meaning-making framework", value: "meaning" }
+    ],
+    scoring_map: {
+      balanced: ["empiricist", "investigator"],
+      conclusion: ["debunker", "empiricist"],
+      briefing: ["strategist"],
+      research: ["investigator", "technologist"],
+      meaning: ["meaning_seeker", "experiencer"]
     }
   }
 ];
@@ -72,13 +143,67 @@ const fallbackArchetypes: PersonaArchetype[] = [
     icon: "📊"
   },
   {
-    id: 'scientist',
-    name: "The Scientist",
-    description: "You're fascinated by the physics and technology implications.",
-    primary_interests: "Propulsion theories, physics analysis, R&D",
-    recommended_sections: ["c", "j", "l", "b"],
+    id: 'historian',
+    name: "The Historian",
+    description: "You're interested in how this topic has evolved over decades and patterns across time.",
+    primary_interests: "Historical cases, policy evolution, cultural patterns",
+    recommended_sections: ["d", "e", "f", "h"],
+    recommended_journey: "executive",
+    icon: "📚"
+  },
+  {
+    id: 'strategist',
+    name: "The Strategist",
+    description: "You focus on national security implications and institutional dynamics.",
+    primary_interests: "Policy, geopolitics, institutional behavior",
+    recommended_sections: ["f", "h", "l", "e"],
+    recommended_journey: "executive",
+    icon: "♟️"
+  },
+  {
+    id: 'investigator',
+    name: "The Investigator",
+    description: "You examine specific cases in detail, looking for contradictions and corroboration.",
+    primary_interests: "Case analysis, witness credibility, forensic evidence",
+    recommended_sections: ["b", "g", "k", "f"],
+    recommended_journey: "retrieval",
+    icon: "🔍"
+  },
+  {
+    id: 'experiencer',
+    name: "The Experiencer",
+    description: "You're drawn to first-person accounts and the consciousness dimension.",
+    primary_interests: "Contact accounts, consciousness research, integration",
+    recommended_sections: ["i", "k", "m"],
+    recommended_journey: "consciousness",
+    icon: "✨"
+  },
+  {
+    id: 'technologist',
+    name: "The Technologist",
+    description: "You want to understand what these craft can do and what it would take to replicate it.",
+    primary_interests: "Propulsion physics, materials science, R&D",
+    recommended_sections: ["c", "j", "l", "g"],
     recommended_journey: "physics",
-    icon: "⚛️"
+    icon: "⚡"
+  },
+  {
+    id: 'debunker',
+    name: "The Skeptical Analyst",
+    description: "You maintain strong prosaic priors and want mundane explanations thoroughly ruled out.",
+    primary_interests: "Falsification, error analysis, methodological rigor",
+    recommended_sections: ["a", "b", "d", "c"],
+    recommended_journey: "executive",
+    icon: "⚖️"
+  },
+  {
+    id: 'meaning_seeker',
+    name: "The Meaning-Seeker",
+    description: "You're interested in philosophical and ontological implications for humanity.",
+    primary_interests: "Philosophy, consciousness, cosmic significance",
+    recommended_sections: ["i", "h", "m", "j"],
+    recommended_journey: "consciousness",
+    icon: "🌌"
   }
 ];
 
@@ -106,39 +231,48 @@ export function PersonaQuiz({
       ]);
       
       if (questionsRes.data && questionsRes.data.length > 0) {
-        const parsedQuestions = questionsRes.data.map((q: any) => {
-          let options = q.options;
-          let scoring_map = q.scoring_map;
-          
-          if (typeof options === 'string') {
-            try {
-              options = JSON.parse(options);
-            } catch (e) {
-              console.error('Error parsing options:', e);
+        const parsedQuestions = questionsRes.data
+          // FILTER: Only keep the 5 condensed questions
+          .filter((q: any) => CONDENSED_QUESTION_NUMBERS.includes(q.question_number))
+          .map((q: any) => {
+            let options = q.options;
+            let scoring_map = q.scoring_map;
+            
+            if (typeof options === 'string') {
+              try {
+                options = JSON.parse(options);
+              } catch (e) {
+                console.error('Error parsing options:', e);
+                options = [];
+              }
+            }
+            
+            if (typeof scoring_map === 'string') {
+              try {
+                scoring_map = JSON.parse(scoring_map);
+              } catch (e) {
+                console.error('Error parsing scoring_map:', e);
+                scoring_map = {};
+              }
+            }
+            
+            if (!Array.isArray(options)) {
               options = [];
             }
-          }
-          
-          if (typeof scoring_map === 'string') {
-            try {
-              scoring_map = JSON.parse(scoring_map);
-            } catch (e) {
-              console.error('Error parsing scoring_map:', e);
-              scoring_map = {};
-            }
-          }
-          
-          if (!Array.isArray(options)) {
-            options = [];
-          }
-          
-          return {
-            ...q,
-            options,
-            scoring_map: scoring_map || {}
-          };
-        });
-        setQuestions(parsedQuestions);
+            
+            return {
+              ...q,
+              options,
+              scoring_map: scoring_map || {}
+            };
+          });
+        
+        // Only use if we got all 5 questions, otherwise use fallback
+        if (parsedQuestions.length >= 5) {
+          setQuestions(parsedQuestions);
+        } else {
+          console.log('Using fallback questions - DB returned', parsedQuestions.length, 'of 5 needed');
+        }
       }
       
       if (archetypesRes.data && archetypesRes.data.length > 0) {
@@ -293,157 +427,166 @@ export function PersonaQuiz({
   const selectedJourneyInfo = selectedJourney ? journeyPaths[selectedJourney] : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-card rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Research Profile Quiz</span>
-          </div>
-          <button onClick={onClose} className="p-1 hover:bg-muted rounded-md transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <Progress value={progress} className="h-1" />
-        
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {!showResults ? (
-            <div className="animate-fade-in">
-              <div className="text-sm text-muted-foreground mb-2">
-                Question {currentQuestion + 1} of {questions.length}
-              </div>
-              
-              <h2 className="text-xl font-semibold mb-6">
-                {question?.question_text || "Loading question..."}
-              </h2>
-              
-              <div className="space-y-3">
-                {question?.options && Array.isArray(question.options) && question.options.length > 0 ? (
-                  question.options.map((option: string | { label: string; value: string }, index: number) => {
-                    const isString = typeof option === 'string';
-                    const label = isString ? option : option.label;
-                    const value = isString ? option : option.value;
-                    
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleAnswer(value)}
-                        className={cn(
-                          "w-full p-4 text-left rounded-lg border-2 transition-all",
-                          answers[question.question_number] === value
-                            ? "border-primary bg-accent"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                        )}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <p>No options available for this question.</p>
-                    <p className="text-sm mt-2">Please check if persona_questions table has valid options data.</p>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center justify-between mt-6">
-                {currentQuestion > 0 ? (
-                  <button
-                    onClick={() => setCurrentQuestion(currentQuestion - 1)}
-                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous question
-                  </button>
-                ) : <div />}
-                
-                {/* Skip quiz and start journey option */}
-                {selectedJourney && selectedJourneyInfo && onSkipQuizAndStartJourney && (
-                  <button
-                    onClick={onSkipQuizAndStartJourney}
-                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <SkipForward className="w-4 h-4" />
-                    Skip quiz & start {selectedJourneyInfo.name}
-                  </button>
-                )}
-              </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="w-full max-w-2xl mx-4">
+        {/* Card */}
+        <div className="bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-semibold">Quick Research Profile</span>
+              <span className="text-xs text-muted-foreground">5 questions</span>
             </div>
-          ) : (
-            <div className="animate-fade-in">
-              <h2 className="text-2xl font-bold mb-6 text-center">Your Research Profile</h2>
-              
-              <div className="space-y-4 mb-8">
-                {getPrimaryArchetype() && (
-                  <div className="p-5 rounded-lg bg-accent border border-primary/20">
-                    <div className="text-sm text-muted-foreground mb-1">Your Profile</div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{getPrimaryArchetype()?.icon}</span>
-                      <span className="text-xl font-semibold">{getPrimaryArchetype()?.name}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {getPrimaryArchetype()?.description}
-                    </p>
-                  </div>
-                )}
-                
-                {getSecondaryArchetype() && (
-                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground mb-1">Secondary Archetype</div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{getSecondaryArchetype()?.icon}</span>
-                      <span className="font-semibold">{getSecondaryArchetype()?.name}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
-              {/* Recommended Path with Visual Badges */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3">Your Recommended Path</h3>
-                <div className="flex items-center gap-2 flex-wrap p-4 bg-muted/50 rounded-lg">
-                  {getPrimaryArchetype()?.recommended_sections && getPrimaryArchetype()!.recommended_sections.length > 0 ? (
-                    getPrimaryArchetype()!.recommended_sections.map((section, i, arr) => (
-                      <div key={section} className="flex items-center gap-2">
-                        <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-mono font-bold text-sm uppercase">
-                          {section}
-                        </span>
-                        {i < arr.length - 1 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-                      </div>
-                    ))
+          {/* Progress */}
+          <Progress value={progress} className="h-1 rounded-none" />
+
+          {/* Content */}
+          <div className="p-6 min-h-[400px] flex flex-col">
+            {!showResults ? (
+              <div className="flex-1 flex flex-col">
+                {/* Question Number */}
+                <div className="text-sm text-muted-foreground mb-2">
+                  Question {currentQuestion + 1} of {questions.length}
+                </div>
+                
+                {/* Question */}
+                <h2 className="text-xl font-semibold mb-6">
+                  {question?.question_text || "Loading question..."}
+                </h2>
+                
+                {/* Options */}
+                <div className="space-y-3 flex-1">
+                  {question?.options && Array.isArray(question.options) && question.options.length > 0 ? (
+                    question.options.map((option: string | { label: string; value: string }, index: number) => {
+                      const isString = typeof option === 'string';
+                      const label = isString ? option : option.label;
+                      const value = isString ? option : option.value;
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleAnswer(value)}
+                          className={cn(
+                            "w-full p-4 text-left rounded-lg border-2 transition-all",
+                            answers[question.question_number] === value
+                              ? "border-primary bg-accent"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          )}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })
                   ) : (
-                    <span className="text-muted-foreground">A → B → C → D → E → F</span>
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No options available for this question.</p>
+                      <p className="text-sm mt-2">Please check if persona_questions table has valid options data.</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Navigation */}
+                <div className="flex justify-between items-center mt-6 pt-4 border-t border-border">
+                  {currentQuestion > 0 ? (
+                    <button
+                      onClick={() => setCurrentQuestion(currentQuestion - 1)}
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous question
+                    </button>
+                  ) : <div />}
+                  
+                  {/* Skip quiz and start journey option */}
+                  {selectedJourney && selectedJourneyInfo && onSkipQuizAndStartJourney && (
+                    <button
+                      onClick={onSkipQuizAndStartJourney}
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                      Skip quiz & start {selectedJourneyInfo.name}
+                    </button>
                   )}
                 </div>
               </div>
-              
-              <div className="flex flex-col gap-3">
-                <Button onClick={handleStartPath} className="w-full" size="lg">
-                  <Play className="w-4 h-4 mr-2" />
-                  Start Your Path
-                </Button>
-                <Button variant="ghost" onClick={handleExploreFreelyInternal}>
-                  Explore Freely
-                </Button>
+            ) : (
+              <div className="flex-1 flex flex-col">
+                <h2 className="text-2xl font-bold mb-6 text-center">Your Research Profile</h2>
+                
+                <div className="space-y-4 mb-6">
+                  {getPrimaryArchetype() && (
+                    <div className="bg-accent/50 border border-primary/20 rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Your Profile</p>
+                      <div className="flex items-center gap-2 text-xl font-semibold">
+                        <span>{getPrimaryArchetype()?.icon}</span>
+                        <span>{getPrimaryArchetype()?.name}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {getPrimaryArchetype()?.description}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {getSecondaryArchetype() && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">Secondary Archetype</p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span>{getSecondaryArchetype()?.icon}</span>
+                        <span>{getSecondaryArchetype()?.name}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recommended Path with Visual Badges */}
+                <div className="bg-muted/30 rounded-lg p-4 mb-6">
+                  <p className="text-sm font-medium mb-3">Your Recommended Path</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {getPrimaryArchetype()?.recommended_sections && getPrimaryArchetype()!.recommended_sections.length > 0 ? (
+                      getPrimaryArchetype()!.recommended_sections.map((section, i, arr) => (
+                        <div key={section} className="flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold uppercase">
+                            {section}
+                          </span>
+                          {i < arr.length - 1 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground">A → B → C → D → E → F</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mt-auto">
+                  <Button onClick={handleStartPath} className="flex-1">
+                    <Play className="w-4 h-4 mr-2" />
+                    Start Your Path
+                  </Button>
+                  <Button variant="outline" onClick={handleExploreFreelyInternal} className="flex-1">
+                    Explore Freely
+                  </Button>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setShowResults(false);
+                    setCurrentQuestion(0);
+                    setAnswers({});
+                    setScores({});
+                  }}
+                  className="w-full mt-4 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Retake Quiz
+                </button>
               </div>
-              
-              <button
-                onClick={() => {
-                  setShowResults(false);
-                  setCurrentQuestion(0);
-                  setAnswers({});
-                  setScores({});
-                }}
-                className="w-full mt-4 text-sm text-muted-foreground hover:text-foreground"
-              >
-                Retake Quiz
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
