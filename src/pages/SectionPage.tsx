@@ -325,55 +325,65 @@ export default function SectionPage() {
         </div>
       ) : null}
 
-      {/* Section Videos */}
-      {sectionVideos.length > 0 && (
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <VideoIcon className="w-5 h-5 text-primary" />
-            Section Videos ({sectionVideos.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sectionVideos.map((video) => {
-              const embedUrl = getYouTubeEmbedUrl(video.url);
-              return (
-                <div key={video.id} className="card-elevated overflow-hidden">
-                  {embedUrl ? (
-                    <div className="aspect-video">
-                      <iframe
-                        src={embedUrl}
-                        title={video.title}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-muted flex items-center justify-center">
-                      <a 
-                        href={video.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Watch Video
-                      </a>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-sm">{video.title}</h3>
-                    {video.duration && (
-                      <span className="text-xs text-muted-foreground">{video.duration}</span>
+      {/* Section Videos - exclude videos already in content blocks */}
+      {(() => {
+        // Get video URLs from content blocks to filter duplicates
+        const contentBlockUrls = new Set(
+          contentBlocks.map(block => block.video_url).filter(Boolean)
+        );
+        const filteredVideos = sectionVideos.filter(video => !contentBlockUrls.has(video.url));
+        
+        if (filteredVideos.length === 0) return null;
+        
+        return (
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <VideoIcon className="w-5 h-5 text-primary" />
+              Additional Videos ({filteredVideos.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredVideos.map((video) => {
+                const embedUrl = getYouTubeEmbedUrl(video.url);
+                return (
+                  <div key={video.id} className="card-elevated overflow-hidden">
+                    {embedUrl ? (
+                      <div className="aspect-video">
+                        <iframe
+                          src={embedUrl}
+                          title={video.title}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-video bg-muted flex items-center justify-center">
+                        <a 
+                          href={video.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Watch Video
+                        </a>
+                      </div>
                     )}
-                    {video.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{video.description}</p>
-                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-sm">{video.title}</h3>
+                      {video.duration && (
+                        <span className="text-xs text-muted-foreground">{video.duration}</span>
+                      )}
+                      {video.description && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{video.description}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Claims Header */}
       <div className="mb-4 text-sm text-muted-foreground">
