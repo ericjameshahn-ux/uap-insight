@@ -6,7 +6,7 @@ import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
 import { VideoCard } from "@/components/VideoCard";
 import { FigureCard } from "@/components/FigureCard";
-import { supabase, Section, Claim, Video, Figure } from "@/lib/supabase";
+import { supabase, Section, Claim, Video, Figure, SectionContentBlock } from "@/lib/supabase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 
@@ -51,6 +51,7 @@ export default function SectionPage() {
   const [sectionVideos, setSectionVideos] = useState<Video[]>([]);
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
+  const [contentBlocks, setContentBlocks] = useState<SectionContentBlock[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Navigation state
@@ -115,6 +116,15 @@ export default function SectionPage() {
         .order('recommended', { ascending: false });
       
       setSectionVideos(videosData || []);
+
+      // Fetch content blocks for this section
+      const { data: blocksData } = await supabase
+        .from('section_content_blocks')
+        .select('*')
+        .eq('section_id', sectionId.toLowerCase())
+        .order('block_order', { ascending: true });
+      
+      setContentBlocks(blocksData || []);
 
       // Fetch related figures (from claims with figure_ids)
       if (claimsData && claimsData.length > 0) {
@@ -261,6 +271,53 @@ export default function SectionPage() {
             {((section as any).intro_content as string).split('\n\n').map((paragraph, i) => (
               <p key={i}>{renderBoldText(paragraph)}</p>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Content Blocks (Video Context) */}
+      {contentBlocks.length > 0 && (
+        <div className="mb-8 space-y-6 animate-fade-in" style={{ animationDelay: '75ms' }}>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <VideoIcon className="w-5 h-5 text-primary" />
+            Key Video Sources ({contentBlocks.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {contentBlocks.map((block) => {
+              const embedUrl = block.video_url ? getYouTubeEmbedUrl(block.video_url) : null;
+              return (
+                <div key={block.id} className="card-elevated overflow-hidden">
+                  {embedUrl ? (
+                    <div className="aspect-video">
+                      <iframe
+                        src={embedUrl}
+                        title={block.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : block.video_url ? (
+                    <div className="aspect-video bg-muted flex items-center justify-center">
+                      <a 
+                        href={block.video_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline flex items-center gap-2"
+                      >
+                        <Play className="w-5 h-5" /> Watch Video
+                      </a>
+                    </div>
+                  ) : null}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm mb-2">{block.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {renderBoldText(block.content)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
