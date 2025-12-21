@@ -92,17 +92,31 @@ export function AppSidebar() {
         const indexData = localStorage.getItem('uap_path_index');
         const nameData = localStorage.getItem('uap_archetype_name');
         
-        if (pathData) {
-          setUserPath(JSON.parse(pathData));
-          setPathIndex(parseInt(indexData || '0', 10));
-          setArchetypeName(nameData || '');
+        console.log('🔍 AppSidebar loading path:');
+        console.log('  Raw uap_path:', pathData);
+        
+        if (pathData && pathData !== 'null' && pathData !== '[]') {
+          const parsed = JSON.parse(pathData);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log('  Parsed path:', parsed);
+            setUserPath(parsed);
+            setPathIndex(parseInt(indexData || '0', 10));
+            setArchetypeName(nameData || '');
+          } else {
+            console.log('  Path is empty, clearing state');
+            setUserPath([]);
+            setPathIndex(0);
+            setArchetypeName('');
+          }
         } else {
+          console.log('  No path data found');
           setUserPath([]);
           setPathIndex(0);
           setArchetypeName('');
         }
       } catch (e) {
-        console.error('Error loading path:', e);
+        console.error('❌ Error loading path:', e);
+        setUserPath([]);
       }
     };
     
