@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, PlayCircle, ChevronDown, Sparkles, Clock, BarChart3, Atom, Brain, ExternalLink, Video, FileText } from "lucide-react";
+import { BookOpen, PlayCircle, Sparkles, Clock, BarChart3, Atom, Brain, ExternalLink, Video, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
@@ -24,10 +24,10 @@ const journeyPaths: Record<string, { path: string[]; name: string }> = {
 };
 
 const journeys = [
-  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers" },
-  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis" },
-  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims" },
-  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research" },
+  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers", gradient: "from-blue-500/10 to-indigo-500/10" },
+  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis", gradient: "from-purple-500/10 to-pink-500/10" },
+  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims", gradient: "from-amber-500/10 to-orange-500/10" },
+  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research", gradient: "from-emerald-500/10 to-teal-500/10" },
 ];
 
 const featuredAnalysis = [
@@ -169,182 +169,194 @@ export default function Index() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      {/* Hero Section with Gradient Background */}
-      <div className="bg-gradient-to-b from-primary/5 to-transparent -mx-6 px-6 pt-8 pb-12 mb-8 rounded-b-3xl">
-        {/* Churchill Quote */}
-        <blockquote className="text-center mb-12 animate-fade-in border-l-4 border-primary/40 pl-6 py-4 bg-card/50 rounded-r-lg max-w-2xl mx-auto">
-          <p className="font-serif text-xl italic text-muted-foreground leading-relaxed">
-            "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
-          </p>
-          <footer className="mt-3 text-sm text-muted-foreground font-medium">
-            — Winston Churchill
-          </footer>
-        </blockquote>
-
-        {/* Welcome Card */}
-        <div className="card-elevated p-8 mb-8 animate-fade-in shadow-lg" style={{ animationDelay: '100ms' }}>
-          <h1 className="text-2xl font-bold mb-4">Welcome to the UAP Research Navigator</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            This is a research tool designed for institutional professionals exploring Unidentified Anomalous Phenomena (UAP). 
-            We focus on <strong>falsifiable claims</strong> and <strong>prioritized sources</strong> — evidence that can be evaluated, 
-            witnesses whose credentials can be verified, and data that has been officially acknowledged.
-          </p>
-          <p className="text-muted-foreground leading-relaxed mt-4">
-            Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, 
-            but to present the most rigorous available evidence in a structured, navigable format.
-          </p>
-        </div>
+    <div className="relative max-w-4xl mx-auto px-6 py-12">
+      {/* Background gradient effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
       </div>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-4 gap-4 mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        {[
-          { label: "Claims", value: stats.claims, suffix: "+" },
-          { label: "Figures", value: stats.figures, suffix: "+" },
-          { label: "Sections", value: stats.sections, suffix: "" },
-          { label: "Videos", value: stats.videos, suffix: "+" },
-        ].map((stat) => (
-          <div key={stat.label} className="text-center p-4 bg-muted/50 rounded-lg shadow-sm">
-            <div className="text-3xl font-bold text-foreground">
-              <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-            </div>
-            <div className="text-sm text-muted-foreground">{stat.label}</div>
+      <div className="relative z-10">
+        {/* Hero Section with Gradient Background */}
+        <div className="bg-gradient-to-b from-primary/5 to-transparent -mx-6 px-6 pt-8 pb-12 mb-8 rounded-b-3xl">
+          {/* Churchill Quote - Enhanced */}
+          <blockquote className="text-center mb-12 animate-fade-in bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border-l-4 border-indigo-500 pl-6 pr-6 py-6 rounded-r-xl max-w-2xl mx-auto shadow-md">
+            <p className="font-serif text-2xl md:text-3xl italic text-gray-800 dark:text-gray-100 leading-relaxed">
+              "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
+            </p>
+            <footer className="mt-4 text-sm text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
+              — Winston Churchill
+            </footer>
+          </blockquote>
+
+          {/* Welcome Card - Enhanced */}
+          <div className="bg-card p-8 mb-8 animate-fade-in shadow-xl rounded-xl border border-gray-200 dark:border-gray-800" style={{ animationDelay: '100ms' }}>
+            <h1 className="text-2xl font-bold mb-4">Welcome to the UAP Research Navigator</h1>
+            <p className="text-muted-foreground leading-relaxed">
+              This is a research tool designed for institutional professionals exploring Unidentified Anomalous Phenomena (UAP). 
+              We focus on <strong className="text-foreground">falsifiable claims</strong> and <strong className="text-foreground">prioritized sources</strong> — evidence that can be evaluated, 
+              witnesses whose credentials can be verified, and data that has been officially acknowledged.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, 
+              but to present the most rigorous available evidence in a structured, navigable format.
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* Primary CTAs */}
-      <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
-        <Button 
-          size="lg" 
-          className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
-          onClick={() => {
-            setSelectedJourney(null);
-            setShowQuiz(true);
-          }}
-        >
-          <Sparkles className="w-5 h-5 mr-2" />
-          Take the Persona Quiz
-        </Button>
-        <Button 
-          variant="outline" 
-          size="lg" 
-          className="flex-1 h-14 text-base"
-          asChild
-        >
-          <a 
-            href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            <PlayCircle className="w-5 h-5 mr-2" />
-            Start with Age of Disclosure
-          </a>
-        </Button>
-      </div>
-
-      {/* Featured Analysis Section */}
-      <div className="mb-12 animate-fade-in" style={{ animationDelay: '350ms' }}>
-        <h2 className="text-lg font-semibold mb-4">Featured Analysis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {featuredAnalysis.map((item) => (
-            <div key={item.id} className="card-elevated p-6 shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <item.icon className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold truncate">{item.title}</h3>
-                    <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20 shrink-0">
-                      {item.badge}
-                    </Badge>
-                  </div>
-                  <p className="text-sm font-medium text-foreground">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">{item.subtitle}</p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {item.text}
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                asChild
-              >
-                {(item as any).isInternal ? (
-                  <Link to={item.buttonUrl}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    {item.buttonText}
-                  </Link>
-                ) : (
-                  <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    {item.buttonText}
-                  </a>
-                )}
-              </Button>
-            </div>
-          ))}
         </div>
-      </div>
 
-      {/* Common Preconceptions */}
-      <div className="mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="preconceptions" className="card-elevated border-0 shadow-sm">
-            <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <span className="font-semibold">Common Preconceptions</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <div className="space-y-4">
-                {preconceptions.map((item, i) => (
-                  <div key={i} className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                    <div>
-                      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Expectation</div>
-                      <p className="text-sm">{item.expectation}</p>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-wider text-primary mb-1">Reality</div>
-                      <p className="text-sm">{item.reality}</p>
-                    </div>
-                  </div>
-                ))}
+        {/* Stats Bar - Enhanced with gradient */}
+        <div className="bg-gradient-to-r from-indigo-50 via-white to-purple-50 dark:from-indigo-950/30 dark:via-background dark:to-purple-950/30 rounded-xl p-2 mb-8 animate-fade-in shadow-sm" style={{ animationDelay: '200ms' }}>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { label: "Claims", value: stats.claims, suffix: "+" },
+              { label: "Figures", value: stats.figures, suffix: "+" },
+              { label: "Sections", value: stats.sections, suffix: "" },
+              { label: "Videos", value: stats.videos, suffix: "+" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center p-4 bg-white/60 dark:bg-background/60 rounded-lg backdrop-blur-sm">
+                <div className="text-3xl font-bold text-foreground">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+            ))}
+          </div>
+        </div>
 
-      {/* Guided Journeys */}
-      <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
-        <h2 className="text-lg font-semibold mb-4">Guided Journeys</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {journeys.map((journey) => (
-            <button
-              key={journey.id}
-              onClick={() => handleJourneyClick(journey.id)}
-              className="card-elevated p-5 hover:shadow-md transition-all group text-left"
+        {/* Primary CTAs */}
+        <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <Button 
+            size="lg" 
+            className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
+            onClick={() => {
+              setSelectedJourney(null);
+              setShowQuiz(true);
+            }}
+          >
+            <Sparkles className="w-5 h-5 mr-2" />
+            Take the Persona Quiz
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="flex-1 h-14 text-base"
+            asChild
+          >
+            <a 
+              href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT" 
+              target="_blank" 
+              rel="noopener noreferrer"
             >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <journey.icon className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold group-hover:text-primary transition-colors">
-                    {journey.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">{journey.description}</p>
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    {journey.duration}
+              <PlayCircle className="w-5 h-5 mr-2" />
+              Start with Age of Disclosure
+            </a>
+          </Button>
+        </div>
+
+        {/* Featured Analysis Section */}
+        <div className="mb-12 animate-fade-in" style={{ animationDelay: '350ms' }}>
+          <h2 className="text-lg font-semibold mb-4">Featured Analysis</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {featuredAnalysis.map((item) => (
+              <div key={item.id} className="card-elevated p-6 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold truncate">{item.title}</h3>
+                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20 shrink-0">
+                        {item.badge}
+                      </Badge>
+                    </div>
+                    <p className="text-sm font-medium text-foreground">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                   </div>
                 </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  {item.text}
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  asChild
+                >
+                  {(item as any).isInternal ? (
+                    <Link to={item.buttonUrl}>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      {item.buttonText}
+                    </Link>
+                  ) : (
+                    <a href={item.buttonUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      {item.buttonText}
+                    </a>
+                  )}
+                </Button>
               </div>
-            </button>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Common Preconceptions */}
+        <div className="mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="preconceptions" className="card-elevated border-0 shadow-sm">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <span className="font-semibold">Common Preconceptions</span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="space-y-4">
+                  {preconceptions.map((item, i) => (
+                    <div key={i} className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Expectation</div>
+                        <p className="text-sm">{item.expectation}</p>
+                      </div>
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-primary mb-1">Reality</div>
+                        <p className="text-sm">{item.reality}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        {/* Guided Journeys - Enhanced */}
+        <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
+          <h2 className="text-lg font-semibold mb-4">Guided Journeys</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {journeys.map((journey) => (
+              <button
+                key={journey.id}
+                onClick={() => handleJourneyClick(journey.id)}
+                className={`relative overflow-hidden bg-gradient-to-br ${journey.gradient} p-5 rounded-xl border border-gray-200/50 dark:border-gray-800/50 hover:shadow-xl hover:scale-105 transition-all duration-300 group text-left`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/80 dark:bg-background/80 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <journey.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {journey.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">{journey.description}</p>
+                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {journey.duration}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
