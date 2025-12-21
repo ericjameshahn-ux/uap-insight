@@ -420,18 +420,18 @@ export default function Index() {
               <div className="text-sm opacity-80">Get your personalized research path</div>
             </div>
           </button>
-          <button
-            onClick={() => window.open('https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7', '_blank', 'noopener,noreferrer')}
+          <Link
+            to="/chat"
             className="flex items-center gap-4 p-6 bg-background border-2 border-primary/20 rounded-xl hover:border-primary/40 hover:bg-primary/5 transition-all hover:scale-[1.02]"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <MessageSquare className="w-6 h-6 text-primary" />
             </div>
             <div className="text-left">
-              <div className="font-semibold text-lg text-foreground">Ask AI Research Assistant</div>
-              <div className="text-sm text-muted-foreground">Query our source documents</div>
+              <div className="font-semibold text-lg text-foreground">Chat with UAP Navigator AI</div>
+              <div className="text-sm text-muted-foreground">Personalized to your research profile</div>
             </div>
-          </button>
+          </Link>
         </div>
 
         {/* Guided Journeys - Enhanced with Persona Labels */}

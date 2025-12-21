@@ -203,8 +203,8 @@ export default function ChatPage() {
             <Bot className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="font-semibold">UAP Research Assistant</h1>
-            <p className="text-xs text-muted-foreground">AI-powered responses with sources</p>
+            <h1 className="font-semibold">UAP Navigator AI</h1>
+            <p className="text-xs text-muted-foreground">Powered by Claude • Personalized for {archetypeDisplay.name}</p>
           </div>
         </div>
         <Badge variant="secondary" className="gap-1.5">
