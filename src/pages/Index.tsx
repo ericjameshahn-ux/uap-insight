@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, PlayCircle, Sparkles, Clock, BarChart3, Atom, Brain, ExternalLink, Video, FileText } from "lucide-react";
+import {
+  BookOpen,
+  PlayCircle,
+  Sparkles,
+  Clock,
+  BarChart3,
+  Atom,
+  Brain,
+  ExternalLink,
+  Video,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
@@ -8,11 +19,23 @@ import { supabase, PersonaArchetype } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 
 const preconceptions = [
-  { expectation: "UAP are a recent phenomenon", reality: "Documented encounters span decades with consistent patterns" },
-  { expectation: "Most witnesses are unreliable", reality: "Many key witnesses are trained military pilots, radar operators, intelligence officers" },
+  {
+    expectation: "UAP are a recent phenomenon",
+    reality: "Documented encounters span decades with consistent patterns",
+  },
+  {
+    expectation: "Most witnesses are unreliable",
+    reality: "Many key witnesses are trained military pilots, radar operators, intelligence officers",
+  },
   { expectation: "There is no physical evidence", reality: "Multiple sensor systems have simultaneously detected UAP" },
-  { expectation: "This is fringe conspiracy", reality: "Congressional hearings, Pentagon programs, and NASA involvement are documented" },
-  { expectation: "Scientists don't take this seriously", reality: "Stanford, Harvard, and other institutions have active researchers" },
+  {
+    expectation: "This is fringe conspiracy",
+    reality: "Congressional hearings, Pentagon programs, and NASA involvement are documented",
+  },
+  {
+    expectation: "Scientists don't take this seriously",
+    reality: "Stanford, Harvard, and other institutions have active researchers",
+  },
 ];
 
 // Journey definitions with paths
@@ -23,11 +46,44 @@ const journeyPaths: Record<string, { path: string[]; name: string }> = {
   consciousness: { path: ["i", "k", "m"], name: "Consciousness Connection" },
 };
 
+// UPDATED: Added personas array to each journey
 const journeys = [
-  { id: "executive", title: "Executive Brief", icon: BarChart3, duration: "45 min", description: "Core evidence for decision-makers", gradient: "from-blue-500/10 to-indigo-500/10" },
-  { id: "physics", title: "Physics Deep Dive", icon: Atom, duration: "60 min", description: "Technical propulsion analysis", gradient: "from-purple-500/10 to-pink-500/10" },
-  { id: "retrieval", title: "Crash Retrieval Evidence", icon: BookOpen, duration: "50 min", description: "Craft possession claims", gradient: "from-amber-500/10 to-orange-500/10" },
-  { id: "consciousness", title: "Consciousness Connection", icon: Brain, duration: "55 min", description: "UAP and consciousness research", gradient: "from-emerald-500/10 to-teal-500/10" },
+  {
+    id: "executive",
+    title: "Executive Brief",
+    icon: BarChart3,
+    duration: "45 min",
+    description: "Core evidence for decision-makers",
+    gradient: "from-blue-500/10 to-indigo-500/10",
+    personas: ["Empiricist", "Strategist", "Skeptical Analyst"],
+  },
+  {
+    id: "physics",
+    title: "Physics Deep Dive",
+    icon: Atom,
+    duration: "60 min",
+    description: "Technical propulsion analysis",
+    gradient: "from-purple-500/10 to-pink-500/10",
+    personas: ["Technologist", "Empiricist"],
+  },
+  {
+    id: "retrieval",
+    title: "Crash Retrieval Evidence",
+    icon: BookOpen,
+    duration: "50 min",
+    description: "Craft possession claims",
+    gradient: "from-amber-500/10 to-orange-500/10",
+    personas: ["Investigator", "Historian"],
+  },
+  {
+    id: "consciousness",
+    title: "Consciousness Connection",
+    icon: Brain,
+    duration: "55 min",
+    description: "UAP and consciousness research",
+    gradient: "from-emerald-500/10 to-teal-500/10",
+    personas: ["Experiencer", "Meaning-Seeker"],
+  },
 ];
 
 const featuredAnalysis = [
@@ -59,13 +115,13 @@ const featuredAnalysis = [
 // Animated counter component
 function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     const duration = 1500;
     const steps = 30;
     const increment = value / steps;
     let current = 0;
-    
+
     const timer = setInterval(() => {
       current += increment;
       if (current >= value) {
@@ -75,11 +131,16 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
         setCount(Math.floor(current));
       }
     }, duration / steps);
-    
+
     return () => clearInterval(timer);
   }, [value]);
-  
-  return <span>{count}{suffix}</span>;
+
+  return (
+    <span>
+      {count}
+      {suffix}
+    </span>
+  );
 }
 
 export default function Index() {
@@ -91,24 +152,21 @@ export default function Index() {
 
   useEffect(() => {
     // Check if user has already taken the quiz
-    const pathData = localStorage.getItem('uap_path');
+    const pathData = localStorage.getItem("uap_path");
     if (pathData) {
       setHasSeenQuiz(true);
-    } else {
-      // Show quiz on first visit after a short delay
-      const timer = setTimeout(() => setShowQuiz(true), 1500);
-      return () => clearTimeout(timer);
     }
+    // REMOVED: Quiz no longer auto-pops - user must click the button
 
     // Fetch actual stats from database
     const fetchStats = async () => {
       const [claims, figures, sections, videos] = await Promise.all([
-        supabase.from('claims').select('id', { count: 'exact', head: true }),
-        supabase.from('figures').select('id', { count: 'exact', head: true }),
-        supabase.from('sections').select('id', { count: 'exact', head: true }),
-        supabase.from('videos').select('id', { count: 'exact', head: true }),
+        supabase.from("claims").select("id", { count: "exact", head: true }),
+        supabase.from("figures").select("id", { count: "exact", head: true }),
+        supabase.from("sections").select("id", { count: "exact", head: true }),
+        supabase.from("videos").select("id", { count: "exact", head: true }),
       ]);
-      
+
       setStats({
         claims: claims.count || 100,
         figures: figures.count || 55,
@@ -116,7 +174,7 @@ export default function Index() {
         videos: videos.count || 38,
       });
     };
-    
+
     fetchStats();
   }, []);
 
@@ -135,36 +193,36 @@ export default function Index() {
 
   const startJourneyDirectly = (journeyId: string) => {
     const journey = journeyPaths[journeyId];
-    
-    console.log('🔵 Starting journey directly:');
-    console.log('  Journey ID:', journeyId);
-    console.log('  Journey object:', journey);
-    
+
+    console.log("🔵 Starting journey directly:");
+    console.log("  Journey ID:", journeyId);
+    console.log("  Journey object:", journey);
+
     if (!journey) {
-      console.error('❌ Journey not found for ID:', journeyId);
-      console.log('  Available journeys:', Object.keys(journeyPaths));
+      console.error("❌ Journey not found for ID:", journeyId);
+      console.log("  Available journeys:", Object.keys(journeyPaths));
       return;
     }
 
-    console.log('  Path:', journey.path);
-    console.log('  Name:', journey.name);
+    console.log("  Path:", journey.path);
+    console.log("  Name:", journey.name);
 
     try {
       // Store path in localStorage
-      localStorage.setItem('uap_path', JSON.stringify(journey.path));
-      localStorage.setItem('uap_path_index', '0');
-      localStorage.setItem('uap_archetype_name', journey.name);
-      localStorage.setItem('uap_archetype_id', journeyId);
+      localStorage.setItem("uap_path", JSON.stringify(journey.path));
+      localStorage.setItem("uap_path_index", "0");
+      localStorage.setItem("uap_archetype_name", journey.name);
+      localStorage.setItem("uap_archetype_id", journeyId);
 
       // Verify saved data
-      console.log('✅ Verify saved - uap_path:', localStorage.getItem('uap_path'));
-      console.log('✅ Verify saved - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
+      console.log("✅ Verify saved - uap_path:", localStorage.getItem("uap_path"));
+      console.log("✅ Verify saved - uap_archetype_name:", localStorage.getItem("uap_archetype_name"));
     } catch (e) {
-      console.error('❌ Error saving to localStorage:', e);
+      console.error("❌ Error saving to localStorage:", e);
     }
-    
+
     // Dispatch storage event to notify other components
-    window.dispatchEvent(new StorageEvent('storage', { key: 'uap_path' }));
+    window.dispatchEvent(new StorageEvent("storage", { key: "uap_path" }));
 
     // Navigate to first section
     navigate(`/section/${journey.path[0]}`);
@@ -172,8 +230,8 @@ export default function Index() {
 
   const handleJourneyClick = (journeyId: string) => {
     // Check if user already has an archetype
-    const existingArchetype = localStorage.getItem('uap_archetype_id');
-    
+    const existingArchetype = localStorage.getItem("uap_archetype_id");
+
     if (existingArchetype) {
       // User has taken quiz - start journey directly
       startJourneyDirectly(journeyId);
@@ -215,22 +273,29 @@ export default function Index() {
           </blockquote>
 
           {/* Welcome Card - Enhanced */}
-          <div className="bg-card p-8 mb-8 animate-fade-in shadow-xl rounded-xl border border-gray-200 dark:border-gray-800" style={{ animationDelay: '100ms' }}>
+          <div
+            className="bg-card p-8 mb-8 animate-fade-in shadow-xl rounded-xl border border-gray-200 dark:border-gray-800"
+            style={{ animationDelay: "100ms" }}
+          >
             <h1 className="text-2xl font-bold mb-4">Welcome to the UAP Research Navigator</h1>
             <p className="text-muted-foreground leading-relaxed">
-              This is a research tool designed for institutional professionals exploring Unidentified Anomalous Phenomena (UAP). 
-              We focus on <strong className="text-foreground">falsifiable claims</strong> and <strong className="text-foreground">prioritized sources</strong> — evidence that can be evaluated, 
+              This is a research tool designed for institutional professionals exploring Unidentified Anomalous
+              Phenomena (UAP). We focus on <strong className="text-foreground">falsifiable claims</strong> and{" "}
+              <strong className="text-foreground">prioritized sources</strong> — evidence that can be evaluated,
               witnesses whose credentials can be verified, and data that has been officially acknowledged.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, 
-              but to present the most rigorous available evidence in a structured, navigable format.
+              Each claim is rated by evidence tier, each source by credibility level. Our goal is not to convince, but
+              to present the most rigorous available evidence in a structured, navigable format.
             </p>
           </div>
         </div>
 
         {/* Stats Bar - Enhanced with gradient */}
-        <div className="bg-gradient-to-r from-indigo-50 via-white to-purple-50 dark:from-indigo-950/30 dark:via-background dark:to-purple-950/30 rounded-xl p-2 mb-8 animate-fade-in shadow-sm" style={{ animationDelay: '200ms' }}>
+        <div
+          className="bg-gradient-to-r from-indigo-50 via-white to-purple-50 dark:from-indigo-950/30 dark:via-background dark:to-purple-950/30 rounded-xl p-2 mb-8 animate-fade-in shadow-sm"
+          style={{ animationDelay: "200ms" }}
+        >
           <div className="grid grid-cols-4 gap-2">
             {[
               { label: "Claims", value: stats.claims, suffix: "+" },
@@ -238,7 +303,10 @@ export default function Index() {
               { label: "Sections", value: stats.sections, suffix: "" },
               { label: "Videos", value: stats.videos, suffix: "+" },
             ].map((stat) => (
-              <div key={stat.label} className="text-center p-4 bg-white/60 dark:bg-background/60 rounded-lg backdrop-blur-sm">
+              <div
+                key={stat.label}
+                className="text-center p-4 bg-white/60 dark:bg-background/60 rounded-lg backdrop-blur-sm"
+              >
                 <div className="text-3xl font-bold text-foreground">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                 </div>
@@ -249,9 +317,9 @@ export default function Index() {
         </div>
 
         {/* Primary CTAs */}
-        <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <Button 
-            size="lg" 
+        <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
+          <Button
+            size="lg"
             className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
             onClick={() => {
               setSelectedJourney(null);
@@ -261,15 +329,10 @@ export default function Index() {
             <Sparkles className="w-5 h-5 mr-2" />
             Take the Persona Quiz
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="flex-1 h-14 text-base"
-            asChild
-          >
-            <a 
-              href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT" 
-              target="_blank" 
+          <Button variant="outline" size="lg" className="flex-1 h-14 text-base" asChild>
+            <a
+              href="https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT"
+              target="_blank"
               rel="noopener noreferrer"
             >
               <PlayCircle className="w-5 h-5 mr-2" />
@@ -279,7 +342,7 @@ export default function Index() {
         </div>
 
         {/* Featured Analysis Section */}
-        <div className="mb-12 animate-fade-in" style={{ animationDelay: '350ms' }}>
+        <div className="mb-12 animate-fade-in" style={{ animationDelay: "350ms" }}>
           <h2 className="text-lg font-semibold mb-4">Featured Analysis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featuredAnalysis.map((item) => (
@@ -299,15 +362,8 @@ export default function Index() {
                     <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  {item.text}
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  asChild
-                >
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.text}</p>
+                <Button variant="outline" size="sm" className="w-full" asChild>
                   {(item as any).isInternal ? (
                     <Link to={item.buttonUrl}>
                       <ExternalLink className="w-4 h-4 mr-2" />
@@ -326,7 +382,7 @@ export default function Index() {
         </div>
 
         {/* Common Preconceptions */}
-        <div className="mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <div className="mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
           <Accordion type="single" collapsible>
             <AccordionItem value="preconceptions" className="card-elevated border-0 shadow-sm">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -352,8 +408,8 @@ export default function Index() {
           </Accordion>
         </div>
 
-        {/* Guided Journeys - Enhanced */}
-        <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
+        {/* Guided Journeys - Enhanced with Persona Labels */}
+        <div className="animate-fade-in" style={{ animationDelay: "500ms" }}>
           <h2 className="text-lg font-semibold mb-4">Guided Journeys</h2>
           <div className="grid grid-cols-2 gap-4">
             {journeys.map((journey) => (
@@ -375,6 +431,8 @@ export default function Index() {
                       <Clock className="w-3 h-3" />
                       {journey.duration}
                     </div>
+                    {/* NEW: Persona labels */}
+                    <div className="mt-2 text-xs text-primary/70">Best for: {journey.personas.join(", ")}</div>
                   </div>
                 </div>
               </button>
@@ -384,8 +442,8 @@ export default function Index() {
       </div>
 
       {/* Persona Quiz Modal */}
-      <PersonaQuiz 
-        isOpen={showQuiz} 
+      <PersonaQuiz
+        isOpen={showQuiz}
         onClose={() => {
           setShowQuiz(false);
           setSelectedJourney(null);
