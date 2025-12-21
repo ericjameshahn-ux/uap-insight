@@ -11,7 +11,6 @@ import KeyFigures from "./pages/KeyFigures";
 import PhysicsAnalysis from "./pages/PhysicsAnalysis";
 import Documents from "./pages/Documents";
 import Videos from "./pages/Videos";
-import JourneyPage from "./pages/JourneyPage";
 import AboutQuiz from "./pages/AboutQuiz";
 import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
@@ -33,7 +32,6 @@ const App = () => (
             <Route path="/physics" element={<PhysicsAnalysis />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/videos" element={<Videos />} />
-            <Route path="/journey/:journeyId" element={<JourneyPage />} />
             <Route path="/about-quiz" element={<AboutQuiz />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="*" element={<NotFound />} />

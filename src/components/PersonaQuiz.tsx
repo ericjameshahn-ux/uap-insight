@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight, Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { supabase, PersonaQuestion, PersonaArchetype, getUserId, Journey } from "@/lib/supabase";
+import { supabase, PersonaQuestion, PersonaArchetype, getUserId } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 interface PersonaQuizProps {
@@ -57,7 +57,7 @@ const fallbackArchetypes: PersonaArchetype[] = [
     name: "The Empiricist",
     description: "You value hard evidence above all else. You want data, measurements, and verifiable facts.",
     primary_interests: "Sensor data, radar evidence, official reports",
-    recommended_sections: ["A", "B", "C", "F"],
+    recommended_sections: ["a", "b", "c", "f"],
     recommended_journey: "executive",
     icon: "📊"
   },
@@ -66,7 +66,7 @@ const fallbackArchetypes: PersonaArchetype[] = [
     name: "The Scientist",
     description: "You're fascinated by the physics and technology implications.",
     primary_interests: "Propulsion theories, physics analysis, R&D",
-    recommended_sections: ["C", "J", "L", "B"],
+    recommended_sections: ["c", "j", "l", "b"],
     recommended_journey: "physics",
     icon: "⚛️"
   }
@@ -80,7 +80,7 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [recommendedJourney, setRecommendedJourney] = useState<Journey | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       const [questionsRes, archetypesRes] = await Promise.all([
@@ -89,12 +89,10 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
       ]);
       
       if (questionsRes.data && questionsRes.data.length > 0) {
-        // Parse options and scoring_map if they're stored as JSONB strings
         const parsedQuestions = questionsRes.data.map((q: any) => {
           let options = q.options;
           let scoring_map = q.scoring_map;
           
-          // Parse options
           if (typeof options === 'string') {
             try {
               options = JSON.parse(options);
@@ -104,7 +102,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
             }
           }
           
-          // Parse scoring_map
           if (typeof scoring_map === 'string') {
             try {
               scoring_map = JSON.parse(scoring_map);
@@ -114,7 +111,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
             }
           }
           
-          // Ensure options is an array
           if (!Array.isArray(options)) {
             options = [];
           }
@@ -129,7 +125,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
       }
       
       if (archetypesRes.data && archetypesRes.data.length > 0) {
-        // Parse recommended_sections if stored as JSONB string
         const parsedArchetypes = archetypesRes.data.map((a: any) => {
           let recommended_sections = a.recommended_sections;
           
@@ -142,14 +137,13 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
             }
           }
           
-          // Ensure it's an array
           if (!Array.isArray(recommended_sections)) {
             recommended_sections = [];
           }
           
           return {
             ...a,
-            recommended_sections
+            recommended_sections: recommended_sections.map((s: string) => s.toLowerCase())
           };
         });
         setArchetypes(parsedArchetypes);
@@ -166,7 +160,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     const newAnswers = { ...answers, [question.question_number]: value };
     setAnswers(newAnswers);
     
-    // Update scores
     const archetypesToAdd = question.scoring_map?.[value] || [];
     const newScores = { ...scores };
     if (Array.isArray(archetypesToAdd)) {
@@ -176,7 +169,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     }
     setScores(newScores);
     
-    // Auto-advance or show results
     if (currentQuestion < questions.length - 1) {
       setTimeout(() => setCurrentQuestion(currentQuestion + 1), 300);
     } else {
@@ -184,33 +176,25 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     }
   };
 
-  const calculateResults = async (finalScores: Record<string, number>) => {
+  const calculateResults = (finalScores: Record<string, number>) => {
     const sorted = Object.entries(finalScores).sort(([, a], [, b]) => b - a);
     setShowResults(true);
     
-    // Get primary archetype's recommended sections
     const primaryId = sorted[0]?.[0];
     const primaryArchetype = archetypes.find(a => a.id === primaryId);
     const recommendedPath = primaryArchetype?.recommended_sections || [];
     
-    // Fetch the recommended journey
-    const journeyId = primaryArchetype?.recommended_journey;
-    if (journeyId) {
-      const { data: journeyData } = await supabase
-        .from('journeys')
-        .select('*')
-        .eq('id', journeyId)
-        .maybeSingle();
-      
-      if (journeyData) {
-        setRecommendedJourney(journeyData);
-      }
-    }
-    
     // Get or create user ID
     const userId = getUserId();
     
-    // Store results in localStorage including the recommended path
+    // Store SIMPLIFIED path data in localStorage
+    localStorage.setItem('uap_user_id', userId);
+    localStorage.setItem('uap_archetype_id', primaryId || '');
+    localStorage.setItem('uap_archetype_name', primaryArchetype?.name || '');
+    localStorage.setItem('uap_path', JSON.stringify(recommendedPath));
+    localStorage.setItem('uap_path_index', '0');
+    
+    // Legacy storage for quiz data
     localStorage.setItem('uap-persona-quiz', JSON.stringify({
       answers,
       scores: finalScores,
@@ -220,16 +204,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
       primaryName: primaryArchetype?.name || 'Researcher',
       completedAt: new Date().toISOString()
     }));
-    
-    // Store journey info
-    localStorage.setItem('uap_user_id', userId);
-    localStorage.setItem('uap_archetype', primaryId || '');
-    localStorage.setItem('uap_journey', journeyId || '');
-    localStorage.setItem('uap_journey_step', '0');
-    
-    // Set navigation mode to personalized
-    localStorage.setItem('uap_navigation_mode', 'personalized');
-    localStorage.setItem('uap_current_path_index', '0');
   };
 
   const getPrimaryArchetype = (): PersonaArchetype | undefined => {
@@ -251,15 +225,19 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
     onClose();
   };
 
-  const handleStartJourney = () => {
-    const journeyId = localStorage.getItem('uap_journey');
+  const handleStartPath = () => {
+    const path = getPrimaryArchetype()?.recommended_sections || [];
     onClose();
-    if (journeyId) {
-      navigate(`/journey/${journeyId}`);
+    if (path.length > 0) {
+      navigate(`/section/${path[0].toLowerCase()}`);
     }
   };
+
   const handleExploreFreelyInternal = () => {
-    localStorage.setItem('uap_navigation_mode', 'free');
+    localStorage.removeItem('uap_path');
+    localStorage.removeItem('uap_path_index');
+    localStorage.removeItem('uap_archetype_id');
+    localStorage.removeItem('uap_archetype_name');
     localStorage.removeItem('uap-persona-quiz');
     if (onExploreFreelyClick) {
       onExploreFreelyClick();
@@ -304,7 +282,6 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
               <div className="space-y-3">
                 {question?.options && Array.isArray(question.options) && question.options.length > 0 ? (
                   question.options.map((option: string | { label: string; value: string }, index: number) => {
-                    // Handle both string arrays ["Option 1", "Option 2"] and object arrays [{label, value}]
                     const isString = typeof option === 'string';
                     const label = isString ? option : option.label;
                     const value = isString ? option : option.value;
@@ -349,7 +326,7 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
               <div className="space-y-4 mb-8">
                 {getPrimaryArchetype() && (
                   <div className="p-5 rounded-lg bg-accent border border-primary/20">
-                    <div className="text-sm text-muted-foreground mb-1">Primary Archetype</div>
+                    <div className="text-sm text-muted-foreground mb-1">Your Profile</div>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{getPrimaryArchetype()?.icon}</span>
                       <span className="text-xl font-semibold">{getPrimaryArchetype()?.name}</span>
@@ -370,27 +347,15 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
                   </div>
                 )}
               </div>
-              
-              {/* Recommended Journey */}
-              {recommendedJourney && (
-                <div className="mb-6 p-4 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
-                  <div className="text-sm text-muted-foreground mb-1">Recommended Journey</div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">{recommendedJourney.icon}</span>
-                    <span className="font-semibold">{recommendedJourney.title}</span>
-                    <span className="text-xs text-muted-foreground">• {recommendedJourney.duration}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{recommendedJourney.description}</p>
-                </div>
-              )}
 
+              {/* Recommended Path with Visual Badges */}
               <div className="mb-6">
                 <h3 className="font-semibold mb-3">Your Recommended Path</h3>
                 <div className="flex items-center gap-2 flex-wrap p-4 bg-muted/50 rounded-lg">
                   {getPrimaryArchetype()?.recommended_sections && getPrimaryArchetype()!.recommended_sections.length > 0 ? (
                     getPrimaryArchetype()!.recommended_sections.map((section, i, arr) => (
                       <div key={section} className="flex items-center gap-2">
-                        <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-mono font-medium text-sm">
+                        <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-mono font-bold text-sm uppercase">
                           {section}
                         </span>
                         {i < arr.length - 1 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
@@ -403,20 +368,13 @@ export function PersonaQuiz({ isOpen, onClose, onComplete, onExploreFreelyClick 
               </div>
               
               <div className="flex flex-col gap-3">
-                {recommendedJourney && (
-                  <Button onClick={handleStartJourney} className="w-full" size="lg">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Your Journey
-                  </Button>
-                )}
-                <div className="flex gap-3">
-                  <Button onClick={handleComplete} variant={recommendedJourney ? "outline" : "default"} className="flex-1">
-                    Begin Your Path
-                  </Button>
-                  <Button variant="ghost" onClick={handleExploreFreelyInternal}>
-                    Explore Freely
-                  </Button>
-                </div>
+                <Button onClick={handleStartPath} className="w-full" size="lg">
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Your Path
+                </Button>
+                <Button variant="ghost" onClick={handleExploreFreelyInternal}>
+                  Explore Freely
+                </Button>
               </div>
               
               <button
