@@ -137,11 +137,21 @@ export default function Index() {
     const journey = journeyPaths[journeyId];
     if (!journey) return;
 
+    console.log('🔵 Starting journey directly:');
+    console.log('  Journey:', journeyId);
+    console.log('  Path:', journey.path);
+
     // Store path in localStorage
     localStorage.setItem('uap_path', JSON.stringify(journey.path));
     localStorage.setItem('uap_path_index', '0');
     localStorage.setItem('uap_archetype_name', journey.name);
     localStorage.setItem('uap_archetype_id', journeyId);
+
+    // Verify saved data
+    console.log('  Verify - uap_path:', localStorage.getItem('uap_path'));
+    
+    // Dispatch storage event to notify other components
+    window.dispatchEvent(new StorageEvent('storage', { key: 'uap_path' }));
 
     // Navigate to first section
     navigate(`/section/${journey.path[0]}`);
