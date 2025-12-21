@@ -205,11 +205,22 @@ export function PersonaQuiz({
     const userId = getUserId();
     
     // Store SIMPLIFIED path data in localStorage
+    console.log('🔵 Quiz Complete - Saving path data:');
+    console.log('  Path:', recommendedPath);
+    console.log('  Archetype:', primaryArchetype?.name);
+    
     localStorage.setItem('uap_user_id', userId);
     localStorage.setItem('uap_archetype_id', primaryId || '');
     localStorage.setItem('uap_archetype_name', primaryArchetype?.name || '');
     localStorage.setItem('uap_path', JSON.stringify(recommendedPath));
     localStorage.setItem('uap_path_index', '0');
+    
+    // Verify saved data
+    console.log('  Verify - uap_path:', localStorage.getItem('uap_path'));
+    console.log('  Verify - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
+    
+    // Dispatch storage event to notify other components
+    window.dispatchEvent(new StorageEvent('storage', { key: 'uap_path' }));
     
     // Legacy storage for quiz data
     localStorage.setItem('uap-persona-quiz', JSON.stringify({

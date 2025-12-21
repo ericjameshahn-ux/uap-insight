@@ -13,6 +13,7 @@ import Documents from "./pages/Documents";
 import Videos from "./pages/Videos";
 import AboutQuiz from "./pages/AboutQuiz";
 import ChatPage from "./pages/ChatPage";
+import SavedItems from "./pages/SavedItems";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/videos" element={<Videos />} />
             <Route path="/about-quiz" element={<AboutQuiz />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/saved" element={<SavedItems />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

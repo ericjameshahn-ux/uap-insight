@@ -11,7 +11,7 @@ import {
   HelpCircle,
   Play,
   MessageSquare,
-  ChevronRight,
+  Bookmark,
 } from "lucide-react";
 import {
   Sidebar,
@@ -50,6 +50,7 @@ const fallbackSections: Section[] = [
 ];
 
 const utilityNav = [
+  { title: "My Queue", url: "/saved", icon: Bookmark },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
   { title: "Physics Analysis", url: "/physics", icon: Atom },
@@ -237,22 +238,22 @@ export function AppSidebar() {
                           "flex items-center gap-3 px-4 py-2 rounded-md transition-colors relative",
                           active 
                             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-                            : "hover:bg-sidebar-accent/50"
+                            : inPath
+                              ? "bg-primary/5 border-l-[3px] border-primary hover:bg-primary/10"
+                              : "hover:bg-sidebar-accent/50",
+                          // Current section in path gets extra emphasis
+                          inPath && section.letter.toLowerCase() === userPath[pathIndex] && "bg-primary/10 border-primary"
                         )}
                       >
-                        {/* Path indicator dot */}
-                        {inPath && !collapsed && (
-                          <span className="absolute left-1 w-1.5 h-1.5 bg-primary rounded-full" />
-                        )}
                         <span className={cn(
                           "font-mono font-medium text-xs w-8 shrink-0",
-                          inPath && "text-primary"
+                          inPath && "text-primary font-bold"
                         )}>
                           {section.letter}
                         </span>
                         {!collapsed && (
                           <>
-                            <span className="flex-1 text-sm truncate">{section.title}</span>
+                            <span className={cn("flex-1 text-sm truncate", inPath && "text-primary")}>{section.title}</span>
                             <ConvictionBadge conviction={section.conviction} className="text-[10px] shrink-0" />
                           </>
                         )}
