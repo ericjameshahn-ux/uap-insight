@@ -90,3 +90,13 @@ export interface PersonaQuestion {
   options: { label: string; value: string }[];
   scoring_map: Record<string, string[]>;
 }
+
+export interface SectionContentBlock {
+  id: string;
+  section_id: string;
+  block_order: number;
+  block_type: string;
+  title: string;
+  content: string;
+  video_url?: string;
+}
