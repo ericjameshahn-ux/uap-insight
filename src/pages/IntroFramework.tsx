@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, Sparkles, BookOpen, ArrowRight, Clock } from "lucide-react";
+import { ArrowDown, Sparkles, BookOpen, ArrowRight, Clock, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThreeTierFramework } from "@/components/intro/ThreeTierFramework";
 import { HistoricalExampleCard } from "@/components/intro/HistoricalExampleCard";
@@ -13,9 +13,22 @@ import { manhattanProject, ghostArmy, condonScenario } from "@/components/intro/
 
 export default function IntroFramework() {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const scrollToContent = () => {
     contentRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -134,6 +147,17 @@ export default function IntroFramework() {
           </div>
         </section>
       </div>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all hover:scale-110 z-50"
+          aria-label="Back to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }
