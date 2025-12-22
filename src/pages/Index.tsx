@@ -321,6 +321,17 @@ export default function Index() {
           <Button
             size="lg"
             className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
+            asChild
+          >
+            <Link to="/intro">
+              <BookOpen className="w-5 h-5 mr-2" />
+              Start Here: The Framework
+            </Link>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="flex-1 h-14 text-base"
             onClick={() => {
               setSelectedJourney(null);
               setShowQuiz(true);
@@ -328,15 +339,6 @@ export default function Index() {
           >
             <Sparkles className="w-5 h-5 mr-2" />
             Take the Persona Quiz
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="flex-1 h-14 text-base"
-            onClick={() => window.open('https://www.amazon.com/Age-Disclosure-Dan-Farah/dp/B0FMF6VFCT', '_blank', 'noopener,noreferrer')}
-          >
-            <PlayCircle className="w-5 h-5 mr-2" />
-            Start with Age of Disclosure
           </Button>
         </div>
 
