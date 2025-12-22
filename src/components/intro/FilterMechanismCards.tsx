@@ -24,8 +24,8 @@ const mechanisms: FilterMechanism[] = [
     icon: Lock,
     summary: 'CIA recommended "public education campaign to reduce interest"',
     details: [
-      { text: '"Debunking" using Disney, celebrities, mass media' },
-      { text: 'Monitor civilian groups for "subversive purposes"' },
+      { text: '"Debunking" using Disney, celebrities, mass media', referenceId: "robertson-panel" },
+      { text: 'Monitor civilian groups for "subversive purposes"', referenceId: "robertson-panel" },
       { text: "Led to AFR 200-2, JANAP 146 penalties" },
       { text: "Declassified 1975—culture of ridicule already established" },
     ],
@@ -38,8 +38,8 @@ const mechanisms: FilterMechanism[] = [
     icon: GraduationCap,
     summary: 'Recommended teachers "refrain from giving students credit" for UFO work',
     details: [
-      { text: "Created 50+ years of academic stigma" },
-      { text: "Ended federal research funding" },
+      { text: "Created 50+ years of academic stigma", referenceId: "condon-report" },
+      { text: "Ended federal research funding", referenceId: "condon-report" },
       { text: 'Self-fulfilling prophecy: "not scientific" → no study → no data' },
     ],
   },
@@ -51,10 +51,10 @@ const mechanisms: FilterMechanism[] = [
     icon: Scale,
     summary: '"No person has ever been prosecuted for disclosing to Congress in private"',
     details: [
-      { text: "SF-312 NDAs explicitly preserve Congressional disclosure rights" },
+      { text: "SF-312 NDAs explicitly preserve Congressional disclosure rights", referenceId: "sf-312" },
       { text: "Classification not binding on Congress", referenceId: "usc-3373" },
       { text: "Constitutional immunity exists", referenceId: "gravel-v-us" },
-      { text: "Fear persists despite legal protections—perception-based control" },
+      { text: "Fear persists despite legal protections—perception-based control", referenceId: "guthrie-yale" },
     ],
   },
   {
@@ -66,7 +66,7 @@ const mechanisms: FilterMechanism[] = [
     summary: 'AARO mandate to "evaluate threat" unfulfilled',
     details: [
       { text: "50 USC 3373(c)(5) requires threat evaluation", referenceId: "usc-3373" },
-      { text: "No public assessment produced" },
+      { text: "No public assessment produced", referenceId: "aaro-reports" },
       { text: "DoD IG concerns about cooperation", referenceId: "dod-ig-aaro" },
       { text: "Pattern of slow-rolling disclosure" },
     ],

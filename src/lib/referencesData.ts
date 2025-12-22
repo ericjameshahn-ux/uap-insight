@@ -157,6 +157,32 @@ export const references: Record<string, Reference> = {
     date: '2023',
     excerpt: 'Defense contractors lobbied against eminent domain and disclosure provisions in UAP legislation. Key provisions stripped from final NDAA.',
     internalSection: 'f'
+  },
+  
+  // Additional References for intro section
+  'aaro-reports': {
+    id: 'aaro-reports',
+    title: 'AARO Annual Reports',
+    source: 'All-domain Anomaly Resolution Office',
+    url: 'https://www.aaro.mil/',
+    date: '2023-2024',
+    excerpt: 'Despite statutory mandate under 50 USC 3373, AARO reports focus on case disposition without comprehensive threat evaluation.',
+    internalSection: 'f'
+  },
+  'sf-312': {
+    id: 'sf-312',
+    title: 'Standard Form 312 (Classified Information NDA)',
+    source: 'Office of the Director of National Intelligence',
+    excerpt: 'SF-312 NDAs explicitly preserve Congressional disclosure rights. Signatories may still disclose to cleared Members of Congress.',
+  },
+  'uap-disclosure-act': {
+    id: 'uap-disclosure-act',
+    title: 'UAP Disclosure Act of 2023',
+    source: 'S.2226, 118th Congress',
+    url: 'https://www.congress.gov/bill/118th-congress/senate-bill/2226',
+    date: '2023',
+    excerpt: 'Defines the five observables as criteria for UAP identification. Establishes disclosure review board and records collection requirements.',
+    internalSection: 'f'
   }
 };
 

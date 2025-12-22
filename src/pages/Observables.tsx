@@ -111,10 +111,12 @@ export default function Observables() {
           </Button>
         </Link>
         
-        <h1 className="text-3xl font-bold mb-3">The Five Observables (Plus One)</h1>
+        <h1 className="text-3xl font-bold mb-3">The Six Observables</h1>
         <p className="text-muted-foreground text-lg max-w-3xl">
-          These are the distinct performance characteristics used by U.S. government programs 
-          (AATIP, UAP Task Force, AARO) to categorize aerial objects that defy known physics.
+          Performance characteristics that define UAP — codified in U.S. law. These distinct 
+          traits, formalized by AATIP and the UAP Task Force, distinguish genuine anomalies 
+          from conventional aircraft. Five were codified in the UAP Disclosure Act of 2023; 
+          the sixth emerged from encounter research.
         </p>
       </div>
 
