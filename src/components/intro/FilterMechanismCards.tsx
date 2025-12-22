@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Lock, GraduationCap, Scale, Building, Briefcase, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ReferenceTooltip } from "@/components/ReferenceTooltip";
+import { FigureTooltip } from "@/components/FigureTooltip";
 
 interface FilterMechanism {
   id: string;
@@ -10,7 +12,7 @@ interface FilterMechanism {
   badge: "HIGH" | "MEDIUM" | "LOWER";
   icon: React.ElementType;
   summary: string;
-  details: string[];
+  details: { text: string; referenceId?: string }[];
 }
 
 const mechanisms: FilterMechanism[] = [
@@ -22,10 +24,10 @@ const mechanisms: FilterMechanism[] = [
     icon: Lock,
     summary: 'CIA recommended "public education campaign to reduce interest"',
     details: [
-      '"Debunking" using Disney, celebrities, mass media',
-      'Monitor civilian groups for "subversive purposes"',
-      "Led to AFR 200-2, JANAP 146 penalties",
-      "Declassified 1975—culture of ridicule already established",
+      { text: '"Debunking" using Disney, celebrities, mass media' },
+      { text: 'Monitor civilian groups for "subversive purposes"' },
+      { text: "Led to AFR 200-2, JANAP 146 penalties" },
+      { text: "Declassified 1975—culture of ridicule already established" },
     ],
   },
   {
@@ -36,9 +38,9 @@ const mechanisms: FilterMechanism[] = [
     icon: GraduationCap,
     summary: 'Recommended teachers "refrain from giving students credit" for UFO work',
     details: [
-      "Created 50+ years of academic stigma",
-      "Ended federal research funding",
-      'Self-fulfilling prophecy: "not scientific" → no study → no data',
+      { text: "Created 50+ years of academic stigma" },
+      { text: "Ended federal research funding" },
+      { text: 'Self-fulfilling prophecy: "not scientific" → no study → no data' },
     ],
   },
   {
@@ -49,10 +51,10 @@ const mechanisms: FilterMechanism[] = [
     icon: Scale,
     summary: '"No person has ever been prosecuted for disclosing to Congress in private"',
     details: [
-      "SF-312 NDAs explicitly preserve Congressional disclosure rights",
-      "Classification not binding on Congress (50 USC 3161(a))",
-      "Constitutional immunity exists (Gravel v. United States)",
-      "Fear persists despite legal protections—perception-based control",
+      { text: "SF-312 NDAs explicitly preserve Congressional disclosure rights" },
+      { text: "Classification not binding on Congress", referenceId: "usc-3373" },
+      { text: "Constitutional immunity exists", referenceId: "gravel-v-us" },
+      { text: "Fear persists despite legal protections—perception-based control" },
     ],
   },
   {
@@ -63,10 +65,10 @@ const mechanisms: FilterMechanism[] = [
     icon: Building,
     summary: 'AARO mandate to "evaluate threat" unfulfilled',
     details: [
-      "50 USC 3373(c)(5) requires threat evaluation",
-      "No public assessment produced",
-      "DoD IG concerns about cooperation",
-      "Pattern of slow-rolling disclosure",
+      { text: "50 USC 3373(c)(5) requires threat evaluation", referenceId: "usc-3373" },
+      { text: "No public assessment produced" },
+      { text: "DoD IG concerns about cooperation", referenceId: "dod-ig-aaro" },
+      { text: "Pattern of slow-rolling disclosure" },
     ],
   },
   {
@@ -77,10 +79,10 @@ const mechanisms: FilterMechanism[] = [
     icon: Briefcase,
     summary: "Schumer Amendment included eminent domain over private materials",
     details: [
-      "Language confirms belief materials are in private hands",
-      "Aerospace lobby killed provisions",
-      '"Waived" SAP structures bypass oversight',
-      'Government claims "no evidence" while contractors claim "proprietary"',
+      { text: "Language confirms belief materials are in private hands", referenceId: "schumer-amendment" },
+      { text: "Aerospace lobby killed provisions", referenceId: "aerospace-lobby" },
+      { text: '"Waived" SAP structures bypass oversight' },
+      { text: 'Government claims "no evidence" while contractors claim "proprietary"' },
     ],
   },
   {
@@ -91,9 +93,9 @@ const mechanisms: FilterMechanism[] = [
     icon: DollarSign,
     summary: 'FASAB Statement 56 allows agencies to "misrepresent" financials',
     details: [
-      'Approved obfuscation for "national security"',
-      "$21 trillion in unsupported adjustments documented",
-      "Makes programs effectively unauditable",
+      { text: 'Approved obfuscation for "national security"', referenceId: "fasab-56" },
+      { text: "$21 trillion in unsupported adjustments documented", referenceId: "skidmore-adjustments" },
+      { text: "Makes programs effectively unauditable" },
     ],
   },
 ];
@@ -161,7 +163,15 @@ export function FilterMechanismCards() {
                     {mechanism.details.map((detail, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                        <span className="text-muted-foreground">{detail}</span>
+                        <span className="text-muted-foreground">
+                          {detail.referenceId ? (
+                            <ReferenceTooltip referenceId={detail.referenceId}>
+                              {detail.text}
+                            </ReferenceTooltip>
+                          ) : (
+                            detail.text
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>

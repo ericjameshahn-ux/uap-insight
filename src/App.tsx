@@ -17,6 +17,7 @@ import SavedItems from "./pages/SavedItems";
 import MyPath from "./pages/MyPath";
 import TimelinePage from "./pages/TimelinePage";
 import IntroFramework from "./pages/IntroFramework";
+import Observables from "./pages/Observables";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/intro" element={<IntroFramework />} />
+            <Route path="/observables" element={<Observables />} />
             <Route path="/section/:sectionId" element={<SectionPage />} />
             <Route path="/claims" element={<ClaimsDatabase />} />
             <Route path="/figures" element={<KeyFigures />} />
