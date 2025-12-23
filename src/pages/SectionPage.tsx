@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { supabase, Section, Claim, Video, Figure, SectionContentBlock, Document 
 const NOTEBOOK_LM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 // Fallback section data
 const fallbackSections: Record<string, Section> = {
@@ -86,6 +87,8 @@ export default function SectionPage() {
   const [contentBlocks, setContentBlocks] = useState<SectionContentBlock[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
   
   // Path state
   const [userPath, setUserPath] = useState<string[]>([]);
@@ -211,6 +214,21 @@ export default function SectionPage() {
     };
 
     fetchData();
+    
+    // Scroll detection for sticky header
+    const handleScroll = () => {
+      if (headerRef.current) {
+        const rect = headerRef.current.getBoundingClientRect();
+        setIsSticky(rect.top <= 0);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [sectionId]);
 
   const handleFigureClick = async (figureId: string) => {
@@ -323,21 +341,40 @@ export default function SectionPage() {
         </div>
       )}
 
-      {/* Section Header */}
-      <div className="mb-8 animate-fade-in">
-        <div className="flex items-center gap-4 mb-4">
-          <span className="font-mono text-4xl font-bold text-foreground">
+      {/* Sticky Section Header */}
+      <div 
+        ref={headerRef}
+        className={cn(
+          "mb-8 animate-fade-in sticky top-0 z-20 -mx-6 px-6 py-4 transition-all duration-200",
+          isSticky && "bg-background/95 backdrop-blur-sm shadow-md border-b border-border"
+        )}
+      >
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-3xl md:text-4xl font-bold text-foreground">
             {section.letter}.
           </span>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{section.title}</h1>
-            {section.subtitle && (
-              <p className="text-muted-foreground">{section.subtitle}</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold truncate">{section.title}</h1>
+            {section.subtitle && !isSticky && (
+              <p className="text-muted-foreground text-sm">{section.subtitle}</p>
             )}
           </div>
           <ConvictionBadge conviction={section.conviction} />
+          {/* Continue button in sticky header when path is active */}
+          {isSticky && nextSection && (
+            <Button 
+              size="sm" 
+              onClick={handleNextSection}
+              className="hidden md:flex items-center gap-1"
+            >
+              Continue
+              <ArrowRight className="w-3 h-3" />
+            </Button>
+          )}
         </div>
-        <p className="text-muted-foreground leading-relaxed">{section.description}</p>
+        {!isSticky && section.description && (
+          <p className="text-muted-foreground leading-relaxed mt-3">{section.description}</p>
+        )}
       </div>
 
       {/* Content Blocks (Video Context) - Side-by-side layout */}
