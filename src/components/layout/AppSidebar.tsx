@@ -35,7 +35,8 @@ import { supabase, Section } from "@/lib/supabase";
 // Fallback sections data when database isn't connected
 const fallbackSections: Section[] = [
   { id: 'framework', letter: 'START', title: 'Start Here: Framework', conviction: 'INFO', description: '', sort_order: -1 },
-  { id: 'observables', letter: '5+1', title: 'The Five Observables', conviction: 'HIGH', description: '', sort_order: 0 },
+  { id: 'observables', letter: '5+1', title: 'The Six Observables', conviction: 'HIGH', description: '', sort_order: 0 },
+  { id: 'hypotheses', letter: '🔮', title: 'Emerging Hypotheses', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
   { id: 'a', letter: 'A', title: 'UAP Exist', conviction: 'HIGH', description: '', sort_order: 1 },
   { id: 'b', letter: 'B', title: 'Real Physical Objects', conviction: 'HIGH', description: '', sort_order: 2 },
   { id: 'c', letter: 'C', title: 'Physics-Defying Capabilities', conviction: 'HIGH', description: '', sort_order: 3 },
@@ -244,7 +245,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {sections.filter(section => section.letter != null).map((section) => {
-                const path = section.letter === 'START' ? '/intro' : section.letter === '5+1' ? '/observables' : `/section/${section.letter.toLowerCase()}`;
+                const path = section.letter === 'START' 
+                  ? '/intro' 
+                  : section.letter === '5+1' 
+                    ? '/observables' 
+                    : section.letter === '🔮'
+                      ? '/hypotheses'
+                      : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
                 const inPath = isInPath(section.letter);
                 
