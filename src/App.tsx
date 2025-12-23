@@ -19,6 +19,7 @@ import TimelinePage from "./pages/TimelinePage";
 import IntroFramework from "./pages/IntroFramework";
 import Observables from "./pages/Observables";
 import Hypotheses from "./pages/Hypotheses";
+import SectionN from "./pages/SectionN";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/intro" element={<IntroFramework />} />
             <Route path="/observables" element={<Observables />} />
             <Route path="/hypotheses" element={<Hypotheses />} />
+            <Route path="/section/n" element={<SectionN />} />
             <Route path="/section/:sectionId" element={<SectionPage />} />
             <Route path="/claims" element={<ClaimsDatabase />} />
             <Route path="/figures" element={<KeyFigures />} />
