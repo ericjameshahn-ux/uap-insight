@@ -13,6 +13,8 @@ import {
   MessageSquare,
   Bookmark,
   Calendar,
+  ChevronRight,
+  Star,
 } from "lucide-react";
 import {
   Sidebar,
@@ -254,6 +256,9 @@ export function AppSidebar() {
                       : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
                 const inPath = isInPath(section.letter);
+                const isNextInPath = userPath.length > 0 && pathIndex < userPath.length && 
+                  section.letter.toLowerCase() === userPath[pathIndex];
+                const isCurrentInPath = inPath && section.letter.toLowerCase() === userPath[pathIndex];
                 
                 return (
                   <SidebarMenuItem key={section.id}>
@@ -261,25 +266,40 @@ export function AppSidebar() {
                       <Link
                         to={path}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-2 rounded-md transition-colors relative",
-                          active 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-                            : inPath
-                              ? "bg-primary/5 border-l-[3px] border-primary hover:bg-primary/10"
-                              : "hover:bg-sidebar-accent/50",
-                          // Current section in path gets extra emphasis
-                          inPath && section.letter.toLowerCase() === userPath[pathIndex] && "bg-primary/10 border-primary"
+                          "flex items-center gap-3 px-4 py-2 rounded-md transition-all relative",
+                          // Active page styling - prominent left border
+                          active && "bg-primary/10 border-l-4 border-primary font-semibold",
+                          // In path but not active
+                          !active && inPath && "bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50",
+                          // Next section in path gets pulse animation
+                          !active && isNextInPath && "animate-pulse bg-amber-100 dark:bg-amber-900/40",
+                          // Default styling
+                          !active && !inPath && "hover:bg-sidebar-accent/50"
                         )}
                       >
+                        {/* Arrow indicator for active page */}
+                        {active && (
+                          <ChevronRight className="w-3 h-3 text-primary shrink-0 -ml-1" />
+                        )}
+                        {/* Star indicator for path sections */}
+                        {!active && inPath && !collapsed && (
+                          <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0 -ml-1" />
+                        )}
                         <span className={cn(
-                          "font-mono font-medium text-xs w-8 shrink-0",
-                          inPath && "text-primary font-bold"
+                          "font-mono font-medium text-xs shrink-0",
+                          active ? "text-primary w-6" : inPath ? "text-amber-600 dark:text-amber-400 font-bold w-8" : "w-8",
                         )}>
                           {section.letter}
                         </span>
                         {!collapsed && (
                           <>
-                            <span className={cn("flex-1 text-sm truncate", inPath && "text-primary")}>{section.title}</span>
+                            <span className={cn(
+                              "flex-1 text-sm truncate",
+                              active && "text-primary",
+                              !active && inPath && "text-amber-700 dark:text-amber-300"
+                            )}>
+                              {section.title}
+                            </span>
                             <ConvictionBadge conviction={section.conviction} className="text-[10px] shrink-0" />
                           </>
                         )}
