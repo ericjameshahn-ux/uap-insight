@@ -34,11 +34,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase, Section } from "@/lib/supabase";
 
-// Fallback sections data when database isn't connected
-const fallbackSections: Section[] = [
+// Special sections that should always appear
+const specialSections: Section[] = [
   { id: 'framework', letter: 'START', title: 'Start Here: Framework', conviction: 'INFO', description: '', sort_order: -1 },
   { id: 'observables', letter: '5+1', title: 'The Six Observables', conviction: 'HIGH', description: '', sort_order: 0 },
   { id: 'hypotheses', letter: '🔮', title: 'Emerging Hypotheses', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
+];
+
+// Fallback sections data when database isn't connected
+const fallbackSections: Section[] = [
+  ...specialSections,
   { id: 'a', letter: 'A', title: 'UAP Exist', conviction: 'HIGH', description: '', sort_order: 1 },
   { id: 'b', letter: 'B', title: 'Real Physical Objects', conviction: 'HIGH', description: '', sort_order: 2 },
   { id: 'c', letter: 'C', title: 'Physics-Defying Capabilities', conviction: 'HIGH', description: '', sort_order: 3 },
@@ -86,7 +91,8 @@ export function AppSidebar() {
         .order('sort_order');
       
       if (data && !error) {
-        setSections(data);
+        // Always include special sections at the beginning
+        setSections([...specialSections, ...data]);
       }
     };
     fetchSections();
