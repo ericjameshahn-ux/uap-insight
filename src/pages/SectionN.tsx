@@ -14,11 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { hypotheses, comparisonMatrix, getYouTubeEmbedUrl } from "@/lib/hypothesesData";
 import type { Hypothesis, HypothesisClaim } from "@/lib/hypothesesData";
 import { cn } from "@/lib/utils";
@@ -172,7 +167,7 @@ function HypothesisCard({
       isExpanded && "shadow-lg"
     )}>
       {/* Header - Always visible */}
-      <CollapsibleTrigger 
+      <button 
         onClick={onToggle}
         className="w-full text-left p-4 md:p-5 flex items-start gap-4 hover:bg-muted/30 transition-colors cursor-pointer"
       >
@@ -205,7 +200,7 @@ function HypothesisCard({
             <ChevronDown className="w-5 h-5 text-muted-foreground" />
           )}
         </div>
-      </CollapsibleTrigger>
+      </button>
       
       {/* Expandable Content */}
       {isExpanded && (
