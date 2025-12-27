@@ -78,14 +78,14 @@ export function HistoricalExampleCard({ example }: Props) {
         <TabsContent value="assumptions" className="mt-0">
           <div className="space-y-3">
             {example.assumptions.map((item, i) => (
-              <div key={i} className="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg text-sm">
-                <div>
+              <div key={i} className="flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-3 p-3 bg-muted/30 rounded-lg text-sm">
+                <div className="min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Assumption</span>
-                  <span className="line-through text-muted-foreground">{item.assumption}</span>
+                  <span className="line-through text-muted-foreground break-words">{item.assumption}</span>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-primary block mb-1">Reality</span>
-                  <span>{item.reality}</span>
+                  <span className="break-words">{item.reality}</span>
                 </div>
               </div>
             ))}
