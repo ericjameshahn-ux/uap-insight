@@ -17,6 +17,7 @@ import SavedItems from "./pages/SavedItems";
 import MyPath from "./pages/MyPath";
 import TimelinePage from "./pages/TimelinePage";
 import IntroFramework from "./pages/IntroFramework";
+import MosaicTheory from "./pages/MosaicTheory";
 import Observables from "./pages/Observables";
 import Hypotheses from "./pages/Hypotheses";
 import SectionN from "./pages/SectionN";
@@ -34,6 +35,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/intro" element={<IntroFramework />} />
+            <Route path="/framework" element={<MosaicTheory />} />
             <Route path="/observables" element={<Observables />} />
             <Route path="/hypotheses" element={<Hypotheses />} />
             <Route path="/section/n" element={<SectionN />} />
