@@ -64,11 +64,11 @@ export function ThreeTierFramework() {
                 )}
                 onClick={() => setExpandedTier(isExpanded ? null : tier.id)}
                 style={{ 
-                  marginLeft: `${(2 - index) * 12}px`,
-                  marginRight: `${(2 - index) * 12}px`
+                  marginLeft: `${(2 - index) * 8}px`,
+                  marginRight: `${(2 - index) * 8}px`
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center shrink-0", tier.iconBg)}>
                     <Icon className={cn("w-6 h-6", tier.iconColor)} />
                   </div>

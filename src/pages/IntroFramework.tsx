@@ -32,7 +32,7 @@ export default function IntroFramework() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 overflow-x-hidden">
       {/* Hero Section */}
       <section className="min-h-[60vh] flex flex-col justify-center items-center text-center mb-16">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
