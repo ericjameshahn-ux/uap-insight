@@ -177,7 +177,7 @@ const MosaicTheory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden max-w-[100vw]">
       {/* Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
         <div 
@@ -718,12 +718,12 @@ const MosaicTheory = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gradient-to-b from-muted/30 to-background">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/30 to-background">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
             Ready to Examine the Evidence?
           </h2>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-sm sm:text-base text-muted-foreground mb-8">
             With this framework in mind, explore 13 categories of evidence, 
             100+ falsifiable claims, and 50+ credentialed witnesses—each 
             evaluated through the Mosaic Theory lens.
@@ -733,7 +733,7 @@ const MosaicTheory = () => {
             <Button
               size="lg"
               onClick={() => navigate('/quiz')}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500"
+              className="min-h-[44px] bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500"
             >
               Take the Persona Quiz
               <ExternalLink className="ml-2 w-4 h-4" />
@@ -742,6 +742,7 @@ const MosaicTheory = () => {
               size="lg"
               variant="outline"
               onClick={() => navigate('/section/a')}
+              className="min-h-[44px]"
             >
               Explore All Sections
               <ExternalLink className="ml-2 w-4 h-4" />
@@ -751,9 +752,9 @@ const MosaicTheory = () => {
       </section>
 
       {/* Footer Quote */}
-      <footer className="py-12 px-4 sm:px-6 border-t border-border">
-        <div className="max-w-2xl mx-auto text-center">
-          <blockquote className="text-lg sm:text-xl italic text-muted-foreground mb-4">
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
+        <div className="max-w-2xl mx-auto text-center px-4">
+          <blockquote className="text-lg sm:text-xl md:text-2xl italic text-muted-foreground mb-4 break-words">
             "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
           </blockquote>
           <cite className="text-sm text-muted-foreground">— Winston Churchill</cite>
