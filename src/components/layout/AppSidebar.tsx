@@ -65,7 +65,7 @@ const utilityNav = [
   { title: "Timeline", url: "/timeline", icon: Calendar },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
-  { title: "Physics Analysis", url: "/physics", icon: Atom },
+  { title: "Physics Education", url: "/physics", icon: Atom },
   { title: "Documents", url: "/documents", icon: FileText },
   { title: "Videos", url: "/videos", icon: Video },
 ];

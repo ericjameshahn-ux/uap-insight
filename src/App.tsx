@@ -9,6 +9,7 @@ import SectionPage from "./pages/SectionPage";
 import ClaimsDatabase from "./pages/ClaimsDatabase";
 import KeyFigures from "./pages/KeyFigures";
 import PhysicsAnalysis from "./pages/PhysicsAnalysis";
+import PhysicsEducation from "./pages/PhysicsEducation";
 import Documents from "./pages/Documents";
 import Videos from "./pages/Videos";
 import AboutQuiz from "./pages/AboutQuiz";
@@ -42,7 +43,8 @@ const App = () => (
             <Route path="/section/:sectionId" element={<SectionPage />} />
             <Route path="/claims" element={<ClaimsDatabase />} />
             <Route path="/figures" element={<KeyFigures />} />
-            <Route path="/physics" element={<PhysicsAnalysis />} />
+            <Route path="/physics-analysis" element={<PhysicsAnalysis />} />
+            <Route path="/physics" element={<PhysicsEducation />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/videos" element={<Videos />} />
             <Route path="/about-quiz" element={<AboutQuiz />} />
