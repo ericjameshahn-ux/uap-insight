@@ -2,22 +2,22 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   BookOpen,
-  PlayCircle,
   Sparkles,
   Clock,
   BarChart3,
   Atom,
   Brain,
-  ExternalLink,
-  Video,
-  Target,
   MessageSquare,
+  Compass,
+  Calendar,
+  HelpCircle,
+  Lightbulb,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
 import { supabase, PersonaArchetype } from "@/lib/supabase";
-import { Badge } from "@/components/ui/badge";
 
 const preconceptions = [
   {
@@ -87,28 +87,54 @@ const journeys = [
   },
 ];
 
-const featuredAnalysis = [
+const explorePlatformCards = [
   {
-    id: "mellon",
-    title: "USAF UAP Suppression",
-    subtitle: "Former Deputy Assistant Secretary of Defense for Intelligence",
-    name: "Chris Mellon",
-    text: "Christopher Mellon alleges the US Air Force is actively suppressing UAP data, citing General James Clapper's admission of a secret 1990s monitoring program. Details include seizing USS Princeton radar data, enforcing NDAs on pilots, and withholding NORAD data from Congress.",
-    badge: "HIGH",
-    buttonText: "Watch Interview",
-    buttonUrl: "https://youtu.be/kBFgexrONyA",
-    icon: Video,
+    id: "quiz",
+    icon: Compass,
+    title: "Personalized Learning Path",
+    description: "Take a short quiz to discover your research style. Get a curated journey through chapters tailored to your interests—whether you're a skeptic, policy analyst, or experiencer.",
+    buttonText: "Take the Quiz",
+    link: "/quiz",
   },
   {
-    id: "mellon2",
-    title: "Pentagon UAP Secrecy",
-    subtitle: "Christopher Mellon, Former Deputy Assistant Secretary of Defense",
-    name: "Chris Mellon",
-    text: "Mellon details how UAP information is being withheld from Congress, the history of government UAP programs, and why disclosure is a national security imperative.",
-    badge: "HIGH",
-    buttonText: "Watch Interview",
-    buttonUrl: "https://youtu.be/FuyVlw4EOWs",
-    icon: Target,
+    id: "timeline",
+    icon: Calendar,
+    title: "Evidence Timeline",
+    description: "Explore key events from 1933 to present in chronological order. See official statements, congressional hearings, and documented encounters on an interactive timeline.",
+    buttonText: "View Timeline",
+    link: "/timeline",
+  },
+  {
+    id: "faq",
+    icon: HelpCircle,
+    title: "Common Questions",
+    description: "Browse frequently asked questions and see exactly where each is answered across our source materials. Find answers to 'Is this real?' 'Why the secrecy?' and more.",
+    buttonText: "Browse FAQs",
+    link: "/faq",
+  },
+  {
+    id: "hypotheses",
+    icon: Lightbulb,
+    title: "Hypotheses & Theories",
+    description: "What do experts actually believe? Review the leading explanations—from advanced foreign tech to non-human intelligence—with evidence for and against each.",
+    buttonText: "Explore Hypotheses",
+    link: "/hypotheses",
+  },
+  {
+    id: "sections",
+    icon: BookOpen,
+    title: "Deep Dive Chapters",
+    description: "Thirteen evidence categories from 'UAP Exist' to 'Consciousness Claims.' Each section contains sourced claims, key figures, and recommended videos. Save topics to your reading list.",
+    buttonText: "Browse Sections",
+    link: "/sections",
+  },
+  {
+    id: "figures",
+    icon: Users,
+    title: "Key Figures Directory",
+    description: "Meet the whistleblowers, officials, and researchers. Filter by credibility tier, see their credentials, and watch their most important interviews.",
+    buttonText: "View Figures",
+    link: "/figures",
   },
 ];
 
@@ -316,11 +342,11 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Primary CTAs */}
-        <div className="flex gap-4 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
+        {/* Primary CTAs - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
           <Button
             size="lg"
-            className="flex-1 h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
+            className="flex-1 min-h-[44px] h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
             asChild
           >
             <Link to="/intro">
@@ -331,7 +357,7 @@ export default function Index() {
           <Button 
             variant="outline" 
             size="lg" 
-            className="flex-1 h-14 text-base"
+            className="flex-1 min-h-[44px] h-14 text-base"
             onClick={() => {
               setSelectedJourney(null);
               setShowQuiz(true);
@@ -342,36 +368,27 @@ export default function Index() {
           </Button>
         </div>
 
-        {/* Featured Analysis Section */}
+        {/* Explore the Platform Section */}
         <div className="mb-12 animate-fade-in" style={{ animationDelay: "350ms" }}>
-          <h2 className="text-lg font-semibold mb-4">Featured Analysis</h2>
+          <h2 className="text-lg font-semibold mb-4">Explore the Platform</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {featuredAnalysis.map((item) => (
-              <div key={item.id} className="card-elevated p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold truncate">{item.title}</h3>
-                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20 shrink-0">
-                        {item.badge}
-                      </Badge>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">{item.subtitle}</p>
-                  </div>
+            {explorePlatformCards.map((card) => (
+              <div 
+                key={card.id} 
+                className="bg-card border border-border rounded-xl p-6 flex flex-col hover:shadow-lg transition-shadow"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <card.icon className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.text}</p>
+                <h3 className="font-semibold text-foreground mb-2">{card.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{card.description}</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full"
-                  onClick={() => window.open(item.buttonUrl, '_blank', 'noopener,noreferrer')}
+                  className="w-full min-h-[44px]"
+                  asChild
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  {item.buttonText}
+                  <Link to={card.link}>{card.buttonText}</Link>
                 </Button>
               </div>
             ))}
