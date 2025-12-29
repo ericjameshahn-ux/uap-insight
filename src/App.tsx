@@ -22,6 +22,7 @@ import MosaicTheory from "./pages/MosaicTheory";
 import Observables from "./pages/Observables";
 import Hypotheses from "./pages/Hypotheses";
 import SectionN from "./pages/SectionN";
+import Institutional from "./pages/Institutional";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/my-path" element={<MyPath />} />
             <Route path="/timeline" element={<TimelinePage />} />
+            <Route path="/institutional" element={<Institutional />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
