@@ -15,6 +15,7 @@ import {
   Calendar,
   ChevronRight,
   Star,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -63,6 +64,7 @@ const fallbackSections: Section[] = [
 const utilityNav = [
   { title: "My Queue", url: "/saved", icon: Bookmark },
   { title: "Timeline", url: "/timeline", icon: Calendar },
+  { title: "Institutional", url: "/institutional", icon: Building2 },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
   { title: "Physics Education", url: "/physics", icon: Atom },
