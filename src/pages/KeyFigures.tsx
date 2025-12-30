@@ -75,18 +75,27 @@ export default function KeyFigures() {
     
     setFigureClaims(claimsData || []);
 
-    // Fetch videos related to this figure (search by name in title/description)
-    const { data: videosData } = await supabase
+    // Fetch videos related to this figure - try figure_id first, then name match
+    const { data: videosById } = await supabase
       .from('videos')
-      .select('*');
+      .select('*')
+      .eq('figure_id', figure.id);
     
-    // Filter videos that mention this figure's name
-    const figureName = figure.name.toLowerCase();
-    const relatedVideos = (videosData || []).filter(video => 
-      video.title?.toLowerCase().includes(figureName) ||
-      video.description?.toLowerCase().includes(figureName)
-    );
-    setFigureVideos(relatedVideos);
+    if (videosById && videosById.length > 0) {
+      setFigureVideos(videosById);
+    } else {
+      // Fallback: search by name in title/description
+      const { data: allVideos } = await supabase
+        .from('videos')
+        .select('*');
+      
+      const figureName = figure.name.toLowerCase();
+      const relatedVideos = (allVideos || []).filter(video => 
+        video.title?.toLowerCase().includes(figureName) ||
+        video.description?.toLowerCase().includes(figureName)
+      );
+      setFigureVideos(relatedVideos);
+    }
   };
 
   // Get unique sections from claims
@@ -277,22 +286,43 @@ export default function KeyFigures() {
                     <Video className="w-4 h-4 text-muted-foreground" />
                     <h3 className="font-semibold text-sm">Related Videos ({figureVideos.length})</h3>
                   </div>
-                  <div className="space-y-2">
-                    {figureVideos.slice(0, 3).map((video) => (
-                      <a
-                        key={video.id}
-                        href={video.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors group"
-                      >
-                        <Video className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
-                        <span className="text-sm text-foreground group-hover:text-primary line-clamp-1 flex-1">
-                          {video.title}
-                        </span>
-                        <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0" />
-                      </a>
-                    ))}
+                  <div className="grid gap-3">
+                    {figureVideos.slice(0, 3).map((video) => {
+                      // Extract YouTube thumbnail
+                      const videoId = video.url?.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/)?.[1];
+                      const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
+                      
+                      return (
+                        <a
+                          key={video.id}
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-2 bg-muted/50 hover:bg-muted rounded-lg transition-colors group"
+                        >
+                          {thumbnail ? (
+                            <img 
+                              src={thumbnail} 
+                              alt={video.title}
+                              className="w-24 h-14 object-cover rounded shrink-0"
+                            />
+                          ) : (
+                            <div className="w-24 h-14 bg-muted rounded flex items-center justify-center shrink-0">
+                              <Video className="w-6 h-6 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm text-foreground group-hover:text-primary line-clamp-2">
+                              {video.title}
+                            </span>
+                            {video.duration && (
+                              <span className="text-xs text-muted-foreground">{video.duration}</span>
+                            )}
+                          </div>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0" />
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               )}
