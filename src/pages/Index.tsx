@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Lightbulb,
   Users,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -352,6 +353,17 @@ export default function Index() {
             <Link to="/intro">
               <BookOpen className="w-5 h-5 mr-2" />
               Start Here: The Framework
+            </Link>
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="lg" 
+            className="flex-1 min-h-[44px] h-14 text-base"
+            asChild
+          >
+            <Link to="/framework">
+              <Layers className="w-5 h-5 mr-2" />
+              Learn Mosaic Theory
             </Link>
           </Button>
           <Button 
