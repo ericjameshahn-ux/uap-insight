@@ -81,6 +81,7 @@ export default function TimelinePage() {
   const [activeEra, setActiveEra] = useState(4);
   const [filterTier, setFilterTier] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [filterWilsonDavis, setFilterWilsonDavis] = useState(false);
   const [showMilestonesOnly, setShowMilestonesOnly] = useState(false);
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -122,7 +123,8 @@ export default function TimelinePage() {
     const matchesTier = !filterTier || event.tier === filterTier;
     const matchesCategory = !filterCategory || event.category === filterCategory;
     const matchesMilestone = !showMilestonesOnly || event.is_milestone;
-    return inEra && matchesTier && matchesCategory && matchesMilestone;
+    const matchesWilsonDavis = !filterWilsonDavis || event.id.startsWith('wdm-');
+    return inEra && matchesTier && matchesCategory && matchesMilestone && matchesWilsonDavis;
   });
 
   const eventsByYear = filteredEvents.reduce((acc, event) => {
@@ -162,7 +164,10 @@ export default function TimelinePage() {
     setFilterTier(null);
     setFilterCategory(null);
     setShowMilestonesOnly(false);
+    setFilterWilsonDavis(false);
   };
+
+  const isWilsonDavisEvent = (eventId: string) => eventId.startsWith('wdm-');
 
   return (
     <div className="min-h-screen bg-background">
@@ -264,9 +269,20 @@ export default function TimelinePage() {
                   <Star className="h-4 w-4" />
                   Milestones Only
                 </button>
+                <button
+                  onClick={() => setFilterWilsonDavis(!filterWilsonDavis)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    filterWilsonDavis 
+                      ? "bg-indigo-600 text-white" 
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  Wilson-Davis
+                </button>
               </div>
 
-              {(filterTier || filterCategory || showMilestonesOnly) && (
+              {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   Clear all filters
                 </Button>

@@ -26,6 +26,7 @@ import SectionN from "./pages/SectionN";
 import Institutional from "./pages/Institutional";
 import HowSecrecyWorks from "./pages/HowSecrecyWorks";
 import FAQ from "./pages/FAQ";
+import WilsonDavisCaseStudy from "./pages/WilsonDavisCaseStudy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/timeline" element={<TimelinePage />} />
             <Route path="/institutional" element={<Institutional />} />
             <Route path="/how-secrecy-works" element={<HowSecrecyWorks />} />
+            <Route path="/case-studies/wilson-davis" element={<WilsonDavisCaseStudy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
 import { VideoCard } from "@/components/VideoCard";
@@ -369,6 +371,35 @@ export default function SectionPage() {
           <p className="text-muted-foreground leading-relaxed mt-3">{section.description}</p>
         )}
       </div>
+
+      {/* Wilson-Davis Featured Card for Section G */}
+      {sectionId?.toLowerCase() === 'g' && (
+        <Card className="mb-8 bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-slate-900/50 dark:to-indigo-900/30 border-indigo-200 dark:border-indigo-800 animate-fade-in">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <Badge className="bg-indigo-600 mb-2">Featured Case Study</Badge>
+                <CardTitle>The Wilson-Davis Memo</CardTitle>
+                <CardDescription>
+                  Former DIA Deputy Director allegedly denied access to crash retrieval program
+                </CardDescription>
+              </div>
+              <FileText className="h-12 w-12 text-indigo-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              The most documented alleged leak in UAP history. Now in the Congressional 
+              Record with author confirmation.
+            </p>
+            <Button asChild>
+              <Link to="/case-studies/wilson-davis">
+                Explore Full Case Study <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Content Blocks (Video Context) - Side-by-side layout */}
       {contentBlocks.length > 0 ? (
