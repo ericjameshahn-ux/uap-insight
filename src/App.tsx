@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import Index from "./pages/Index";
 import SectionPage from "./pages/SectionPage";
+import Sections from "./pages/Sections";
 import ClaimsDatabase from "./pages/ClaimsDatabase";
 import KeyFigures from "./pages/KeyFigures";
 import PhysicsAnalysis from "./pages/PhysicsAnalysis";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/framework" element={<MosaicTheory />} />
             <Route path="/observables" element={<Observables />} />
             <Route path="/hypotheses" element={<Hypotheses />} />
+            <Route path="/sections" element={<Sections />} />
             <Route path="/section/n" element={<SectionN />} />
             <Route path="/section/:sectionId" element={<SectionPage />} />
             <Route path="/claims" element={<ClaimsDatabase />} />

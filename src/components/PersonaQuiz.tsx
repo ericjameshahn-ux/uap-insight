@@ -239,21 +239,19 @@ export function PersonaQuiz({
             let scoring_map = q.scoring_map;
             
             if (typeof options === 'string') {
-              try {
-                options = JSON.parse(options);
-              } catch (e) {
-                console.error('Error parsing options:', e);
-                options = [];
-              }
+            try {
+              options = JSON.parse(options);
+            } catch (e) {
+              options = [];
+            }
             }
             
             if (typeof scoring_map === 'string') {
-              try {
-                scoring_map = JSON.parse(scoring_map);
-              } catch (e) {
-                console.error('Error parsing scoring_map:', e);
-                scoring_map = {};
-              }
+            try {
+              scoring_map = JSON.parse(scoring_map);
+            } catch (e) {
+              scoring_map = {};
+            }
             }
             
             if (!Array.isArray(options)) {
@@ -270,8 +268,6 @@ export function PersonaQuiz({
         // Only use if we got all 5 questions, otherwise use fallback
         if (parsedQuestions.length >= 5) {
           setQuestions(parsedQuestions);
-        } else {
-          console.log('Using fallback questions - DB returned', parsedQuestions.length, 'of 5 needed');
         }
       }
       
@@ -283,7 +279,6 @@ export function PersonaQuiz({
             try {
               recommended_sections = JSON.parse(recommended_sections);
             } catch (e) {
-              console.error('Error parsing recommended_sections:', e);
               recommended_sections = [];
             }
           }
@@ -337,32 +332,21 @@ export function PersonaQuiz({
     // Use archetype's recommended sections, or fallback to executive brief path
     let recommendedPath = primaryArchetype?.recommended_sections || [];
     if (!recommendedPath || recommendedPath.length === 0) {
-      console.warn('No recommended_sections found for archetype, using fallback path');
       recommendedPath = ["a", "b", "c", "f"]; // Fallback to executive brief
     }
     
     // Get or create user ID
     const userId = getUserId();
     
-    // Store SIMPLIFIED path data in localStorage
-    console.log('🔵 Quiz Complete - Saving path data:');
-    console.log('  Primary archetype ID:', primaryId);
-    console.log('  Primary archetype:', primaryArchetype);
-    console.log('  Path:', recommendedPath);
-    console.log('  Archetype name:', primaryArchetype?.name);
-    
+    // Store path data in localStorage
     try {
       localStorage.setItem('uap_user_id', userId);
       localStorage.setItem('uap_archetype_id', primaryId || 'unknown');
       localStorage.setItem('uap_archetype_name', primaryArchetype?.name || 'Researcher');
       localStorage.setItem('uap_path', JSON.stringify(recommendedPath));
       localStorage.setItem('uap_path_index', '0');
-      
-      // Verify saved data
-      console.log('✅ Verify saved - uap_path:', localStorage.getItem('uap_path'));
-      console.log('✅ Verify saved - uap_archetype_name:', localStorage.getItem('uap_archetype_name'));
     } catch (e) {
-      console.error('❌ Error saving to localStorage:', e);
+      // Silent fail for localStorage errors
     }
     
     // Dispatch storage event to notify other components

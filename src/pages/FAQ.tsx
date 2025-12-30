@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faqData, themes } from "@/data/faqData";
+import { BackButton } from "@/components/BackButton";
 
 export default function FAQ() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +33,7 @@ export default function FAQ() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <BackButton />
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">

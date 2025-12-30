@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Star, Filter } from "lucide-react";
+import { Star, Filter, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/VideoCard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase, Video } from "@/lib/supabase";
+import { BackButton } from "@/components/BackButton";
 
 const sectionOptions = ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 
@@ -14,16 +14,20 @@ export default function Videos() {
   const [sectionFilter, setSectionFilter] = useState("ALL");
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
-      const { data } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('videos')
         .select('*')
         .order('recommended', { ascending: false });
       
-      if (data) {
+      if (fetchError) {
+        setError(fetchError);
+      } else if (data) {
         setVideos(data);
         setFilteredVideos(data);
       }
@@ -52,8 +56,22 @@ export default function Videos() {
 
   const recommendedCount = videos.filter(v => v.recommended).length;
 
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <BackButton />
+        <div className="text-center py-12">
+          <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Failed to load videos</h1>
+          <p className="text-muted-foreground">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
+      <BackButton />
       <div className="mb-8 animate-fade-in">
         <h1 className="text-2xl font-bold mb-2">Videos</h1>
         <p className="text-muted-foreground">

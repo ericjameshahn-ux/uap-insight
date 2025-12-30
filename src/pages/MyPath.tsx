@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase, Section, PersonaArchetype } from "@/lib/supabase";
+import { BackButton } from "@/components/BackButton";
 
 // Archetype display info
 const archetypeIcons: Record<string, string> = {
@@ -258,6 +259,7 @@ export default function MyPath() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
+      <BackButton />
       {/* Section 1: Your Profile */}
       <Card>
         <CardHeader>
