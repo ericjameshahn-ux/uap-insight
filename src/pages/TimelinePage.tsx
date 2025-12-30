@@ -339,7 +339,8 @@ export default function TimelinePage() {
                                       {event.category}
                                     </Badge>
                                     {event.is_milestone && (
-                                      <Badge variant="default" className="bg-primary">
+                                      <Badge variant="default" className="bg-primary flex items-center gap-1">
+                                        <Star className="h-3 w-3 fill-current" />
                                         MILESTONE
                                       </Badge>
                                     )}
