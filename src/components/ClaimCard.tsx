@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, User, Eye, Bookmark, X } from "lucide-react";
+import { ChevronDown, User, Eye, Bookmark, X, Check, HelpCircle } from "lucide-react";
 import { TierBadge } from "./TierBadge";
 import { cn } from "@/lib/utils";
 import { Claim, getUserId, supabase } from "@/lib/supabase";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ClaimCardProps {
   claim: Claim;
@@ -12,6 +17,15 @@ interface ClaimCardProps {
 
 type ContentStatus = 'viewed' | 'later' | 'skip' | null;
 
+// Get verification status from claim text
+const getVerificationStatus = (claim: Claim) => {
+  const text = `${claim.quote || ''} ${claim.source || ''}`.toUpperCase();
+  if (text.includes('FALSIFIED')) return { icon: X, color: 'text-red-500', bg: 'bg-red-500/10', label: 'Falsified' };
+  if (text.includes('VERIFIED')) return { icon: Check, color: 'text-green-500', bg: 'bg-green-500/10', label: 'Verified' };
+  if (text.includes('UNVERIFIED')) return { icon: HelpCircle, color: 'text-amber-400', bg: 'bg-amber-500/10', label: 'Unverified' };
+  return null;
+};
+
 export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState<ContentStatus>(null);
@@ -20,6 +34,8 @@ export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProp
   // Generate claim ID like "A-01"
   const claimNumber = claim.id ? String(claim.id).padStart(2, '0') : '01';
   const displayId = sectionLetter ? `${sectionLetter}-${claimNumber}` : claimNumber;
+  
+  const verificationStatus = getVerificationStatus(claim);
 
   // Load status from localStorage on mount
   useEffect(() => {
@@ -70,6 +86,24 @@ export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProp
         <div className="flex flex-col gap-2 shrink-0">
           <span className="section-id">{displayId}</span>
           <TierBadge tier={claim.tier} />
+          
+          {/* Verification Status Indicator */}
+          {verificationStatus && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={cn(
+                  "flex items-center justify-center w-6 h-6 rounded-full cursor-help",
+                  verificationStatus.bg
+                )}>
+                  <verificationStatus.icon className={cn("w-3.5 h-3.5", verificationStatus.color)} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                {verificationStatus.label}
+              </TooltipContent>
+            </Tooltip>
+          )}
+          
           {/* Status indicator */}
           {status === 'viewed' && (
             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500/20">
