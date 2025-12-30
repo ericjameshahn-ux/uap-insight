@@ -7,21 +7,32 @@ import { FigureCard } from "@/components/FigureCard";
 import { TierBadge } from "@/components/TierBadge";
 import { BackButton } from "@/components/BackButton";
 import { supabase, Figure, Claim, Video as VideoType } from "@/lib/supabase";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const tierOptions = ['ALL', 'HIGHEST', 'HIGH', 'MEDIUM', 'LOWER'];
 
 export default function KeyFigures() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  
   const [figures, setFigures] = useState<Figure[]>([]);
   const [filteredFigures, setFilteredFigures] = useState<Figure[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [tierFilter, setTierFilter] = useState("ALL");
   const [clearanceFilter, setClearanceFilter] = useState(false);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [figureClaims, setFigureClaims] = useState<Claim[]>([]);
   const [figureVideos, setFigureVideos] = useState<VideoType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Update search when URL changes
+  useEffect(() => {
+    const urlSearch = searchParams.get("search");
+    if (urlSearch) {
+      setSearch(urlSearch);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchFigures = async () => {
