@@ -24,6 +24,7 @@ import Hypotheses from "./pages/Hypotheses";
 import SectionN from "./pages/SectionN";
 import Institutional from "./pages/Institutional";
 import HowSecrecyWorks from "./pages/HowSecrecyWorks";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,8 @@ const App = () => (
             <Route path="/documents" element={<Documents />} />
             <Route path="/videos" element={<Videos />} />
             <Route path="/about-quiz" element={<AboutQuiz />} />
+            <Route path="/quiz" element={<AboutQuiz />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/my-path" element={<MyPath />} />
