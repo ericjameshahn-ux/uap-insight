@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FigureCard } from "@/components/FigureCard";
 import { ClaimCard } from "@/components/ClaimCard";
+import { BackButton } from "@/components/BackButton";
 import { supabase, Figure, Claim } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 
@@ -75,6 +76,8 @@ export default function KeyFigures() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
+      <BackButton />
+      
       <div className="mb-8 animate-fade-in">
         <h1 className="text-2xl font-bold mb-2">Key Figures</h1>
         <p className="text-muted-foreground">

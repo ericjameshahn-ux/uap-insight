@@ -7,6 +7,7 @@ import { ClaimCard } from "@/components/ClaimCard";
 import { VideoCard } from "@/components/VideoCard";
 import { FigureCard } from "@/components/FigureCard";
 import { DocumentCard } from "@/components/DocumentCard";
+import { BackButton } from "@/components/BackButton";
 import { supabase, Section, Claim, Video, Figure, SectionContentBlock, Document } from "@/lib/supabase";
 
 const NOTEBOOK_LM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
@@ -305,6 +306,8 @@ export default function SectionPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      <BackButton />
+      
       {/* Path Progress Banner */}
       {userPath.length > 0 && isInPath && (
         <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
