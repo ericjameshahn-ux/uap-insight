@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
-import { Search, Shield, ExternalLink } from "lucide-react";
+import { Search, Shield, ExternalLink, Video, BookOpen, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FigureCard } from "@/components/FigureCard";
-import { ClaimCard } from "@/components/ClaimCard";
+import { TierBadge } from "@/components/TierBadge";
 import { BackButton } from "@/components/BackButton";
-import { supabase, Figure, Claim } from "@/lib/supabase";
-import { Link } from "react-router-dom";
+import { supabase, Figure, Claim, Video as VideoType } from "@/lib/supabase";
+import { Link, useNavigate } from "react-router-dom";
 
 const tierOptions = ['ALL', 'HIGHEST', 'HIGH', 'MEDIUM', 'LOWER'];
 
 export default function KeyFigures() {
+  const navigate = useNavigate();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [filteredFigures, setFilteredFigures] = useState<Figure[]>([]);
   const [search, setSearch] = useState("");
@@ -19,6 +20,7 @@ export default function KeyFigures() {
   const [clearanceFilter, setClearanceFilter] = useState(false);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [figureClaims, setFigureClaims] = useState<Claim[]>([]);
+  const [figureVideos, setFigureVideos] = useState<VideoType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,12 +68,31 @@ export default function KeyFigures() {
     setSelectedFigure(figure);
     
     // Fetch claims by this figure
-    const { data } = await supabase
+    const { data: claimsData } = await supabase
       .from('claims')
       .select('*')
       .eq('figure_id', figure.id);
     
-    setFigureClaims(data || []);
+    setFigureClaims(claimsData || []);
+
+    // Fetch videos related to this figure (search by name in title/description)
+    const { data: videosData } = await supabase
+      .from('videos')
+      .select('*');
+    
+    // Filter videos that mention this figure's name
+    const figureName = figure.name.toLowerCase();
+    const relatedVideos = (videosData || []).filter(video => 
+      video.title?.toLowerCase().includes(figureName) ||
+      video.description?.toLowerCase().includes(figureName)
+    );
+    setFigureVideos(relatedVideos);
+  };
+
+  // Get unique sections from claims
+  const getFeaturedSections = () => {
+    const sections = [...new Set(figureClaims.map(c => c.section_id.toUpperCase()))];
+    return sections.sort();
   };
 
   return (
@@ -171,10 +192,33 @@ export default function KeyFigures() {
             <div className="space-y-6">
               <FigureCard figure={selectedFigure} />
               
+              {/* Featured In Sections */}
               {figureClaims.length > 0 && (
-                <div>
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BookOpen className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="font-semibold text-sm">Featured In Sections</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {getFeaturedSections().map(section => (
+                      <Link
+                        key={section}
+                        to={`/section/${section.toLowerCase()}`}
+                        className="px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-medium hover:bg-primary/20 transition-colors"
+                        onClick={() => setSelectedFigure(null)}
+                      >
+                        Section {section}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Claims by this Figure */}
+              {figureClaims.length > 0 && (
+                <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold">Claims by this Figure</h3>
+                    <h3 className="font-semibold">Claims by this Figure ({figureClaims.length})</h3>
                     <Button variant="ghost" size="sm" asChild>
                       <Link 
                         to={`/claims?figure=${encodeURIComponent(selectedFigure.name)}`}
@@ -185,14 +229,38 @@ export default function KeyFigures() {
                       </Link>
                     </Button>
                   </div>
-                  <div className="space-y-3">
-                    {figureClaims.slice(0, 5).map((claim) => (
-                      <ClaimCard 
-                        key={claim.id} 
-                        claim={claim} 
-                        sectionLetter={claim.section_id.toUpperCase()}
-                      />
-                    ))}
+                  <div className="space-y-2">
+                    {figureClaims.slice(0, 5).map((claim) => {
+                      const claimNumber = String(claim.id).padStart(2, '0');
+                      const displayId = `${claim.section_id.toUpperCase()}-${claimNumber}`;
+                      
+                      return (
+                        <button
+                          key={claim.id}
+                          onClick={() => {
+                            setSelectedFigure(null);
+                            navigate(`/section/${claim.section_id}?claim=${claim.id}`);
+                          }}
+                          className="w-full text-left p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors group"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col gap-1 shrink-0">
+                              <span className="text-xs font-mono font-semibold text-primary">{displayId}</span>
+                              <TierBadge tier={claim.tier} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                {claim.claim}
+                              </p>
+                              {claim.date && (
+                                <p className="text-xs text-muted-foreground mt-1">{claim.date}</p>
+                              )}
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0 mt-1" />
+                          </div>
+                        </button>
+                      );
+                    })}
                     {figureClaims.length > 5 && (
                       <p className="text-sm text-muted-foreground text-center py-2">
                         +{figureClaims.length - 5} more claims
@@ -201,6 +269,48 @@ export default function KeyFigures() {
                   </div>
                 </div>
               )}
+
+              {/* Related Videos */}
+              {figureVideos.length > 0 && (
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Video className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="font-semibold text-sm">Related Videos ({figureVideos.length})</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {figureVideos.slice(0, 3).map((video) => (
+                      <a
+                        key={video.id}
+                        href={video.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors group"
+                      >
+                        <Video className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
+                        <span className="text-sm text-foreground group-hover:text-primary line-clamp-1 flex-1">
+                          {video.title}
+                        </span>
+                        <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* View Full Profile Button */}
+              <div className="pt-4 border-t border-border">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    setSelectedFigure(null);
+                    navigate(`/figures/${selectedFigure.id}`);
+                  }}
+                >
+                  View Full Profile
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
