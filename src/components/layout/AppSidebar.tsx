@@ -72,6 +72,7 @@ const utilityNav = [
   { title: "Physics Education", url: "/physics", icon: Atom },
   { title: "Documents", url: "/documents", icon: FileText },
   { title: "Videos", url: "/videos", icon: Video },
+  { title: "FAQ", url: "/faq", icon: HelpCircle },
 ];
 
 const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
@@ -109,30 +110,23 @@ export function AppSidebar() {
         const indexData = localStorage.getItem('uap_path_index');
         const nameData = localStorage.getItem('uap_archetype_name');
         
-        console.log('🔍 AppSidebar loading path:');
-        console.log('  Raw uap_path:', pathData);
-        
         if (pathData && pathData !== 'null' && pathData !== '[]') {
           const parsed = JSON.parse(pathData);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            console.log('  Parsed path:', parsed);
             setUserPath(parsed);
             setPathIndex(parseInt(indexData || '0', 10));
             setArchetypeName(nameData || '');
           } else {
-            console.log('  Path is empty, clearing state');
             setUserPath([]);
             setPathIndex(0);
             setArchetypeName('');
           }
         } else {
-          console.log('  No path data found');
           setUserPath([]);
           setPathIndex(0);
           setArchetypeName('');
         }
       } catch (e) {
-        console.error('❌ Error loading path:', e);
         setUserPath([]);
       }
     };

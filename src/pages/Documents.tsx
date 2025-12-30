@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { FileText, Download, ExternalLink, Filter, Sparkles } from "lucide-react";
+import { FileText, Download, ExternalLink, Filter, Sparkles, AlertTriangle, BookOpen } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { supabase, Document } from "@/lib/supabase";
+import { BackButton } from "@/components/BackButton";
+import { Link } from "react-router-dom";
 
 const sectionOptions = ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 const AI_ASSISTANT_URL = "https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7";
@@ -12,16 +14,20 @@ export default function Documents() {
   const [filteredDocs, setFilteredDocs] = useState<Document[]>([]);
   const [sectionFilter, setSectionFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
       setLoading(true);
-      const { data } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('documents')
         .select('*')
         .order('title');
       
-      if (data) {
+      if (fetchError) {
+        setError(fetchError);
+      } else if (data) {
         setDocuments(data);
         setFilteredDocs(data);
       }
@@ -46,8 +52,22 @@ export default function Documents() {
     return '📁';
   };
 
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <BackButton />
+        <div className="text-center py-12">
+          <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Failed to load documents</h1>
+          <p className="text-muted-foreground">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
+      <BackButton />
       <div className="mb-8 animate-fade-in">
         <h1 className="text-2xl font-bold mb-2">Documents</h1>
         <p className="text-muted-foreground">
@@ -167,10 +187,24 @@ export default function Documents() {
           ))}
 
           {filteredDocs.length === 0 && (
-            <div className="card-elevated p-12 text-center text-muted-foreground col-span-3">
-              {documents.length === 0 
-                ? "No documents available. Connect your Supabase database to load data."
-                : "No documents match your filter."}
+            <div className="card-elevated p-12 text-center col-span-3">
+              {documents.length === 0 ? (
+                <div className="space-y-4">
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
+                  <h3 className="text-lg font-semibold">Documents Coming Soon</h3>
+                  <p className="text-muted-foreground">
+                    We're preparing source documents for each evidence section.
+                  </p>
+                  <Button asChild variant="outline">
+                    <Link to="/sections">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Browse Sections Instead
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No documents match your filter.</p>
+              )}
             </div>
           )}
         </div>
