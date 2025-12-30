@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Grid, List, Filter } from "lucide-react";
+import { Search, Grid, List, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,11 +9,15 @@ import { FigureCard } from "@/components/FigureCard";
 import { BackButton } from "@/components/BackButton";
 import { supabase, Claim, Figure } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "react-router-dom";
 
 const tierOptions = ['ALL', 'HIGHEST', 'HIGH', 'MEDIUM', 'LOWER'];
 const sectionOptions = ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 
 export default function ClaimsDatabase() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const figureFilter = searchParams.get('figure');
+  
   const [claims, setClaims] = useState<Claim[]>([]);
   const [filteredClaims, setFilteredClaims] = useState<Claim[]>([]);
   const [search, setSearch] = useState("");
@@ -22,6 +26,11 @@ export default function ClaimsDatabase() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const clearFigureFilter = () => {
+    searchParams.delete('figure');
+    setSearchParams(searchParams);
+  };
 
   useEffect(() => {
     const fetchClaims = async () => {
@@ -42,6 +51,14 @@ export default function ClaimsDatabase() {
 
   useEffect(() => {
     let filtered = claims;
+
+    // Figure filter from URL
+    if (figureFilter) {
+      const figureLower = figureFilter.toLowerCase();
+      filtered = filtered.filter(claim => 
+        claim.source.toLowerCase().includes(figureLower)
+      );
+    }
 
     // Search filter
     if (search) {
@@ -64,7 +81,7 @@ export default function ClaimsDatabase() {
     }
 
     setFilteredClaims(filtered);
-  }, [search, tierFilter, sectionFilter, claims]);
+  }, [search, tierFilter, sectionFilter, claims, figureFilter]);
 
   const handleFigureClick = async (figureId: string) => {
     const { data } = await supabase
@@ -88,6 +105,24 @@ export default function ClaimsDatabase() {
           Search and explore all documented claims across research sections.
         </p>
       </div>
+
+      {/* Figure Filter Banner */}
+      {figureFilter && (
+        <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg mb-6 animate-fade-in">
+          <span className="text-sm text-foreground">
+            Showing claims by <strong className="text-primary">{figureFilter}</strong>
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFigureFilter}
+            className="ml-auto gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+            Clear filter
+          </Button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
