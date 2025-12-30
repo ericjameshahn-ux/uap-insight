@@ -128,6 +128,19 @@ export interface TimelineEvent {
   created_at?: string;
 }
 
+export interface GlossaryTerm {
+  id: string;
+  term: string;
+  full_name: string | null;
+  definition: string;
+  context: string | null;
+  category: string;
+  related_terms: string | null;
+  section_ids: string | null;
+  sort_order: number;
+  created_at?: string;
+}
+
 // Helper to get or create user ID
 export function getUserId(): string {
   let userId = localStorage.getItem('uap_user_id');

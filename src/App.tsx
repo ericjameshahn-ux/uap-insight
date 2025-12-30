@@ -26,6 +26,7 @@ import SectionN from "./pages/SectionN";
 import Institutional from "./pages/Institutional";
 import HowSecrecyWorks from "./pages/HowSecrecyWorks";
 import FAQ from "./pages/FAQ";
+import Glossary from "./pages/Glossary";
 import WilsonDavisCaseStudy from "./pages/WilsonDavisCaseStudy";
 import NotFound from "./pages/NotFound";
 
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/about-quiz" element={<AboutQuiz />} />
             <Route path="/quiz" element={<AboutQuiz />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/glossary" element={<Glossary />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/my-path" element={<MyPath />} />
