@@ -14,7 +14,6 @@ import {
   Bookmark,
   Calendar,
   ChevronRight,
-  Star,
   Building2,
   Shield,
 } from "lucide-react";
@@ -178,12 +177,12 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-thin">
-        {/* YOUR PATH Section */}
+        {/* YOUR JOURNEY Section */}
         {userPath.length > 0 && !collapsed && (
           <SidebarGroup className="border-b border-sidebar-border pb-4">
             <SidebarGroupLabel className="text-xs uppercase tracking-wider text-primary px-4 py-2 font-semibold">
               <Link to="/my-path" className="hover:underline">
-                Your Path
+                Your Journey
               </Link>
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -192,7 +191,7 @@ export function AppSidebar() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{archetypeName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {pathIndex + 1}/{userPath.length} sections
+                      Step {pathIndex + 1} of {userPath.length}
                     </p>
                   </div>
                 </div>
@@ -203,22 +202,19 @@ export function AppSidebar() {
                       key={s}
                       to={`/section/${s}`}
                       className={cn(
-                        "px-1.5 py-0.5 rounded text-[10px] font-mono uppercase transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all",
                         i === pathIndex
                           ? "bg-primary text-primary-foreground"
                           : i < pathIndex
                             ? "bg-primary/20 text-primary"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            : "bg-muted text-muted-foreground hover:bg-primary/10"
                       )}
+                      title={`Section ${s.toUpperCase()}`}
                     >
-                      {s}
+                      {s.toUpperCase()}
                     </Link>
                   ))}
                 </div>
-                <p className="text-[10px] text-primary/70 flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-primary text-primary" />
-                  Starred sections in menu below
-                </p>
                 <Button 
                   size="sm" 
                   className="w-full"
@@ -296,13 +292,10 @@ export function AppSidebar() {
                         {active && (
                           <ChevronRight className="w-3 h-3 text-primary shrink-0 -ml-1" />
                         )}
-                        {/* Star indicator for path sections */}
-                        {!active && inPath && !collapsed && (
-                          <Star className="w-3 h-3 text-primary fill-primary shrink-0 -ml-1" />
-                        )}
                         <span className={cn(
-                          "font-mono font-medium text-xs shrink-0",
-                          active ? "text-primary w-6" : inPath ? "text-primary font-bold w-8" : "w-8",
+                          "font-mono font-medium text-xs shrink-0 w-8",
+                          active && "text-primary",
+                          inPath && "text-primary font-bold"
                         )}>
                           {section.letter}
                         </span>
