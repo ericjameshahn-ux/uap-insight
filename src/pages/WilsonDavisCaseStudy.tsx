@@ -6,6 +6,9 @@ import { FigureCard } from "@/components/FigureCard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { WilsonDavisNetwork } from "@/components/WilsonDavisNetwork";
+import { WilsonDavisCrossReferences } from "@/components/WilsonDavisCrossReferences";
+import { WilsonDavisTierJustification } from "@/components/WilsonDavisTierJustification";
 import { 
   FileText, 
   CheckCircle, 
@@ -255,6 +258,9 @@ export default function WilsonDavisCaseStudy() {
           </CardContent>
         </Card>
 
+        {/* Figure Network Visualization */}
+        <WilsonDavisNetwork />
+
         {/* Evidence Assessment */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-t-4 border-green-500">
@@ -295,6 +301,12 @@ export default function WilsonDavisCaseStudy() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Evidence Tier Justification */}
+        <WilsonDavisTierJustification />
+
+        {/* Cross-Reference Analysis */}
+        <WilsonDavisCrossReferences />
 
         {/* Falsifiability Section */}
         <Card>

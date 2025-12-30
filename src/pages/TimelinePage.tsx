@@ -337,20 +337,32 @@ export default function TimelinePage() {
                       return (
                         <Card
                           key={event.id}
-                          className={`cursor-pointer transition-all border-l-4 ${tierBorderColors[event.tier]} hover:shadow-md ${
-                            isExpanded ? "ring-2 ring-primary/50" : ""
-                          }`}
+                          className={`cursor-pointer transition-all border-l-4 hover:shadow-md ${
+                            isWilsonDavisEvent(event.id) 
+                              ? "border-l-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20" 
+                              : tierBorderColors[event.tier]
+                          } ${isExpanded ? "ring-2 ring-primary/50" : ""}`}
                           onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
                         >
                           <CardContent className="p-4">
                             {/* Header */}
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex items-start gap-3">
-                                <div className={`p-2 rounded-lg ${categoryColors[event.category] || "bg-muted"}`}>
+                                <div className={`p-2 rounded-lg ${
+                                  isWilsonDavisEvent(event.id) 
+                                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/50" 
+                                    : categoryColors[event.category] || "bg-muted"
+                                }`}>
                                   <Icon className="h-4 w-4" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex flex-wrap gap-2 mb-1">
+                                    {isWilsonDavisEvent(event.id) && (
+                                      <Badge className="bg-indigo-600 text-white flex items-center gap-1">
+                                        <FileText className="h-3 w-3" />
+                                        Wilson-Davis
+                                      </Badge>
+                                    )}
                                     <Badge className={tierColors[event.tier]} variant="secondary">
                                       {event.tier}
                                     </Badge>
