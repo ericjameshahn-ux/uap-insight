@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Search, Shield } from "lucide-react";
+import { Search, Shield, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FigureCard } from "@/components/FigureCard";
 import { ClaimCard } from "@/components/ClaimCard";
 import { supabase, Figure, Claim } from "@/lib/supabase";
+import { Link } from "react-router-dom";
 
 const tierOptions = ['ALL', 'HIGHEST', 'HIGH', 'MEDIUM', 'LOWER'];
 
@@ -167,24 +168,33 @@ export default function KeyFigures() {
             <div className="space-y-6">
               <FigureCard figure={selectedFigure} />
               
-              {selectedFigure.bio && (
-                <div>
-                  <h3 className="font-semibold mb-2">Biography</h3>
-                  <p className="text-sm text-muted-foreground">{selectedFigure.bio}</p>
-                </div>
-              )}
-              
               {figureClaims.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-3">Claims by this Figure</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">Claims by this Figure</h3>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link 
+                        to={`/claims?figure=${encodeURIComponent(selectedFigure.name)}`}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        View All Claims
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
+                    </Button>
+                  </div>
                   <div className="space-y-3">
-                    {figureClaims.map((claim) => (
+                    {figureClaims.slice(0, 5).map((claim) => (
                       <ClaimCard 
                         key={claim.id} 
                         claim={claim} 
                         sectionLetter={claim.section_id.toUpperCase()}
                       />
                     ))}
+                    {figureClaims.length > 5 && (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        +{figureClaims.length - 5} more claims
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
