@@ -273,14 +273,26 @@ export default function Index() {
         {/* Hero Section with Gradient Background */}
         <div className="bg-gradient-to-b from-primary/5 to-transparent -mx-6 px-6 pt-8 pb-12 mb-8 rounded-b-3xl">
           {/* Churchill Quote - Enhanced */}
-          <blockquote className="text-center mb-12 animate-fade-in bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border-l-4 border-indigo-500 pl-6 pr-6 py-6 rounded-r-xl max-w-2xl mx-auto shadow-md">
-            <p className="font-serif text-2xl md:text-3xl italic text-gray-800 dark:text-gray-100 leading-relaxed">
-              "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
-            </p>
-            <footer className="mt-4 text-sm text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
-              — Winston Churchill
-            </footer>
-          </blockquote>
+          {/* Quotes Section */}
+          <div className="max-w-2xl mx-auto mb-12 animate-fade-in">
+            <blockquote className="text-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border-l-4 border-indigo-500 pl-6 pr-6 py-6 rounded-r-xl shadow-md">
+              <p className="font-serif text-2xl md:text-3xl italic text-gray-800 dark:text-gray-100 leading-relaxed">
+                "In wartime, truth is so precious that she should always be attended by a bodyguard of lies."
+              </p>
+              <footer className="mt-4 text-sm text-gray-600 dark:text-gray-300 font-semibold tracking-wide">
+                — Winston Churchill
+              </footer>
+            </blockquote>
+            
+            <blockquote className="text-center mt-4 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30 border-l-4 border-indigo-400/60 pl-5 pr-5 py-4 rounded-r-lg shadow-sm">
+              <p className="font-serif text-lg md:text-xl italic text-gray-600 dark:text-gray-300 leading-relaxed">
+                "It's easier to fool people than to convince them that they have been fooled"
+              </p>
+              <footer className="mt-3 text-xs text-gray-500 dark:text-gray-400 tracking-wide">
+                — likely not Mark Twain
+              </footer>
+            </blockquote>
+          </div>
 
           {/* Welcome Card - Enhanced */}
           <div
