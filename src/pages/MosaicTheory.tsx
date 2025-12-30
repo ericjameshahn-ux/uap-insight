@@ -4,6 +4,14 @@ import { Eye, Filter, Layers, ChevronDown, ExternalLink, Glasses } from 'lucide-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { 
+  FinancialMosaicDiagram, 
+  FortitudeGroundTruthMap, 
+  FortitudeFilterView, 
+  ManhattanProjectMap,
+  UAPApplicationDiagram,
+  ObserverLensDiagram 
+} from "@/components/mosaic/MosaicDiagrams";
 
 // ============================================
 // MOSAIC THEORY INTRODUCTION PAGE
@@ -364,6 +372,28 @@ const MosaicTheory = () => {
               </span>
             </p>
           </div>
+
+          {/* Financial Mosaic Diagram */}
+          <div className="mt-12">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+                <span>📊</span>
+                <span>From Securities Analysis</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto">
+                Financial analysts use Mosaic Theory to assemble non-material pieces—each insignificant alone—into material conclusions. 
+                <a 
+                  href="https://en.wikipedia.org/wiki/Mosaic_theory_(investments)" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline ml-1"
+                >
+                  Learn more →
+                </a>
+              </p>
+            </div>
+            <FinancialMosaicDiagram />
+          </div>
         </div>
       </section>
 
@@ -413,6 +443,10 @@ const MosaicTheory = () => {
               </TabsList>
 
               <TabsContent value="ground-truth" className="p-4 sm:p-6">
+                {/* Visual Map */}
+                <div className="mb-6">
+                  <ManhattanProjectMap />
+                </div>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {manhattanProject.groundTruth.map((item, i) => (
                     <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
@@ -550,6 +584,10 @@ const MosaicTheory = () => {
               </TabsList>
 
               <TabsContent value="ground-truth" className="p-4 sm:p-6">
+                {/* Visual Map */}
+                <div className="mb-6">
+                  <FortitudeGroundTruthMap />
+                </div>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {operationFortitude.groundTruth.map((item, i) => (
                     <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
@@ -561,6 +599,10 @@ const MosaicTheory = () => {
               </TabsContent>
 
               <TabsContent value="filter" className="p-4 sm:p-6">
+                {/* Visual: German Reconnaissance View */}
+                <div className="mb-6">
+                  <FortitudeFilterView />
+                </div>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {operationFortitude.filter.map((item, i) => (
                     <div key={i} className="p-3 bg-muted/30 rounded-lg">
@@ -688,6 +730,11 @@ const MosaicTheory = () => {
                 ))}
               </ul>
             </div>
+          </div>
+
+          {/* UAP Application Diagram */}
+          <div className="mb-12">
+            <UAPApplicationDiagram />
           </div>
 
           {/* The Parallel */}
