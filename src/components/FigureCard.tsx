@@ -1,5 +1,6 @@
 import { Shield, FileText, ClipboardCheck } from "lucide-react";
 import { TierBadge } from "./TierBadge";
+import { Badge } from "@/components/ui/badge";
 import { Figure, Claim, supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -15,6 +16,13 @@ interface FigureCardProps {
   onClick?: () => void;
   showFullDetails?: boolean;
 }
+
+// Wilson-Davis connected figures
+const wilsonDavisConnected = [
+  'thomas-wilson', 'eric-davis', 'edgar-mitchell', 'christopher-mellon',
+  'hal-puthoff', 'david-grusch', 'paul-kaminski', 'michael-kostelnik',
+  'william-perry', 'will-miller', 'oke-shannon', 'jacques-gansler'
+];
 
 // Check if figure has verification analysis in credentials
 const hasVerificationNotes = (credentials?: string) => {
@@ -84,6 +92,21 @@ export function FigureCard({ figure, compact = false, onClick, showFullDetails =
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs text-xs">
                   {getVerificationPreview(figure.credentials)}
+                </TooltipContent>
+              </Tooltip>
+            )}
+            
+            {/* Wilson-Davis Connection Badge */}
+            {wilsonDavisConnected.includes(figure.id) && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className="text-xs border-indigo-300 text-indigo-600 dark:text-indigo-400 ml-1">
+                    <FileText className="h-3 w-3 mr-1" />
+                    WDM
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Connected to Wilson-Davis Memo
                 </TooltipContent>
               </Tooltip>
             )}
