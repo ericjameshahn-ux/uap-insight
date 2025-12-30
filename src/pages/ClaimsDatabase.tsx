@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ClaimCard } from "@/components/ClaimCard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FigureCard } from "@/components/FigureCard";
+import { BackButton } from "@/components/BackButton";
 import { supabase, Claim, Figure } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +80,8 @@ export default function ClaimsDatabase() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
+      <BackButton />
+      
       <div className="mb-8 animate-fade-in">
         <h1 className="text-2xl font-bold mb-2">Claims Database</h1>
         <p className="text-muted-foreground">

@@ -3,6 +3,7 @@ import { supabase, TimelineEvent } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/BackButton";
 import { 
   Calendar, 
   FileText, 
@@ -166,6 +167,8 @@ export default function TimelinePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        <BackButton />
+        
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
