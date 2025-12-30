@@ -338,6 +338,49 @@ export default function Index() {
           </div>
         </div>
 
+        {/* About This Platform Section */}
+        <div
+          className="bg-card border-l-4 border-indigo-400 rounded-r-xl p-6 mb-8 shadow-md animate-fade-in"
+          style={{ animationDelay: "250ms" }}
+        >
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <span className="text-lg">🔬</span> About This Research Platform
+          </h2>
+          
+          <p className="text-muted-foreground mb-4 leading-relaxed">
+            This site represents an experiment in AI-assisted research infrastructure, built to test whether modern AI tools can create functional, cross-domain research platforms—and to provide professionals with an accessible, structured entry point into UAP disclosure developments.
+          </p>
+          
+          <p className="font-medium text-foreground mb-3">What powers this platform:</p>
+          <ul className="text-muted-foreground space-y-2 mb-4 ml-1">
+            <li className="flex items-start gap-2">
+              <span className="text-primary">•</span>
+              <span><strong className="text-foreground">Personal Research</strong> — ~1.5 years of systematic investigation into UAP disclosure</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary">•</span>
+              <span><strong className="text-foreground">AI Document Analysis</strong> — Analyses of interviews, documentaries, Congressional hearings, and public records</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary">•</span>
+              <span><strong className="text-foreground">NotebookLM Integration</strong> — Library of 100+ source document analyses available for deep-dive queries</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary">•</span>
+              <span><strong className="text-foreground">Custom AI Chatbot</strong> — Real-time Q&A powered by Claude API with topic-specific context</span>
+            </li>
+          </ul>
+          
+          <p className="font-medium text-foreground mb-2">What you'll find:</p>
+          <p className="text-muted-foreground text-sm mb-4">
+            <Link to="/quiz" className="text-primary hover:underline">Personalized learning paths</Link> based on your interests and background, <Link to="/timeline" className="text-primary hover:underline">timeline views</Link> tracing events from 1933 to present, <Link to="/claims" className="text-primary hover:underline">falsifiable claims database</Link> with credibility tiers and source attribution, <Link to="/faq" className="text-primary hover:underline">FAQ exploration</Link> for common questions, and <Link to="/framework" className="text-primary hover:underline">Mosaic Theory framework</Link> for evaluating information in environments of deliberate suppression.
+          </p>
+          
+          <p className="text-sm text-muted-foreground/80 italic border-t border-border pt-4 mt-4">
+            Each claim is rated by evidence tier. Each source by credibility level. Our goal is not to convince, but to present the most rigorous available evidence in a structured, navigable format.
+          </p>
+        </div>
+
         {/* Primary CTAs - Stack on mobile */}
         <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
           <Button
