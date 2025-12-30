@@ -23,6 +23,7 @@ import Observables from "./pages/Observables";
 import Hypotheses from "./pages/Hypotheses";
 import SectionN from "./pages/SectionN";
 import Institutional from "./pages/Institutional";
+import HowSecrecyWorks from "./pages/HowSecrecyWorks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/my-path" element={<MyPath />} />
             <Route path="/timeline" element={<TimelinePage />} />
             <Route path="/institutional" element={<Institutional />} />
+            <Route path="/how-secrecy-works" element={<HowSecrecyWorks />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

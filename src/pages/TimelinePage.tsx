@@ -15,7 +15,9 @@ import {
   PlayCircle,
   ExternalLink,
   ChevronDown,
-  Filter
+  Filter,
+  Factory,
+  Star
 } from "lucide-react";
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -27,17 +29,23 @@ const categoryIcons: Record<string, React.ElementType> = {
   DOCUMENT: FileText,
   INCIDENT: Radio,
   RESEARCH: Microscope,
+  INSTITUTIONAL: Users,
+  LEGAL: Scale,
+  CONTRACTOR: Factory,
 };
 
 const categoryColors: Record<string, string> = {
-  SIGHTING: "bg-blue-500/20 text-blue-300 border-blue-500/50",
-  LEGISLATION: "bg-purple-500/20 text-purple-300 border-purple-500/50",
-  DISCLOSURE: "bg-emerald-500/20 text-emerald-300 border-emerald-500/50",
-  PROGRAM: "bg-amber-500/20 text-amber-300 border-amber-500/50",
+  SIGHTING: "bg-amber-500/20 text-amber-300 border-amber-500/50",
+  LEGISLATION: "bg-green-500/20 text-green-300 border-green-500/50",
+  DISCLOSURE: "bg-yellow-500/20 text-yellow-300 border-yellow-500/50",
+  PROGRAM: "bg-blue-500/20 text-blue-300 border-blue-500/50",
   TESTIMONY: "bg-rose-500/20 text-rose-300 border-rose-500/50",
-  DOCUMENT: "bg-cyan-500/20 text-cyan-300 border-cyan-500/50",
+  DOCUMENT: "bg-purple-500/20 text-purple-300 border-purple-500/50",
   INCIDENT: "bg-orange-500/20 text-orange-300 border-orange-500/50",
   RESEARCH: "bg-indigo-500/20 text-indigo-300 border-indigo-500/50",
+  INSTITUTIONAL: "bg-cyan-500/20 text-cyan-300 border-cyan-500/50",
+  LEGAL: "bg-violet-500/20 text-violet-300 border-violet-500/50",
+  CONTRACTOR: "bg-slate-500/20 text-slate-300 border-slate-500/50",
 };
 
 const tierColors: Record<string, string> = {
@@ -72,6 +80,7 @@ export default function TimelinePage() {
   const [activeEra, setActiveEra] = useState(4);
   const [filterTier, setFilterTier] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [showMilestonesOnly, setShowMilestonesOnly] = useState(false);
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -111,7 +120,8 @@ export default function TimelinePage() {
     const inEra = event.year >= era.start && event.year <= era.end;
     const matchesTier = !filterTier || event.tier === filterTier;
     const matchesCategory = !filterCategory || event.category === filterCategory;
-    return inEra && matchesTier && matchesCategory;
+    const matchesMilestone = !showMilestonesOnly || event.is_milestone;
+    return inEra && matchesTier && matchesCategory && matchesMilestone;
   });
 
   const eventsByYear = filteredEvents.reduce((acc, event) => {
@@ -150,6 +160,7 @@ export default function TimelinePage() {
   const clearFilters = () => {
     setFilterTier(null);
     setFilterCategory(null);
+    setShowMilestonesOnly(false);
   };
 
   return (
@@ -199,7 +210,7 @@ export default function TimelinePage() {
               <Filter className="h-4 w-4" />
               Filters
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-              {(filterTier || filterCategory) && (
+              {(filterTier || filterCategory || showMilestonesOnly) && (
                 <Badge variant="secondary" className="ml-1">
                   Active
                 </Badge>
@@ -238,7 +249,21 @@ export default function TimelinePage() {
                 ))}
               </div>
 
-              {(filterTier || filterCategory) && (
+              <div className="flex items-center gap-3 pt-2 border-t border-border/50">
+                <button
+                  onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    showMilestonesOnly 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Star className="h-4 w-4" />
+                  Milestones Only
+                </button>
+              </div>
+
+              {(filterTier || filterCategory || showMilestonesOnly) && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   Clear all filters
                 </Button>
