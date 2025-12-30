@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Star,
   Building2,
+  Shield,
 } from "lucide-react";
 import {
   Sidebar,
@@ -65,6 +66,7 @@ const utilityNav = [
   { title: "My Queue", url: "/saved", icon: Bookmark },
   { title: "Timeline", url: "/timeline", icon: Calendar },
   { title: "Institutional", url: "/institutional", icon: Building2 },
+  { title: "How Secrecy Works", url: "/how-secrecy-works", icon: Shield },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
   { title: "Physics Education", url: "/physics", icon: Atom },
