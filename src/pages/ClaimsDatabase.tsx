@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Grid, List, X } from "lucide-react";
+import { Search, Grid, List, X, Scale } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,6 +23,7 @@ export default function ClaimsDatabase() {
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("ALL");
   const [sectionFilter, setSectionFilter] = useState("ALL");
+  const [contestedFilter, setContestedFilter] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,6 +61,13 @@ export default function ClaimsDatabase() {
       );
     }
 
+    // Contested/Analyzed filter
+    if (contestedFilter) {
+      filtered = filtered.filter(claim => 
+        claim.tier === 'LOWER' && claim.figure_id
+      );
+    }
+
     // Search filter
     if (search) {
       const searchLower = search.toLowerCase();
@@ -81,7 +89,7 @@ export default function ClaimsDatabase() {
     }
 
     setFilteredClaims(filtered);
-  }, [search, tierFilter, sectionFilter, claims, figureFilter]);
+  }, [search, tierFilter, sectionFilter, claims, figureFilter, contestedFilter]);
 
   const handleFigureClick = async (figureId: string) => {
     const { data } = await supabase
@@ -162,6 +170,16 @@ export default function ClaimsDatabase() {
             </Button>
           ))}
         </div>
+
+        <Button
+          variant={contestedFilter ? "secondary" : "outline"}
+          size="sm"
+          onClick={() => setContestedFilter(!contestedFilter)}
+          className="gap-2"
+        >
+          <Scale className="w-4 h-4" />
+          Contested/Analyzed
+        </Button>
 
         <div className="flex gap-1 p-1 bg-muted rounded-md">
           <Button

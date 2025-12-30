@@ -1,8 +1,13 @@
-import { Shield, FileText } from "lucide-react";
+import { Shield, FileText, ClipboardCheck } from "lucide-react";
 import { TierBadge } from "./TierBadge";
 import { Figure, Claim, supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FigureCardProps {
   figure: Figure;
@@ -10,6 +15,19 @@ interface FigureCardProps {
   onClick?: () => void;
   showFullDetails?: boolean;
 }
+
+// Check if figure has verification analysis in credentials
+const hasVerificationNotes = (credentials?: string) => {
+  if (!credentials) return false;
+  const upper = credentials.toUpperCase();
+  return upper.includes('VERIFIED') || upper.includes('FALSIFIED') || upper.includes('UNVERIFIED');
+};
+
+// Get first 200 chars of credentials for tooltip
+const getVerificationPreview = (credentials?: string) => {
+  if (!credentials) return '';
+  return credentials.length > 200 ? credentials.slice(0, 200) + '...' : credentials;
+};
 
 export function FigureCard({ figure, compact = false, onClick, showFullDetails = false }: FigureCardProps) {
   const [figureClaims, setFigureClaims] = useState<Claim[]>([]);
@@ -32,6 +50,8 @@ export function FigureCard({ figure, compact = false, onClick, showFullDetails =
     }
   }, [figure.id, showFullDetails]);
 
+  const showVerificationBadge = hasVerificationNotes(figure.credentials);
+
   // Compact mode for grid display
   if (compact) {
     return (
@@ -52,6 +72,21 @@ export function FigureCard({ figure, compact = false, onClick, showFullDetails =
               <TierBadge tier={figure.tier} />
             </div>
             <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{figure.role}</p>
+            
+            {/* Verification Badge */}
+            {showVerificationBadge && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-muted rounded text-xs text-muted-foreground cursor-help">
+                    <ClipboardCheck className="w-3 h-3" />
+                    <span>Verified Details</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs text-xs">
+                  {getVerificationPreview(figure.credentials)}
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
       </div>
