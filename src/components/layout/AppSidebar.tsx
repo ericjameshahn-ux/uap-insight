@@ -217,6 +217,10 @@ export function AppSidebar() {
                     </Link>
                   ))}
                 </div>
+                <p className="text-[10px] text-primary/70 flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-primary text-primary" />
+                  Starred sections in menu below
+                </p>
                 <Button 
                   size="sm" 
                   className="w-full"
@@ -283,9 +287,9 @@ export function AppSidebar() {
                           // Active page styling - prominent left border
                           active && "bg-primary/10 border-l-4 border-primary font-semibold",
                           // In path but not active
-                          !active && inPath && "bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50",
+                          !active && inPath && "bg-primary/5 hover:bg-primary/10",
                           // Next section in path gets pulse animation
-                          !active && isNextInPath && "animate-pulse bg-amber-100 dark:bg-amber-900/40",
+                          !active && isNextInPath && "animate-pulse bg-primary/15",
                           // Default styling
                           !active && !inPath && "hover:bg-sidebar-accent/50"
                         )}
@@ -296,11 +300,11 @@ export function AppSidebar() {
                         )}
                         {/* Star indicator for path sections */}
                         {!active && inPath && !collapsed && (
-                          <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0 -ml-1" />
+                          <Star className="w-3 h-3 text-primary fill-primary shrink-0 -ml-1" />
                         )}
                         <span className={cn(
                           "font-mono font-medium text-xs shrink-0",
-                          active ? "text-primary w-6" : inPath ? "text-amber-600 dark:text-amber-400 font-bold w-8" : "w-8",
+                          active ? "text-primary w-6" : inPath ? "text-primary font-bold w-8" : "w-8",
                         )}>
                           {section.letter}
                         </span>
@@ -309,7 +313,7 @@ export function AppSidebar() {
                             <span className={cn(
                               "flex-1 text-sm truncate",
                               active && "text-primary",
-                              !active && inPath && "text-amber-700 dark:text-amber-300"
+                              !active && inPath && "text-primary/80"
                             )}>
                               {section.title}
                             </span>
