@@ -67,6 +67,7 @@ const utilityNav = [
   { title: "How Secrecy Works", url: "/how-secrecy-works", icon: Shield },
   { title: "Claims Database", url: "/claims", icon: Database },
   { title: "Key Figures", url: "/figures", icon: Users },
+  { title: "Glossary", url: "/glossary", icon: BookOpen },
   { title: "Physics Education", url: "/physics", icon: Atom },
   { title: "Documents", url: "/documents", icon: FileText },
   { title: "Videos", url: "/videos", icon: Video },
