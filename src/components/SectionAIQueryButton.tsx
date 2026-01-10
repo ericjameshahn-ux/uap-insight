@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Copy, Check, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Copy, Check, ExternalLink, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SectionAIQueryButtonProps {
   sectionId: string;
@@ -14,56 +20,86 @@ interface SectionAIQueryButtonProps {
   variant?: "inline" | "card" | "floating";
 }
 
-// Quick prompts tailored to each section
+// Persona lenses for AI prompt personalization
+const personaLenses: Record<string, string> = {
+  empiricist: "Please prioritize hard sensor data (radar/FLIR), physical material analyses (isotopic ratios/metamaterials), and quantifiable performance metrics (g-forces/velocities) over anecdotal accounts.",
+  historian: "Frame the answer within the chronological evolution of government programs (from Blue Book to AARO), tracing the legislative paper trail and historical precedents for secrecy mechanisms.",
+  strategist: "Analyze the geopolitical implications, national security risks, and the bureaucratic power struggles (e.g., Title 10 vs. Title 50 jurisdiction) driving the containment or disclosure of this information.",
+  investigator: "Focus on cross-referencing specific witness credibility, corroborating testimonies (e.g., Varginha, Nimitz), and identifying concrete chains of custody for alleged evidence.",
+  experiencer: "Include the 'high strangeness' aspects often filtered out of official reports, such as consciousness interfaces, telepathy, the 'Hitchhiker Effect,' and physiological after-effects.",
+  technologist: "Detail the proposed engineering mechanisms—specifically metric engineering, vacuum polarization, and terahertz waveguides—and how they align with or challenge known physics (e.g., the Schwinger limit).",
+  skeptic: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops).",
+  debunker: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops).",
+  meaning_seeker: "Explore the 'ontological shock,' theological reframing, and the profound paradigm shift in the human worldview that these disclosures imply."
+};
+
+// Display names for personas
+const personaDisplayNames: Record<string, string> = {
+  empiricist: "Empiricist",
+  historian: "Historian",
+  strategist: "Strategist",
+  investigator: "Investigator",
+  experiencer: "Experiencer",
+  technologist: "Technologist",
+  skeptic: "Skeptic",
+  debunker: "Skeptic",
+  meaning_seeker: "Meaning-Seeker"
+};
+
+// Detailed prompts tailored to each section
 const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> = {
   a: [
-    { title: "Official statements", prompt: "List all official US government statements acknowledging UAP are real, with dates and speaker credentials." },
-    { title: "Presidential quotes", prompt: "What have US Presidents said about UFOs/UAP? Include direct quotes with dates." },
+    { title: "Official acknowledgments timeline", prompt: "Create a comprehensive timeline of official US government acknowledgments that UAP are real, including quotes from Presidents (Obama, Clinton), DNIs (Ratcliffe, Haines, Brennan), and Pentagon officials. Note each speaker's clearance level and the specific claims they made." },
+    { title: "Multi-source corroboration", prompt: "Which UAP claims have been independently corroborated by multiple credentialed sources? Map the overlapping testimonies between Grusch, Elizondo, Mellon, and Congressional witnesses." },
   ],
   b: [
-    { title: "Sensor evidence", prompt: "What multi-sensor evidence confirms UAP are physical objects? Include radar, IR, and visual data." },
-    { title: "Nimitz details", prompt: "Give me a complete breakdown of the 2004 Nimitz encounter with all witness testimonies." },
+    { title: "Sensor data analysis", prompt: "Detail all known multi-sensor UAP encounters where radar, FLIR/infrared, and visual observation occurred simultaneously. For each case, explain what makes sensor artifacts or spoofing an insufficient explanation." },
+    { title: "Nimitz encounter breakdown", prompt: "Provide a minute-by-minute reconstruction of the 2004 Nimitz/Tic Tac encounter including: Kevin Day's radar observations, Fravor's visual engagement, the CAP point pre-positioning anomaly, and the subsequent data seizure allegations." },
+    { title: "Counter-argument: Sensor glitches", prompt: "What is the strongest skeptical explanation for the Five Observables (parallax error, radar spoofing, electronic warfare)? Then explain what evidence contradicts these explanations." },
   ],
   c: [
-    { title: "Five Observables", prompt: "Explain the Five Observables of UAP with documented examples of each capability." },
-    { title: "Acceleration data", prompt: "What acceleration and velocity data has been recorded for UAP? Include specific measurements." },
+    { title: "Five Observables with data", prompt: "For each of the Five Observables (instant acceleration, hypersonic velocity, low observability, transmedium travel, positive lift with no visible propulsion), provide the specific measured values from documented encounters and explain why conventional physics cannot account for them." },
+    { title: "Pais Effect analysis", prompt: "Explain the Pais Effect (Inertial Mass Reduction) theory, the Navy's $508K HEEMFG experiment results, the Schwinger Limit constraint, and why proponents argue the experiment's failure was due to material limitations rather than flawed physics." },
+    { title: "Metamaterials evidence", prompt: "Summarize what we know about alleged UAP metamaterials (Bismuth/Magnesium layers, 'Art's Parts'), including AARO/ORNL analysis results, the isotopic ratio debate, and the terahertz waveguide hypothesis." },
   ],
   d: [
-    { title: "Historical cases", prompt: "What are the most well-documented UAP cases from before 2000? Include Roswell, Belgian Wave, etc." },
-    { title: "Pattern analysis", prompt: "Are there consistent patterns in UAP reports across decades? What characteristics persist?" },
+    { title: "Pre-2000 case patterns", prompt: "Analyze the most well-documented UAP cases before 2000 (Roswell 1947, Belgian Wave 1989-90, Rendlesham Forest 1980, Tehran 1976). What characteristics persist across decades and what does this pattern suggest?" },
+    { title: "Government program evolution", prompt: "Trace the evolution of US government UAP programs chronologically: Sign → Grudge → Blue Book → Robertson Panel → Condon Report → AAWSAP → AATIP → UAPTF → AARO. What changed and what stayed the same?" },
   ],
   e: [
-    { title: "International incidents", prompt: "List documented UAP encounters from non-US military sources with details." },
-    { title: "Global patterns", prompt: "How do UAP encounters compare across different countries? Are there regional differences?" },
+    { title: "International military encounters", prompt: "List documented UAP encounters from non-US military sources (Belgian Air Force, Peruvian Air Force, Brazilian military at Varginha, French GEIPAN). How do international accounts corroborate or differ from US reports?" },
+    { title: "Nuclear correlation evidence", prompt: "What evidence supports the claim that UAP activity correlates with nuclear facilities? Include Malmstrom AFB 1967 ICBM shutdowns, and explain why the 'coincidence/technical malfunction' counter-argument may be insufficient." },
   ],
   f: [
-    { title: "Legal framework", prompt: "What legal protections exist for UAP whistleblowers? Summarize Guthrie's analysis." },
-    { title: "Classification barriers", prompt: "How is UAP information classified and what prevents disclosure?" },
+    { title: "Guthrie legal framework", prompt: "Summarize Dillon Guthrie's key findings from his Yale presentation and Harvard National Security Journal article: Why has no one been prosecuted for disclosing classified info to Congress? What do SF-312 and SAP NDAs actually say about Congressional disclosure?" },
+    { title: "Classification mechanisms", prompt: "Explain the specific mechanisms used to hide UAP programs: Title 10 vs Title 50 jurisdiction, waived/unacknowledged SAPs, IRAD loopholes, Atomic Energy Act exploitation, and FASAB Statement 56. How do these create legal 'black holes'?" },
+    { title: "AARO statutory failures", prompt: "What is AARO's statutory mandate under 50 U.S.C. § 3373(c)(5) regarding threat assessment? What evidence suggests they have not fulfilled this mandate?" },
   ],
   g: [
-    { title: "Retrieval claims", prompt: "Summarize all crash retrieval program claims with witness credentials and corroboration." },
-    { title: "Material evidence", prompt: "What physical evidence allegedly exists from recovered UAP? Who has testified about it?" },
+    { title: "Crash retrieval testimony", prompt: "Compile all crash retrieval program claims with witness credentials: Grusch (NGA/NRO), Lacatski (AAWSAP), Elizondo (AATIP), Eric Davis. What specific programs or locations have been named? What did the ICIG conclude about Grusch's complaint?" },
+    { title: "Circular reporting counter", prompt: "What is the 'circular reporting' criticism of crash retrieval claims (Kirkpatrick's argument)? Then explain what evidence contradicts this—specifically the ICIG finding and the Schumer/Rounds legislation basis." },
+    { title: "1933 Magenta Italy claim", prompt: "What is the evidence for the 1933 Magenta, Italy recovery claim? Include Grusch's testimony, the alleged Vatican/OSS connection, and the strongest counter-arguments (forgery, lack of documentation)." },
   ],
   h: [
-    { title: "Secrecy mechanisms", prompt: "How has secrecy around UAP programs been maintained? Explain SAPs, FASAB 56, etc." },
-    { title: "Financial trails", prompt: "What financial irregularities have been linked to UAP programs?" },
+    { title: "Breakaway civilization thesis", prompt: "Explain the 'Breakaway Civilization' hypothesis as articulated by Catherine Austin Fitts and Jason Jorjani. What is the evidence (missing trillions, FASAB 56, deep underground bases)? What are the strongest counter-arguments?" },
+    { title: "Private contractor custody", prompt: "What evidence suggests private aerospace companies (Lockheed, contractors) possess UAP technology? Explain the IRAD loophole, the 'corporate risk/shareholder duty' counter-argument, and why some argue the technology may be 'too dangerous to monetize.'" },
   ],
   i: [
-    { title: "Consciousness research", prompt: "What connections exist between UAP research and consciousness studies?" },
-    { title: "Contact claims", prompt: "Summarize credentialed witness testimony about direct contact or communication with UAP." },
+    { title: "Consciousness interface evidence", prompt: "What evidence connects UAP phenomena to consciousness? Include: Stargate/remote viewing programs, Dr. Garry Nolan's caudate-putamen research, the 'Hitchhiker Effect,' and credentialed experiencer testimony (Bledsoe, Ilyumzhinov)." },
+    { title: "Telepathy claims analysis", prompt: "Summarize testimony about telepathic communication with UAP/entities. Include Dr. Venturelli (Varginha), Kirsan Ilyumzhinov, and the strongest counter-argument (psychological projection/hallucination). What makes the 'anthropomorphism' criticism potentially insufficient?" },
   ],
   j: [
-    { title: "Physics research", prompt: "What physics theories could explain UAP capabilities? Include Pais patents and Puthoff research." },
-    { title: "Propulsion concepts", prompt: "What propulsion mechanisms have been proposed for UAP? Include scientific assessments." },
+    { title: "Propulsion physics theories", prompt: "Compare the leading theoretical frameworks for UAP propulsion: Pais Effect (vacuum polarization), Alcubierre metric (warp drive), Puthoff's polarizable vacuum, and metamaterial waveguides. Which has the most experimental support? Which faces the biggest physics constraints?" },
+    { title: "Bob Lazar assessment", prompt: "Provide a balanced analysis of Bob Lazar's claims: Element 115 prediction (confirmed), S-4 facility details, biometric scanner verification, versus credential gaps (MIT/Caltech), Moscovium instability problem, and 'Gravity A' physics issues." },
   ],
   k: [
-    { title: "Biological claims", prompt: "What testimony exists about non-human biologics? Include credentials of witnesses." },
+    { title: "Non-human biologics testimony", prompt: "Compile all testimony regarding 'non-human biologics': Grusch's Congressional statement, Varginha medical reports, the officer death from 'novel pathogen.' What is the 'Mudinho' counter-explanation and why do critics find it insufficient?" },
   ],
   l: [
-    { title: "Tech development", prompt: "What technology developments may be related to UAP research? Include defense contractor connections." },
+    { title: "Defense contractor connections", prompt: "Map the connections between UAP research and defense contractors: Which companies have been named in testimony? What is the IRAD funding mechanism? How does Skywatcher.AI represent a new model of private UAP research?" },
   ],
   m: [
-    { title: "Implications", prompt: "What are the potential implications of UAP being real? Cover scientific, religious, and societal impacts." },
+    { title: "Ontological implications", prompt: "What are the profound implications if UAP represent non-human intelligence? Cover: scientific paradigm shifts, religious/theological reframing, the 'dual reality' of public vs classified physics, and what 'ontological shock' means for society." },
   ],
 };
 
@@ -76,17 +112,37 @@ export function SectionAIQueryButton({
 }: SectionAIQueryButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [userPersona, setUserPersona] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Get user's persona from localStorage
+  useEffect(() => {
+    const storedPersona = localStorage.getItem('uap_primary_archetype');
+    if (storedPersona && personaLenses[storedPersona]) {
+      setUserPersona(storedPersona);
+    }
+  }, []);
 
   const prompts = sectionQuickPrompts[sectionId.toLowerCase()] || [];
 
+  // Build the full prompt with persona lens prepended
+  const buildFullPrompt = (basePrompt: string): string => {
+    if (userPersona && personaLenses[userPersona]) {
+      return `${personaLenses[userPersona]}\n\n${basePrompt}`;
+    }
+    return basePrompt;
+  };
+
   const copyToClipboard = async (text: string, index: number) => {
     try {
-      await navigator.clipboard.writeText(text);
+      const fullPrompt = buildFullPrompt(text);
+      await navigator.clipboard.writeText(fullPrompt);
       setCopiedIndex(index);
       toast({
         title: "Copied!",
-        description: "Now open NotebookLM and paste your prompt.",
+        description: userPersona 
+          ? `Prompt copied with your ${personaDisplayNames[userPersona]} lens applied.`
+          : "Now open NotebookLM and paste your prompt.",
       });
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
@@ -186,6 +242,37 @@ export function SectionAIQueryButton({
 
         {prompts.length > 0 && (
           <CollapsibleContent className="mt-4 space-y-2">
+            {/* Persona context indicator */}
+            {userPersona && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 p-2 bg-background/50 rounded-md border border-border/50">
+                <span className="font-medium text-foreground">
+                  Your {personaDisplayNames[userPersona]} lens will be applied
+                </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-xs">
+                        Your research persona customizes how the AI responds. 
+                        The {personaDisplayNames[userPersona]} lens prioritizes 
+                        {userPersona === 'empiricist' && ' sensor data and quantifiable metrics.'}
+                        {userPersona === 'historian' && ' chronological evolution and legislative trails.'}
+                        {userPersona === 'strategist' && ' geopolitical and institutional analysis.'}
+                        {userPersona === 'investigator' && ' witness credibility and case forensics.'}
+                        {userPersona === 'technologist' && ' physics mechanisms and engineering details.'}
+                        {userPersona === 'skeptic' && ' prosaic explanations and critical evaluation.'}
+                        {userPersona === 'debunker' && ' prosaic explanations and critical evaluation.'}
+                        {userPersona === 'experiencer' && ' high strangeness and consciousness aspects.'}
+                        {userPersona === 'meaning_seeker' && ' ontological and philosophical implications.'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            )}
+            
             <p className="text-xs text-muted-foreground mb-2">
               Click to copy, then paste in NotebookLM:
             </p>
