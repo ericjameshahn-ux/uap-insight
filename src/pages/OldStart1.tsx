@@ -53,9 +53,11 @@ export default function IntroFramework() {
           The same approach reveals patterns in information environments designed to obscure.
         </p>
 
-        <Button size="lg" onClick={scrollToContent} className="gap-2">
-          Begin Framework
-          <ArrowDown className="w-4 h-4" />
+        <Button size="lg" asChild className="gap-2">
+          <Link to="/framework">
+            Begin Framework
+            <ArrowDown className="w-4 h-4" />
+          </Link>
         </Button>
       </section>
 

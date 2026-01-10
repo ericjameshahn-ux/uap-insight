@@ -19,6 +19,9 @@ const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/ob
 const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
 const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg';
 
+// Fallback image for Ghost Army (public domain Wikimedia)
+const GHOST_ARMY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/1280px-Dummy_tank_%28AWM_P02584.002%29.jpg';
+
 // ==========================================
 // PART 1: THE CONCEPT
 // ==========================================
@@ -222,6 +225,9 @@ const GhostArmySection = () => {
                   filter: currentStage.filter,
                   transform: currentStage.transform,
                   transformOrigin: 'center 40%'
+                }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = GHOST_ARMY_FALLBACK;
                 }}
               />
               
@@ -1084,6 +1090,11 @@ const PersonaFooter = () => {
 // MAIN PAGE COMPONENT
 // ==========================================
 export default function MosaicTheoryFramework() {
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Page Status Banner */}
