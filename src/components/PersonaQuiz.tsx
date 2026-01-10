@@ -47,11 +47,11 @@ const fallbackQuestions: PersonaQuestion[] = [
     ],
     scoring_map: {
       curiosity: ["empiricist", "historian"],
-      experience: ["experiencer"],
+      experience: ["investigator"],
       security: ["strategist"],
       science: ["empiricist", "technologist"],
       investment: ["technologist"],
-      spiritual: ["meaning_seeker", "experiencer"]
+      spiritual: ["historian", "investigator"]
     }
   },
   {
@@ -71,8 +71,8 @@ const fallbackQuestions: PersonaQuestion[] = [
       documents: ["empiricist", "strategist"],
       witnesses: ["investigator"],
       patterns: ["historian"],
-      experiencer: ["experiencer"],
-      bigpicture: ["meaning_seeker", "strategist"]
+      experiencer: ["investigator"],
+      bigpicture: ["strategist", "historian"]
     }
   },
   {
@@ -87,11 +87,11 @@ const fallbackQuestions: PersonaQuestion[] = [
       { label: "Convinced non-human intelligence is involved", value: "convinced" }
     ],
     scoring_map: {
-      strong_skeptic: ["debunker"],
-      open_skeptic: ["debunker", "empiricist"],
+      strong_skeptic: ["skeptic"],
+      open_skeptic: ["skeptic", "empiricist"],
       agnostic: ["empiricist", "investigator"],
       leaning_real: ["investigator", "technologist"],
-      convinced: ["experiencer", "meaning_seeker"]
+      convinced: ["historian", "technologist"]
     }
   },
   {
@@ -105,7 +105,7 @@ const fallbackQuestions: PersonaQuestion[] = [
       { label: "Expert-level technical capability", value: "expert" }
     ],
     scoring_map: {
-      minimal: ["historian", "meaning_seeker"],
+      minimal: ["historian", "investigator"],
       basic: ["strategist", "investigator"],
       strong: ["technologist", "empiricist"],
       expert: ["technologist", "empiricist"]
@@ -124,28 +124,29 @@ const fallbackQuestions: PersonaQuestion[] = [
     ],
     scoring_map: {
       balanced: ["empiricist", "investigator"],
-      conclusion: ["debunker", "empiricist"],
+      conclusion: ["skeptic", "empiricist"],
       briefing: ["strategist"],
       research: ["investigator", "technologist"],
-      meaning: ["meaning_seeker", "experiencer"]
+      meaning: ["historian", "strategist"]
     }
   }
 ];
 
+// 6 consolidated personas
 const fallbackArchetypes: PersonaArchetype[] = [
   {
     id: 'empiricist',
     name: "The Empiricist",
-    description: "You value hard evidence above all else. You want data, measurements, and verifiable facts.",
+    description: "You prioritize hard sensor data, physical material analyses, and quantifiable performance metrics over anecdotal accounts.",
     primary_interests: "Sensor data, radar evidence, official reports",
     recommended_sections: ["a", "b", "c", "f"],
     recommended_journey: "executive",
-    icon: "📊"
+    icon: "🔬"
   },
   {
     id: 'historian',
     name: "The Historian",
-    description: "You're interested in how this topic has evolved over decades and patterns across time.",
+    description: "You trace the chronological evolution of government programs, legislative paper trails, and historical precedents.",
     primary_interests: "Historical cases, policy evolution, cultural patterns",
     recommended_sections: ["d", "e", "f", "h"],
     recommended_journey: "executive",
@@ -154,7 +155,7 @@ const fallbackArchetypes: PersonaArchetype[] = [
   {
     id: 'strategist',
     name: "The Strategist",
-    description: "You focus on national security implications and institutional dynamics.",
+    description: "You analyze geopolitical implications, national security risks, and bureaucratic power struggles.",
     primary_interests: "Policy, geopolitics, institutional behavior",
     recommended_sections: ["f", "h", "l", "e"],
     recommended_journey: "executive",
@@ -163,47 +164,29 @@ const fallbackArchetypes: PersonaArchetype[] = [
   {
     id: 'investigator',
     name: "The Investigator",
-    description: "You examine specific cases in detail, looking for contradictions and corroboration.",
+    description: "You focus on cross-referencing witness credibility, corroborating testimonies, and chains of custody.",
     primary_interests: "Case analysis, witness credibility, forensic evidence",
     recommended_sections: ["b", "g", "k", "f"],
     recommended_journey: "retrieval",
     icon: "🔍"
   },
   {
-    id: 'experiencer',
-    name: "The Experiencer",
-    description: "You're drawn to first-person accounts and the consciousness dimension.",
-    primary_interests: "Contact accounts, consciousness research, integration",
-    recommended_sections: ["i", "k", "m"],
-    recommended_journey: "consciousness",
-    icon: "✨"
-  },
-  {
-    id: 'technologist',
-    name: "The Technologist",
-    description: "You want to understand what these craft can do and what it would take to replicate it.",
-    primary_interests: "Propulsion physics, materials science, R&D",
-    recommended_sections: ["c", "j", "l", "g"],
-    recommended_journey: "physics",
-    icon: "⚡"
-  },
-  {
-    id: 'debunker',
-    name: "The Skeptical Analyst",
-    description: "You maintain strong prosaic priors and want mundane explanations thoroughly ruled out.",
+    id: 'skeptic',
+    name: "The Skeptic",
+    description: "You critically evaluate evidence by highlighting prosaic explanations, circular reporting, and disinformation. Also suits the curious and agnostic.",
     primary_interests: "Falsification, error analysis, methodological rigor",
     recommended_sections: ["a", "b", "d", "c"],
     recommended_journey: "executive",
     icon: "⚖️"
   },
   {
-    id: 'meaning_seeker',
-    name: "The Meaning-Seeker",
-    description: "You're interested in philosophical and ontological implications for humanity.",
-    primary_interests: "Philosophy, consciousness, cosmic significance",
-    recommended_sections: ["i", "h", "m", "j"],
-    recommended_journey: "consciousness",
-    icon: "🌌"
+    id: 'technologist',
+    name: "The Technologist",
+    description: "You want detailed proposed engineering mechanisms and how they align with or challenge known physics.",
+    primary_interests: "Propulsion physics, materials science, R&D",
+    recommended_sections: ["c", "j", "l", "g"],
+    recommended_journey: "physics",
+    icon: "⚡"
   }
 ];
 

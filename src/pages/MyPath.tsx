@@ -9,24 +9,21 @@ import { Progress } from "@/components/ui/progress";
 import { supabase, Section, PersonaArchetype } from "@/lib/supabase";
 import { BackButton } from "@/components/BackButton";
 
-// Archetype display info
+// Archetype display info (6 consolidated personas)
 const archetypeIcons: Record<string, string> = {
   empiricist: "🔬",
-  investigator: "🔍",
+  historian: "📚",
   strategist: "♟️",
-  technologist: "⚙️",
-  historian: "📜",
-  meaning_seeker: "🌌",
-  debunker: "🎯",
-  experiencer: "✨",
-  scientist: "⚛️",
-  policymaker: "🏛️",
-  philosopher: "💭",
-  skeptic: "🤔",
+  investigator: "🔍",
+  skeptic: "⚖️",
+  technologist: "⚡",
+  // Legacy mappings for backwards compatibility
+  debunker: "⚖️",
+  scientist: "🔬",
   executive: "📊",
-  physics: "⚛️",
-  retrieval: "🛸",
-  consciousness: "🧠",
+  physics: "⚡",
+  retrieval: "🔍",
+  consciousness: "📚",
 };
 
 // Path rationales for each archetype
@@ -67,65 +64,29 @@ const pathRationales: Record<string, Record<string, string>> = {
     e: "Examine global patterns across nations and cultures",
     f: "Understand how information has been managed over time",
   },
-  meaning_seeker: {
-    i: "Start with consciousness and contact phenomena",
-    k: "Explore NHI biological encounters and their implications",
-    m: "Examine esoteric history and philosophical context",
-    e: "Consider the global, cross-cultural nature of the phenomena",
+  skeptic: {
+    a: "Begin with the most verified official acknowledgments",
+    b: "Evaluate multi-sensor evidence for consistency",
+    c: "Critically assess claims against known physics",
+    d: "Understand information gaps before drawing conclusions",
   },
-  experiencer: {
-    i: "Connect with documented experiencer testimony",
-    k: "Explore NHI encounters from those who've had them",
-    m: "Examine broader context and meaning",
-    c: "Understand the physics of what you may have witnessed",
-  },
+  // Legacy mappings
   debunker: {
     a: "Start with official claims that can be verified or falsified",
     b: "Examine physical evidence with skeptical rigor",
     c: "Challenge physics-defying claims with technical analysis",
     f: "Investigate what's being hidden and why",
   },
-  skeptic: {
-    a: "Begin with the most verified official acknowledgments",
-    b: "Evaluate multi-sensor evidence for consistency",
-    c: "Critically assess claims against known physics",
-    f: "Understand information gaps before drawing conclusions",
-  },
-  executive: {
-    a: "Quick overview of official acknowledgments",
-    b: "Key physical evidence highlights",
-    c: "Summary of capabilities observed",
-    f: "Understanding of classification landscape",
-  },
-  physics: {
-    c: "Deep analysis of physics-defying capabilities",
-    j: "Comprehensive propulsion R&D review",
-    l: "Adjacent technology and investment landscape",
-    g: "Material science and reverse engineering claims",
-  },
-  retrieval: {
-    b: "Physical evidence of craft existence",
-    g: "Detailed crash retrieval program analysis",
-    k: "Biological evidence and NHI encounters",
-    f: "Government programs and classification",
-  },
-  consciousness: {
-    i: "Consciousness and contact phenomena deep dive",
-    k: "NHI biological encounters and communication",
-    m: "Esoteric and philosophical dimensions",
-  },
 };
 
-// Fallback archetypes
+// Fallback archetypes (6 consolidated personas)
 const fallbackArchetypes: PersonaArchetype[] = [
-  { id: 'empiricist', name: "The Empiricist", description: "You value hard evidence above all else. You want data, measurements, and verifiable facts before drawing conclusions.", primary_interests: "Sensor data, radar evidence, official reports", recommended_sections: ["a", "b", "c", "f"], recommended_journey: "executive", icon: "📊" },
-  { id: 'investigator', name: "The Investigator", description: "You dig deep into primary sources and cross-reference testimony. You're driven to uncover what's been hidden.", primary_interests: "Whistleblower testimony, document analysis, institutional patterns", recommended_sections: ["b", "g", "k", "f"], recommended_journey: "retrieval", icon: "🔍" },
-  { id: 'scientist', name: "The Scientist", description: "You're fascinated by the physics and technology implications. How could these capabilities work?", primary_interests: "Propulsion theories, physics analysis, R&D", recommended_sections: ["c", "j", "l", "b"], recommended_journey: "physics", icon: "⚛️" },
-  { id: 'strategist', name: "The Strategist", description: "You think in terms of institutions, power dynamics, and geopolitical implications.", primary_interests: "Policy impact, institutional dynamics, strategic implications", recommended_sections: ["f", "h", "g", "a"], recommended_journey: "executive", icon: "♟️" },
-  { id: 'historian', name: "The Historian", description: "You see patterns across decades. Understanding the past illuminates the present.", primary_interests: "Historical cases, document timelines, pattern analysis", recommended_sections: ["d", "a", "e", "f"], recommended_journey: "executive", icon: "📜" },
-  { id: 'meaning_seeker', name: "The Meaning Seeker", description: "You're drawn to the bigger questions. What does this mean for humanity?", primary_interests: "Consciousness research, philosophical implications, experiencer accounts", recommended_sections: ["i", "k", "m", "e"], recommended_journey: "consciousness", icon: "🌌" },
-  { id: 'debunker', name: "The Debunker", description: "You approach with healthy skepticism. Claims must survive rigorous scrutiny.", primary_interests: "Critical analysis, alternative explanations, evidence quality", recommended_sections: ["a", "b", "c", "f"], recommended_journey: "executive", icon: "🎯" },
-  { id: 'experiencer', name: "The Experiencer", description: "You may have had your own encounter. You seek validation and understanding.", primary_interests: "Experiencer testimony, consciousness connection, personal meaning", recommended_sections: ["i", "k", "m", "c"], recommended_journey: "consciousness", icon: "✨" },
+  { id: 'empiricist', name: "The Empiricist", description: "You prioritize hard sensor data, physical material analyses, and quantifiable performance metrics over anecdotal accounts.", primary_interests: "Sensor data, radar evidence, official reports", recommended_sections: ["a", "b", "c", "f"], recommended_journey: "executive", icon: "🔬" },
+  { id: 'historian', name: "The Historian", description: "You trace the chronological evolution of government programs, legislative paper trails, and historical precedents for secrecy mechanisms.", primary_interests: "Historical cases, policy evolution, pattern analysis", recommended_sections: ["d", "e", "f", "h"], recommended_journey: "executive", icon: "📚" },
+  { id: 'strategist', name: "The Strategist", description: "You analyze geopolitical implications, national security risks, and bureaucratic power struggles driving containment or disclosure.", primary_interests: "Policy impact, institutional dynamics, strategic implications", recommended_sections: ["f", "h", "l", "e"], recommended_journey: "executive", icon: "♟️" },
+  { id: 'investigator', name: "The Investigator", description: "You focus on cross-referencing witness credibility, corroborating testimonies, and identifying concrete chains of custody for alleged evidence.", primary_interests: "Case analysis, witness credibility, forensic evidence", recommended_sections: ["b", "g", "k", "f"], recommended_journey: "retrieval", icon: "🔍" },
+  { id: 'skeptic', name: "The Skeptic", description: "You critically evaluate evidence by highlighting prosaic explanations, circular reporting, and the possibility of disinformation. Also suits the curious and agnostic.", primary_interests: "Critical analysis, alternative explanations, evidence quality", recommended_sections: ["a", "b", "d", "c"], recommended_journey: "executive", icon: "⚖️" },
+  { id: 'technologist', name: "The Technologist", description: "You want detailed proposed engineering mechanisms—metric engineering, vacuum polarization, terahertz waveguides—and how they align with or challenge known physics.", primary_interests: "Propulsion physics, materials science, R&D", recommended_sections: ["c", "j", "l", "g"], recommended_journey: "physics", icon: "⚡" },
 ];
 
 export default function MyPath() {

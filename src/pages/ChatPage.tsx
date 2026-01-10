@@ -14,20 +14,16 @@ interface ChatMessage {
 
 const DAILY_LIMIT = 20;
 
-// Archetype display names, icons, and descriptions
+// Archetype display names, icons, and descriptions (6 consolidated personas)
 const archetypeInfo: Record<string, { name: string; icon: string; description: string }> = {
-  empiricist: { name: "The Empiricist", icon: "🔬", description: "rigorous scientific methodology and measurable data" },
-  investigator: { name: "The Investigator", icon: "🔍", description: "detailed forensic analysis and evidence chains" },
-  strategist: { name: "The Strategist", icon: "♟️", description: "geopolitical implications and institutional dynamics" },
-  technologist: { name: "The Technologist", icon: "⚙️", description: "engineering analysis and propulsion systems" },
-  historian: { name: "The Historian", icon: "📜", description: "historical patterns and documented cases over time" },
-  meaning_seeker: { name: "The Meaning Seeker", icon: "🌌", description: "deeper implications for humanity and consciousness" },
-  debunker: { name: "The Debunker", icon: "🎯", description: "critical evaluation and identifying conventional explanations" },
-  experiencer: { name: "The Experiencer", icon: "✨", description: "firsthand accounts and phenomenological evidence" },
-  scientist: { name: "The Scientist", icon: "⚛️", description: "theoretical physics and scientific anomalies" },
-  policymaker: { name: "The Policymaker", icon: "🏛️", description: "policy implications and government accountability" },
-  philosopher: { name: "The Philosopher", icon: "💭", description: "epistemological questions and paradigm implications" },
-  skeptic: { name: "The Skeptic", icon: "🤔", description: "demanding extraordinary evidence for extraordinary claims" },
+  empiricist: { name: "The Empiricist", icon: "🔬", description: "sensor data and multi-source confirmation" },
+  historian: { name: "The Historian", icon: "📚", description: "patterns across decades and policy evolution" },
+  strategist: { name: "The Strategist", icon: "♟️", description: "national security and institutional behavior" },
+  investigator: { name: "The Investigator", icon: "🔍", description: "case forensics and witness credibility" },
+  skeptic: { name: "The Skeptic", icon: "⚖️", description: "falsification and prosaic explanations first" },
+  technologist: { name: "The Technologist", icon: "⚡", description: "physics, propulsion, and materials science" },
+  // Legacy mappings for backwards compatibility
+  debunker: { name: "The Skeptic", icon: "⚖️", description: "falsification and prosaic explanations first" },
 };
 
 const formatArchetype = (archetype: string): string => {
@@ -36,10 +32,10 @@ const formatArchetype = (archetype: string): string => {
     historian: "The Historian 📚",
     strategist: "The Strategist ♟️",
     investigator: "The Investigator 🔍",
-    experiencer: "The Experiencer ✨",
+    skeptic: "The Skeptic ⚖️",
     technologist: "The Technologist ⚡",
-    debunker: "The Skeptical Analyst ⚖️",
-    meaning_seeker: "The Meaning-Seeker 🌌"
+    // Legacy mappings
+    debunker: "The Skeptic ⚖️",
   };
   return names[archetype] || archetype;
 };
@@ -50,10 +46,10 @@ const getPersonaEmphasis = (archetype: string): string => {
     historian: "historical context, timelines, and pattern recognition",
     strategist: "national security implications and policy dynamics",
     investigator: "case details, witness credibility, and forensic analysis",
-    experiencer: "first-person accounts and consciousness research",
+    skeptic: "prosaic explanations and methodological rigor",
     technologist: "propulsion physics, engineering specs, and technical analysis",
+    // Legacy mappings
     debunker: "prosaic explanations and methodological rigor",
-    meaning_seeker: "philosophical implications and existential questions"
   };
   return emphases[archetype] || "balanced analysis";
 };
