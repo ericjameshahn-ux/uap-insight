@@ -147,16 +147,16 @@ const GhostArmySection = () => {
       subtitle: "Context Lost",
       description: "Zoom into the 'tank.' The soldiers are cropped out. Without context, this is simply a Sherman tank—exactly what the deception intended.",
       filter: "grayscale(100%) contrast(150%) brightness(90%)", 
-      transform: "scale(1.8) translateY(-15%)", 
+      transform: "scale(2.5) translate(-10%, -25%)", 
       showRedaction: false, 
       showHUD: false 
     },
     { 
       title: "OBSERVER LENS", 
-      subtitle: "False Conclusion",
-      description: "German intelligence confirms: Heavy armor division at Calais. The assessment is methodologically sound—but built on controlled information.",
+      subtitle: "German Intelligence Assessment",
+      description: "Luftwaffe reconnaissance confirms armor presence. The assessment is methodologically sound—but built on controlled information.",
       filter: "grayscale(100%) contrast(130%) brightness(85%)", 
-      transform: "scale(1.8) translateY(-15%)", 
+      transform: "scale(2.5) translate(-10%, -25%)", 
       showRedaction: false, 
       showHUD: true 
     },
@@ -172,6 +172,13 @@ const GhostArmySection = () => {
             <p className="text-stone-500 text-xs font-mono tracking-widest mb-2">HISTORICAL PRECEDENT #1</p>
             <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-1">Operation Fortitude</h2>
             <p className="text-stone-600 text-sm">The Ghost Army, 1944</p>
+          </div>
+          
+          {/* Context Introduction */}
+          <div className="bg-stone-200/70 border border-stone-300 rounded-lg p-4 mb-6 max-w-3xl mx-auto">
+            <p className="text-stone-600 text-sm italic leading-relaxed">
+              In 1944, the Allies created a fictitious "First United States Army Group" (FUSAG) to convince Hitler that the D-Day invasion would target Calais, not Normandy. The 23rd Headquarters Special Troops—the "Ghost Army"—deployed inflatable tanks, fake radio traffic, and sound trucks to simulate an entire armored division. German intelligence took the bait.
+            </p>
           </div>
           
           <div className="flex justify-center gap-2 mb-4 flex-wrap">
@@ -217,14 +224,20 @@ const GhostArmySection = () => {
               )}
               
               {currentStage.showHUD && (
-                <div className="absolute inset-0 bg-green-900/30 border-4 border-green-500/50">
-                  <div className="absolute top-4 left-4 text-green-400 font-mono text-xs">
-                    <p>ANALYSIS: FUSAG</p>
-                    <p>COORD: 50.9°N 1.9°E</p>
+                <div className="absolute inset-0 bg-green-900/40 border-4 border-green-500/60">
+                  <div className="absolute top-3 left-3 right-3 text-green-400 font-mono text-[10px] space-y-1">
+                    <p className="font-bold tracking-wider">LUFTWAFFE RECONNAISSANCE - SECTOR 7</p>
+                    <p>COORD: 50.9°N 1.9°E | DATE: 1944-06-02</p>
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4 bg-green-900/80 p-3 rounded">
-                    <p className="text-green-400 font-mono text-sm font-bold">
-                      ASSESSMENT: HEAVY ARMOR DIVISION CONFIRMED
+                  <div className="absolute bottom-3 left-3 right-3 bg-green-950/90 p-3 rounded border border-green-500/50 space-y-1">
+                    <p className="text-green-300 font-mono text-xs font-bold">
+                      CONFIRMED: SHERMAN M4 MEDIUM TANK
+                    </p>
+                    <p className="text-green-400 font-mono text-[10px]">
+                      FUSAG ORDER OF BATTLE: 11 DIVISIONS
+                    </p>
+                    <p className="text-amber-400 font-mono text-[10px] font-bold mt-2">
+                      ▶ RECOMMENDATION: RESERVE PANZERS FOR CALAIS FRONT
                     </p>
                   </div>
                 </div>
@@ -341,6 +354,13 @@ const ManhattanProjectSection = () => {
             <p className="text-slate-400 text-sm">Oak Ridge, Los Alamos, Hanford — 1942-1945</p>
           </div>
           
+          {/* Context Introduction */}
+          <div className="bg-slate-800/70 border border-slate-600 rounded-lg p-4 mb-6 max-w-3xl mx-auto">
+            <p className="text-slate-400 text-sm italic leading-relaxed">
+              The Manhattan Project employed 125,000 workers across 30+ sites to build the atomic bomb. Compartmentalization was so extreme that Vice President Truman didn't learn of its existence until after FDR's death. This demonstrates that large-scale secrecy is not only possible—it has historical precedent.
+            </p>
+          </div>
+          
           <div className="flex justify-center gap-2 mb-4 flex-wrap">
             {stages.map((s, idx) => (
               <button
@@ -373,7 +393,7 @@ const ManhattanProjectSection = () => {
                 alt="The Gadget - first atomic bomb"
                 className="w-full h-full object-cover transition-all duration-700"
                 style={{
-                  filter: `${currentStage.filter} blur(${currentStage.blur}px)`,
+                  filter: activeStage === 0 ? 'none' : `${currentStage.filter} blur(${currentStage.blur}px)`,
                 }}
               />
               
