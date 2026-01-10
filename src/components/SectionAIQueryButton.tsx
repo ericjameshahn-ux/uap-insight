@@ -29,38 +29,44 @@ interface SectionAIQueryButtonProps {
   variant?: "inline" | "card" | "floating";
 }
 
-// Persona lenses for AI prompt personalization - with full descriptions
-const personaLenses: Record<string, { label: string; description: string; prompt: string }> = {
+// Persona lenses for AI prompt personalization - with full detailed descriptions
+const personaLenses: Record<string, { name: string; icon: string; description: string; lens: string }> = {
   empiricist: {
-    label: "🔬 The Empiricist",
+    name: "The Empiricist",
+    icon: "🔬",
     description: "Evidence-first, data-driven analysis",
-    prompt: "As someone who prioritizes sensor data and reproducible evidence,"
+    lens: "Please prioritize hard sensor data (radar/FLIR), physical material analyses (isotopic ratios/metamaterials), and quantifiable performance metrics (g-forces/velocities) over anecdotal accounts."
   },
   historian: {
-    label: "📚 The Historian",
+    name: "The Historian",
+    icon: "📚",
     description: "Patterns across time and policy",
-    prompt: "As someone focused on historical patterns and the evolution of government programs,"
+    lens: "Frame the answer within the chronological evolution of government programs (from Blue Book to AARO), tracing the legislative paper trail and historical precedents for secrecy mechanisms."
   },
   strategist: {
-    label: "♟️ The Strategist",
-    description: "National security and policy implications",
-    prompt: "As someone focused on national security implications and institutional behavior,"
+    name: "The Strategist",
+    icon: "♟️",
+    description: "National security implications",
+    lens: "Analyze the geopolitical implications, national security risks, and the bureaucratic power struggles (e.g., Title 10 vs. Title 50 jurisdiction) driving the containment or disclosure of this information."
   },
   investigator: {
-    label: "🔍 The Investigator",
-    description: "Case-by-case forensic examination",
-    prompt: "As an investigator focused on witness credibility and chains of custody,"
+    name: "The Investigator",
+    icon: "🔍",
+    description: "Forensic case examination",
+    lens: "Focus on cross-referencing specific witness credibility, corroborating testimonies (e.g., Varginha, Nimitz), and identifying concrete chains of custody for alleged evidence."
   },
   technologist: {
-    label: "⚡ The Technologist",
-    description: "Physics, propulsion, and tech applications",
-    prompt: "As someone focused on physics, engineering mechanisms, and technical feasibility,"
+    name: "The Technologist",
+    icon: "⚡",
+    description: "Physics and engineering focus",
+    lens: "Detail the proposed engineering mechanisms—specifically metric engineering, vacuum polarization, and terahertz waveguides—and how they align with or challenge known physics (e.g., the Schwinger limit)."
   },
-  skeptic: {
-    label: "⚖️ The Skeptical Analyst",
-    description: "Rigorous prosaic explanation testing",
-    prompt: "As a skeptical analyst who values falsification and prosaic explanations first,"
-  },
+  debunker: {
+    name: "The Skeptical Analyst",
+    icon: "⚖️",
+    description: "Rigorous counter-arguments",
+    lens: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops)."
+  }
 };
 
 // Display names for personas (for toast messages)
@@ -70,18 +76,16 @@ const personaDisplayNames: Record<string, string> = {
   strategist: "Strategist",
   investigator: "Investigator",
   technologist: "Technologist",
-  skeptic: "Skeptical Analyst",
+  debunker: "Skeptical Analyst",
 };
 
 // Available personas for dropdown selection (6 research-focused personas)
-const availablePersonas = [
-  { id: "empiricist", label: "🔬 The Empiricist", description: "Evidence-first, data-driven analysis" },
-  { id: "historian", label: "📚 The Historian", description: "Patterns across time and policy" },
-  { id: "strategist", label: "♟️ The Strategist", description: "National security and policy implications" },
-  { id: "investigator", label: "🔍 The Investigator", description: "Case-by-case forensic examination" },
-  { id: "technologist", label: "⚡ The Technologist", description: "Physics, propulsion, and tech applications" },
-  { id: "skeptic", label: "⚖️ The Skeptical Analyst", description: "Rigorous prosaic explanation testing" },
-];
+const availablePersonas = Object.entries(personaLenses).map(([id, data]) => ({
+  id,
+  icon: data.icon,
+  name: data.name,
+  description: data.description,
+}));
 
 // Detailed prompts tailored to each section
 const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> = {
@@ -159,13 +163,24 @@ export function SectionAIQueryButton({
   const [includePersona, setIncludePersona] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<string>("");
   const [previewPromptIndex, setPreviewPromptIndex] = useState<number | null>(null);
+  const [detectedPersona, setDetectedPersona] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Get user's persona from localStorage on mount
+  // Get user's persona from localStorage on mount and auto-enable
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
-    if (storedPersona && personaLenses[storedPersona]) {
-      setSelectedPersona(storedPersona);
+    // Map old persona keys to new ones if needed
+    const personaMap: Record<string, string> = {
+      'skeptic': 'debunker',
+      'experiencer': 'empiricist',
+      'meaning_seeker': 'historian',
+    };
+    const mappedPersona = personaMap[storedPersona || ''] || storedPersona;
+    
+    if (mappedPersona && personaLenses[mappedPersona]) {
+      setSelectedPersona(mappedPersona);
+      setDetectedPersona(mappedPersona);
+      setIncludePersona(true); // Auto-enable persona when detected
     }
   }, []);
 
@@ -175,9 +190,9 @@ export function SectionAIQueryButton({
   const buildFullPrompt = (basePrompt: string): string => {
     if (includePersona && selectedPersona && personaLenses[selectedPersona]) {
       const persona = personaLenses[selectedPersona];
-      return `Research Persona: ${persona.prompt}\n\nResearch Starter Focus: ${basePrompt}`;
+      return `**Research Persona:** ${persona.lens}\n\n**Research Focus:** ${basePrompt}`;
     }
-    return `Research Starter Focus: ${basePrompt}`;
+    return `**Research Focus:** ${basePrompt}`;
   };
 
   const copyToClipboard = async (text: string, index: number) => {
@@ -289,8 +304,18 @@ export function SectionAIQueryButton({
 
         {prompts.length > 0 && (
           <CollapsibleContent className="mt-4 space-y-3">
+            {/* Auto-detected persona indicator */}
+            {detectedPersona && personaLenses[detectedPersona] && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-md text-sm">
+                <span className="text-lg">{personaLenses[detectedPersona].icon}</span>
+                <span className="text-primary font-medium">
+                  🎯 Your {personaLenses[detectedPersona].name} lens will be applied to prompts
+                </span>
+              </div>
+            )}
+            
             {/* Persona toggle and dropdown */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-background/50 rounded-md border border-border/50">
+            <div className="flex flex-col gap-3 p-3 bg-background/50 rounded-md border border-border/50">
               <div className="flex items-center gap-2">
                 <Switch
                   id="persona-toggle"
@@ -317,15 +342,27 @@ export function SectionAIQueryButton({
               
               {includePersona && (
                 <Select value={selectedPersona} onValueChange={setSelectedPersona}>
-                  <SelectTrigger className="w-[280px] h-9 text-sm">
-                    <SelectValue placeholder="Select research persona..." />
+                  <SelectTrigger className="w-full h-auto py-2 text-sm">
+                    <SelectValue placeholder="Select research persona...">
+                      {selectedPersona && personaLenses[selectedPersona] && (
+                        <span className="flex items-center gap-2">
+                          <span>{personaLenses[selectedPersona].icon}</span>
+                          <span>{personaLenses[selectedPersona].name}</span>
+                          <span className="text-muted-foreground">—</span>
+                          <span className="text-muted-foreground text-xs">{personaLenses[selectedPersona].description}</span>
+                        </span>
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="w-[320px]">
+                  <SelectContent className="w-[400px]">
                     {availablePersonas.map((persona) => (
-                      <SelectItem key={persona.id} value={persona.id} className="py-2">
-                        <div className="flex flex-col">
-                          <span className="font-medium">{persona.label}</span>
-                          <span className="text-xs text-muted-foreground">{persona.description}</span>
+                      <SelectItem key={persona.id} value={persona.id} className="py-3">
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">{persona.icon}</span>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{persona.name}</span>
+                            <span className="text-xs text-muted-foreground">— {persona.description}</span>
+                          </div>
                         </div>
                       </SelectItem>
                     ))}
