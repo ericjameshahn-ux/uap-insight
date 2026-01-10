@@ -145,15 +145,15 @@ function ComparisonMatrix() {
   return (
     <Card className="mb-8">
       <CardHeader>
-        <h2 className="text-xl font-bold text-foreground">Hypothesis Comparison Matrix</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Hypothesis Comparison Matrix</h2>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto -mx-4 md:mx-0">
-          <table className="w-full text-sm min-w-[600px]">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full text-xs sm:text-sm min-w-[600px]">
             <thead className="bg-muted">
               <tr>
                 {comparisonMatrix.headers.map((header, i) => (
-                  <th key={i} className={`p-3 ${i === 0 ? 'text-left' : 'text-center'} font-semibold text-foreground`}>
+                  <th key={i} className={`p-2 sm:p-3 ${i === 0 ? 'text-left' : 'text-center'} font-semibold text-foreground`}>
                     {header}
                   </th>
                 ))}
@@ -162,9 +162,9 @@ function ComparisonMatrix() {
             <tbody>
               {comparisonMatrix.rows.map((row, i) => (
                 <tr key={i} className="border-b border-border">
-                  <td className="p-3 font-medium text-foreground">{row.feature}</td>
+                  <td className="p-2 sm:p-3 font-medium text-foreground">{row.feature}</td>
                   {row.values.map((value, j) => (
-                    <td key={j} className="p-3 text-center text-muted-foreground text-xs md:text-sm">
+                    <td key={j} className="p-2 sm:p-3 text-center text-muted-foreground text-xs">
                       {value}
                     </td>
                   ))}

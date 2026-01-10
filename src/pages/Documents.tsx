@@ -66,36 +66,36 @@ export default function Documents() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <BackButton />
-      <div className="mb-8 animate-fade-in">
-        <h1 className="text-2xl font-bold mb-2">Documents</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-6 sm:mb-8 animate-fade-in">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">Documents</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Official documents, reports, and research papers related to UAP.
         </p>
       </div>
 
       {/* AI Research Assistant Card */}
-      <div className="mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
+      <div className="mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
         <a 
           href={AI_ASSISTANT_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="block card-elevated p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:shadow-lg transition-all group"
+          className="block card-elevated p-4 sm:p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:shadow-lg transition-all group"
         >
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-              <Sparkles className="w-6 h-6 text-primary" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shrink-0">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
                 Query All Source Documents with AI
               </h2>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                 Ask questions about all source materials using NotebookLM's AI assistant. 
                 Get instant answers, summaries, and cross-referenced insights from the entire document collection.
               </p>
-              <Button size="sm" className="pointer-events-none">
+              <Button size="sm" className="pointer-events-none min-h-[44px]">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Open AI Assistant
               </Button>
@@ -105,10 +105,10 @@ export default function Documents() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+      <div className="flex gap-4 mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
         <Select value={sectionFilter} onValueChange={setSectionFilter}>
-          <SelectTrigger className="w-40">
-            <Filter className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-full sm:w-40 min-h-[44px]">
+            <Filter className="w-4 h-4 mr-2 shrink-0" />
             <SelectValue placeholder="Filter by section" />
           </SelectTrigger>
           <SelectContent>
