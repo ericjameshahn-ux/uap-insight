@@ -12,6 +12,7 @@ import {
   TrendingUp, Microscope, History, Target, Brain, Globe,
   Banknote, GraduationCap, MessageCircle, Zap
 } from 'lucide-react';
+import { PageStatusBanner } from '@/components/PageStatusBanner';
 
 // Image paths - Supabase Storage
 const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg.jpg';
@@ -1085,6 +1086,17 @@ const PersonaFooter = () => {
 export default function MosaicTheoryFramework() {
   return (
     <div className="min-h-screen">
+      {/* Page Status Banner */}
+      <div className="px-6 pt-6">
+        <div className="max-w-4xl mx-auto">
+          <PageStatusBanner
+            lastUpdated="January 10, 2026"
+            status="under-construction"
+            statusNote="Restructuring Ground Truth → Filter → Mosaic flow"
+          />
+        </div>
+      </div>
+      
       {/* PART 1: THE CONCEPT */}
       <FinancialFramework />
       <GhostArmySection />
