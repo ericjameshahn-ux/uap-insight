@@ -15,6 +15,7 @@ import {
 
 // Image paths - Supabase Storage
 const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg.jpg';
+const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
 const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg.jpg';
 
 // ==========================================
@@ -128,6 +129,7 @@ const GhostArmySection = () => {
       title: "GROUND TRUTH", 
       subtitle: "Full Context Available",
       description: "Four American soldiers easily carry a 'tank.' The 93-lb rubber decoy is part of the 23rd Headquarters Special Troops—the Ghost Army.",
+      image: GHOST_ARMY_IMAGE,
       filter: "none", 
       transform: "scale(1)", 
       showRedaction: false, 
@@ -137,6 +139,7 @@ const GhostArmySection = () => {
       title: "THE FILTER", 
       subtitle: "Classification Applied",
       description: "The image is marked classified. A redaction bar obscures the soldiers. Grain and age effects suggest archival reconnaissance footage.",
+      image: GHOST_ARMY_IMAGE,
       filter: "grayscale(100%) contrast(120%) sepia(20%)", 
       transform: "scale(1)", 
       showRedaction: true, 
@@ -145,7 +148,8 @@ const GhostArmySection = () => {
     { 
       title: "THE MOSAIC", 
       subtitle: "Context Lost",
-      description: "Zoom into the 'tank.' The soldiers are cropped out. Without context, this is simply a Sherman tank—exactly what the deception intended.",
+      description: "Cropped to just the tank. Without the soldiers for scale, this appears to be genuine heavy armor—exactly what the deception intended.",
+      image: GHOST_ARMY_IMAGE,
       filter: "grayscale(100%) contrast(150%) brightness(90%)", 
       transform: "scale(2.5) translate(-10%, -25%)", 
       showRedaction: false, 
@@ -153,10 +157,11 @@ const GhostArmySection = () => {
     },
     { 
       title: "OBSERVER LENS", 
-      subtitle: "German Intelligence Assessment",
-      description: "Luftwaffe reconnaissance confirms armor presence. The assessment is methodologically sound—but built on controlled information.",
-      filter: "grayscale(100%) contrast(130%) brightness(85%)", 
-      transform: "scale(2.5) translate(-10%, -25%)", 
+      subtitle: "False Conclusion",
+      description: "German aerial reconnaissance confirms: FUSAG staging area with armored divisions at Calais. The assessment is methodologically sound—built entirely on controlled information.",
+      image: GERMAN_RECON_IMAGE,
+      filter: "grayscale(100%) contrast(110%)", 
+      transform: "scale(1)", 
       showRedaction: false, 
       showHUD: true 
     },
@@ -209,8 +214,8 @@ const GhostArmySection = () => {
             
             <div className="relative aspect-video bg-stone-200 overflow-hidden">
               <img
-                src={GHOST_ARMY_IMAGE}
-                alt="Ghost Army inflatable tank"
+                src={currentStage.image}
+                alt="Ghost Army operation"
                 className="w-full h-full object-cover transition-all duration-700"
                 style={{
                   filter: currentStage.filter,
@@ -225,19 +230,20 @@ const GhostArmySection = () => {
               
               {currentStage.showHUD && (
                 <div className="absolute inset-0 bg-green-900/40 border-4 border-green-500/60">
-                  <div className="absolute top-3 left-3 right-3 text-green-400 font-mono text-[10px] space-y-1">
-                    <p className="font-bold tracking-wider">LUFTWAFFE RECONNAISSANCE - SECTOR 7</p>
-                    <p>COORD: 50.9°N 1.9°E | DATE: 1944-06-02</p>
+                  <div className="absolute top-3 left-3 text-green-400 font-mono text-xs space-y-1">
+                    <p className="font-bold">LUFTWAFFE AUFKLÄRUNG</p>
+                    <p>SECTOR: PAS-DE-CALAIS</p>
+                    <p>DATE: 1944.06.02</p>
                   </div>
-                  <div className="absolute bottom-3 left-3 right-3 bg-green-950/90 p-3 rounded border border-green-500/50 space-y-1">
-                    <p className="text-green-300 font-mono text-xs font-bold">
-                      CONFIRMED: SHERMAN M4 MEDIUM TANK
-                    </p>
-                    <p className="text-green-400 font-mono text-[10px]">
-                      FUSAG ORDER OF BATTLE: 11 DIVISIONS
-                    </p>
-                    <p className="text-amber-400 font-mono text-[10px] font-bold mt-2">
-                      ▶ RECOMMENDATION: RESERVE PANZERS FOR CALAIS FRONT
+                  <div className="absolute top-3 right-3 text-green-400 font-mono text-xs text-right space-y-1">
+                    <p>ENEMY: FUSAG</p>
+                    <p>TANKS: 40+ CONFIRMED</p>
+                    <p>THREAT: MAXIMUM</p>
+                  </div>
+                  <div className="absolute bottom-3 left-3 right-3 bg-green-900/90 p-3 rounded border border-green-500/50">
+                    <p className="text-green-300 font-mono text-xs mb-1">INTELLIGENCE ASSESSMENT</p>
+                    <p className="text-green-400 font-mono text-sm font-bold">
+                      FUSAG INVASION FORCE CONFIRMED — RECOMMEND RESERVE PANZERS FOR CALAIS DEFENSE
                     </p>
                   </div>
                 </div>
