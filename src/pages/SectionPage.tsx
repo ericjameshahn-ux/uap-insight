@@ -347,7 +347,7 @@ export default function SectionPage() {
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="pt-0 text-sm text-slate-400 leading-relaxed">
+            <CardContent className="pt-0 text-sm text-slate-200 leading-relaxed">
               {renderMarkdown(content)}
             </CardContent>
           </CollapsibleContent>

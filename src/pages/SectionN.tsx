@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { hypotheses, comparisonMatrix, getYouTubeEmbedUrl } from "@/lib/hypothesesData";
 import type { Hypothesis, HypothesisClaim } from "@/lib/hypothesesData";
 import { cn } from "@/lib/utils";
+import { SectionAIQueryButton } from "@/components/SectionAIQueryButton";
 
 // Color scheme for each hypothesis
 const hypothesisColors = [
@@ -473,6 +474,9 @@ export default function SectionN() {
       
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+        {/* AI Query Button */}
+        <SectionAIQueryButton sectionId="n" sectionTitle="Hypotheses & Interpretations" />
+        
         {/* Hypothesis Cards */}
         {reorderedHypotheses.map((hypothesis, index) => (
           <div key={hypothesis.id} id={`hypothesis-${hypothesis.id}`} className="scroll-mt-20">
