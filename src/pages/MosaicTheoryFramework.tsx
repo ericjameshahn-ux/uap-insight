@@ -29,7 +29,7 @@ const GHOST_ARMY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thum
 // --- 1. HERO: FINANCIAL AUTHORITY ---
 const FinancialFramework = () => {
   return (
-    <section className="bg-slate-950 text-white py-20 px-6">
+    <section className="bg-slate-950 text-white py-12 px-6">
       <div className="max-w-4xl mx-auto">
         {/* Terminal Header */}
         <div className="bg-slate-900 rounded-t-lg border border-slate-700 px-4 py-2 flex items-center gap-2">
@@ -118,15 +118,23 @@ const GhostArmySection = () => {
   });
   
   const [activeStage, setActiveStage] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
-      if (v < 0.25) setActiveStage(0);
-      else if (v < 0.45) setActiveStage(1);
-      else if (v < 0.65) setActiveStage(2);
+      if (v < 0.3) setActiveStage(0);
+      else if (v < 0.5) setActiveStage(1);
+      else if (v < 0.7) setActiveStage(2);
       else setActiveStage(3);
     });
   }, [scrollYProgress]);
+  
+  // Reset image state when stage changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [activeStage]);
   
   const stages = [
     { 
@@ -174,23 +182,22 @@ const GhostArmySection = () => {
   const currentStage = stages[activeStage];
   
   return (
-    <section ref={containerRef} className="min-h-[200vh] bg-stone-100 relative">
-      <div className="sticky top-0 min-h-screen py-8 px-6">
+    <section ref={containerRef} className="min-h-[140vh] bg-stone-100 relative">
+      <div className="sticky top-0 min-h-screen py-6 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-6">
-            <p className="text-stone-500 text-xs font-mono tracking-widest mb-2">HISTORICAL PRECEDENT #1</p>
+          <div className="text-center mb-4">
+            <p className="text-stone-500 text-xs font-mono tracking-widest mb-1">HISTORICAL PRECEDENT #1</p>
             <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-1">Operation Fortitude</h2>
             <p className="text-stone-600 text-sm">The Ghost Army, 1944</p>
           </div>
           
-          {/* Context Introduction */}
-          <div className="bg-stone-200/70 border border-stone-300 rounded-lg p-4 mb-6 max-w-3xl mx-auto">
+          <div className="bg-stone-200/70 border border-stone-300 rounded-lg p-3 mb-4 max-w-3xl mx-auto">
             <p className="text-stone-600 text-sm italic leading-relaxed">
               In 1944, the Allies created a fictitious "First United States Army Group" (FUSAG) to convince Hitler that the D-Day invasion would target Calais, not Normandy. The 23rd Headquarters Special Troops—the "Ghost Army"—deployed inflatable tanks, fake radio traffic, and sound trucks to simulate an entire armored division. German intelligence took the bait.
             </p>
           </div>
           
-          <div className="flex justify-center gap-2 mb-4 flex-wrap">
+          <div className="flex justify-center gap-2 mb-3 flex-wrap">
             {stages.map((s, idx) => (
               <button
                 key={idx}
@@ -216,26 +223,36 @@ const GhostArmySection = () => {
               </span>
             </div>
             
-            <div className="relative aspect-video bg-stone-200 overflow-hidden">
+            <div className="relative aspect-video bg-stone-300 overflow-hidden">
+              {/* Loading skeleton */}
+              {!imageLoaded && !imageError && (
+                <div className="absolute inset-0 bg-stone-300 animate-pulse flex items-center justify-center">
+                  <div className="text-stone-400 text-sm font-mono">Loading...</div>
+                </div>
+              )}
               <img
-                src={currentStage.image}
+                src={imageError ? GHOST_ARMY_FALLBACK : currentStage.image}
                 alt="Ghost Army operation"
-                className="w-full h-full object-cover transition-all duration-700"
+                className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: currentStage.filter,
                   transform: currentStage.transform,
                   transformOrigin: 'center 40%'
                 }}
+                onLoad={() => setImageLoaded(true)}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = GHOST_ARMY_FALLBACK;
+                  if (!imageError) {
+                    setImageError(true);
+                    (e.target as HTMLImageElement).src = GHOST_ARMY_FALLBACK;
+                  }
                 }}
               />
               
-              {currentStage.showRedaction && (
+              {currentStage.showRedaction && imageLoaded && (
                 <div className="absolute bottom-0 left-0 right-0 h-[35%] bg-black"></div>
               )}
               
-              {currentStage.showHUD && (
+              {currentStage.showHUD && imageLoaded && (
                 <div className="absolute inset-0 bg-green-900/40 border-4 border-green-500/60">
                   <div className="absolute top-3 left-3 text-green-400 font-mono text-xs space-y-1">
                     <p className="font-bold">LUFTWAFFE AUFKLÄRUNG</p>
@@ -271,7 +288,7 @@ const GhostArmySection = () => {
           </div>
           
           {/* Immersion Scenario */}
-          <div className="mt-8 bg-slate-900 rounded-lg p-6 text-white">
+          <div className="mt-6 bg-slate-900 rounded-lg p-4 text-white">
             <div className="flex items-start gap-3">
               <Radio className="w-5 h-5 text-amber-500 flex-shrink-0 mt-1" />
               <div>
@@ -289,7 +306,7 @@ const GhostArmySection = () => {
             </div>
           </div>
           
-          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
@@ -316,14 +333,20 @@ const ManhattanProjectSection = () => {
   });
   
   const [activeStage, setActiveStage] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
-      if (v < 0.3) setActiveStage(0);
-      else if (v < 0.55) setActiveStage(1);
+      if (v < 0.35) setActiveStage(0);
+      else if (v < 0.6) setActiveStage(1);
       else setActiveStage(2);
     });
   }, [scrollYProgress]);
+  
+  // Reset image state when stage changes
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [activeStage]);
   
   const stages = [
     { 
@@ -358,23 +381,22 @@ const ManhattanProjectSection = () => {
   const currentStage = stages[activeStage];
   
   return (
-    <section ref={containerRef} className="min-h-[180vh] bg-slate-900 relative">
-      <div className="sticky top-0 min-h-screen py-8 px-6">
+    <section ref={containerRef} className="min-h-[120vh] bg-slate-900 relative">
+      <div className="sticky top-0 min-h-screen py-6 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-6">
-            <p className="text-slate-500 text-xs font-mono tracking-widest mb-2">HISTORICAL PRECEDENT #2</p>
+          <div className="text-center mb-4">
+            <p className="text-slate-500 text-xs font-mono tracking-widest mb-1">HISTORICAL PRECEDENT #2</p>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">The Manhattan Project</h2>
             <p className="text-slate-400 text-sm">Oak Ridge, Los Alamos, Hanford — 1942-1945</p>
           </div>
           
-          {/* Context Introduction */}
-          <div className="bg-slate-800/70 border border-slate-600 rounded-lg p-4 mb-6 max-w-3xl mx-auto">
+          <div className="bg-slate-800/70 border border-slate-600 rounded-lg p-3 mb-4 max-w-3xl mx-auto">
             <p className="text-slate-400 text-sm italic leading-relaxed">
               The Manhattan Project employed 125,000 workers across 30+ sites to build the atomic bomb. Compartmentalization was so extreme that Vice President Truman didn't learn of its existence until after FDR's death. This demonstrates that large-scale secrecy is not only possible—it has historical precedent.
             </p>
           </div>
           
-          <div className="flex justify-center gap-2 mb-4 flex-wrap">
+          <div className="flex justify-center gap-2 mb-3 flex-wrap">
             {stages.map((s, idx) => (
               <button
                 key={idx}
@@ -400,17 +422,24 @@ const ManhattanProjectSection = () => {
               </span>
             </div>
             
-            <div className="relative aspect-video bg-slate-900 overflow-hidden">
+            <div className="relative aspect-video bg-slate-800 overflow-hidden">
+              {/* Loading skeleton */}
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-slate-700 animate-pulse flex items-center justify-center">
+                  <div className="text-slate-500 text-sm font-mono">Loading...</div>
+                </div>
+              )}
               <img
                 src={MANHATTAN_IMAGE}
                 alt="The Gadget - first atomic bomb"
-                className="w-full h-full object-cover transition-all duration-700"
+                className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: activeStage === 0 ? 'none' : `${currentStage.filter} blur(${currentStage.blur}px)`,
                 }}
+                onLoad={() => setImageLoaded(true)}
               />
               
-              {currentStage.showStamp && (
+              {currentStage.showStamp && imageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="border-4 border-red-600 px-8 py-4 bg-black/70 rotate-[-10deg]">
                     <p className="text-red-500 font-bold text-xl tracking-widest">RESTRICTED DATA</p>
@@ -419,7 +448,7 @@ const ManhattanProjectSection = () => {
                 </div>
               )}
               
-              {currentStage.showHUD && (
+              {currentStage.showHUD && imageLoaded && (
                 <div className="absolute bottom-4 left-4 right-4 bg-amber-900/90 border-2 border-amber-500 p-4 rounded">
                   <p className="text-amber-300 font-mono text-xs mb-1">INDUSTRIAL SURVEY ASSESSMENT</p>
                   <p className="text-amber-100 font-mono text-sm">
@@ -442,7 +471,7 @@ const ManhattanProjectSection = () => {
           </div>
           
           {/* Immersion Scenario */}
-          <div className="mt-8 bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="mt-6 bg-slate-800 rounded-lg p-4 border border-slate-700">
             <div className="flex items-start gap-3">
               <Lock className="w-5 h-5 text-amber-500 flex-shrink-0 mt-1" />
               <div>
@@ -466,15 +495,15 @@ const ManhattanProjectSection = () => {
 
 // --- TRANSITION SECTION ---
 const TransitionSection = () => (
-  <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-zinc-100 py-24 px-6 text-center">
+  <section className="bg-gradient-to-b from-slate-900 via-slate-800 to-zinc-100 py-12 px-6 text-center">
     <div className="max-w-2xl mx-auto">
-      <p className="text-slate-400 font-mono text-sm mb-4 tracking-widest">NOW CONSIDER...</p>
-      <h2 className="text-2xl md:text-3xl text-white mb-6 leading-relaxed">
+      <p className="text-slate-400 font-mono text-sm mb-3 tracking-widest">NOW CONSIDER...</p>
+      <h2 className="text-2xl md:text-3xl text-white mb-4 leading-relaxed">
         What if similar information control existed for 
         <span className="text-amber-500"> 80 years </span>
         around a different topic?
       </h2>
-      <p className="text-slate-300 mb-8">
+      <p className="text-slate-300">
         You've seen how filters work. Now apply this framework to UAP.
       </p>
     </div>
