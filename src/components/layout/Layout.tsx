@@ -1,11 +1,19 @@
+import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { NotebookLMModal } from "@/components/NotebookLMModal";
+import { useNotebookLMShortcut } from "@/hooks/useKeyboardShortcut";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const [showNotebookLMModal, setShowNotebookLMModal] = useState(false);
+
+  // Global keyboard shortcut for NotebookLM (Ctrl/Cmd + K)
+  useNotebookLMShortcut(() => setShowNotebookLMModal(true));
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full overflow-x-hidden max-w-[100vw]">
@@ -20,6 +28,12 @@ export function Layout({ children }: LayoutProps) {
           </main>
         </div>
       </div>
+
+      {/* Global NotebookLM Modal - triggered by Ctrl/Cmd + K */}
+      <NotebookLMModal 
+        isOpen={showNotebookLMModal} 
+        onClose={() => setShowNotebookLMModal(false)} 
+      />
     </SidebarProvider>
   );
 }
