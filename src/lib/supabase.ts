@@ -14,6 +14,8 @@ export interface Section {
   description: string;
   sort_order: number;
   subtitle?: string;
+  section_summary?: string;
+  counter_arguments?: string;
 }
 
 export interface Claim {
