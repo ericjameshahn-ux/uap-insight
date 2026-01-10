@@ -1,55 +1,43 @@
-import { Sparkles, ExternalLink, ArrowLeft, FlaskConical, History, Target, Search, Star, Zap, Scale, Compass } from "lucide-react";
+import { Sparkles, ExternalLink, ArrowLeft, FlaskConical, History, Target, Search, Zap, Scale, Microscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const archetypes = [
   {
-    icon: FlaskConical,
+    icon: Microscope,
     emoji: "🔬",
     name: "The Empiricist",
-    description: "Prioritizes sensor data and reproducible evidence",
+    description: "Sensor data and multi-source confirmation first",
   },
   {
     icon: History,
     emoji: "📚",
     name: "The Historian",
-    description: "Interested in patterns across decades",
+    description: "Patterns across decades and policy evolution",
   },
   {
     icon: Target,
     emoji: "♟️",
     name: "The Strategist",
-    description: "Focuses on national security implications",
+    description: "National security and institutional behavior",
   },
   {
     icon: Search,
     emoji: "🔍",
     name: "The Investigator",
-    description: "Examines specific cases in detail",
+    description: "Case forensics and witness credibility",
   },
   {
-    icon: Star,
-    emoji: "✨",
-    name: "The Experiencer",
-    description: "Drawn to first-person accounts",
+    icon: Scale,
+    emoji: "⚖️",
+    name: "The Skeptic",
+    description: "Falsification and prosaic explanations first",
   },
   {
     icon: Zap,
     emoji: "⚡",
     name: "The Technologist",
-    description: "Interested in propulsion physics",
-  },
-  {
-    icon: Scale,
-    emoji: "⚖️",
-    name: "The Skeptical Analyst",
-    description: "Maintains strong prosaic priors",
-  },
-  {
-    icon: Compass,
-    emoji: "🌌",
-    name: "The Meaning-Seeker",
-    description: "Explores philosophical implications",
+    description: "Physics, propulsion, and materials science",
   },
 ];
 
@@ -87,9 +75,9 @@ export default function AboutQuiz() {
 
       {/* Archetypes Grid */}
       <div className="mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <h2 className="text-lg font-semibold mb-4">The 8 Research Profiles</h2>
+        <h2 className="text-lg font-semibold mb-4">The 6 Research Profiles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {archetypes.map((archetype, i) => (
+          {archetypes.map((archetype) => (
             <div 
               key={archetype.name} 
               className="card-elevated p-4 flex items-start gap-3"
@@ -145,11 +133,15 @@ export default function AboutQuiz() {
       </div>
 
       {/* Take Quiz CTA */}
-      <div className="mt-12 text-center animate-fade-in" style={{ animationDelay: '500ms' }}>
-        <Link to="/">
-          <Button size="lg" className="shadow-lg">
+      <div className="mt-12 bg-primary text-primary-foreground rounded-xl p-8 text-center animate-fade-in" style={{ animationDelay: '500ms' }}>
+        <h3 className="text-2xl font-bold mb-2">Ready to find your research profile?</h3>
+        <p className="text-primary-foreground/80 mb-6">
+          Answer 5 quick questions to get your personalized learning path.
+        </p>
+        <Link to="/quiz">
+          <Button size="lg" variant="secondary" className="shadow-lg">
             <Sparkles className="w-5 h-5 mr-2" />
-            Take the Quiz
+            Start the Quiz
           </Button>
         </Link>
       </div>
