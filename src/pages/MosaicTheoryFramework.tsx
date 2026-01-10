@@ -14,13 +14,14 @@ import {
 } from 'lucide-react';
 import { PageStatusBanner } from '@/components/PageStatusBanner';
 
-// Image paths - Supabase Storage
-const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg';
+// Image paths - Using reliable public domain sources
+// Ghost Army inflatable tank - Australian War Memorial photo (public domain)
+const GHOST_ARMY_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg';
 const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
 const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg';
 
-// Fallback image for Ghost Army (public domain Wikimedia)
-const GHOST_ARMY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/1280px-Dummy_tank_%28AWM_P02584.002%29.jpg';
+// Secondary fallback for Ghost Army
+const GHOST_ARMY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
 
 // ==========================================
 // PART 1: THE CONCEPT
@@ -119,7 +120,6 @@ const GhostArmySection = () => {
   
   const [activeStage, setActiveStage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
@@ -133,7 +133,6 @@ const GhostArmySection = () => {
   // Reset image state when stage changes
   useEffect(() => {
     setImageLoaded(false);
-    setImageError(false);
   }, [activeStage]);
   
   const stages = [
@@ -223,16 +222,16 @@ const GhostArmySection = () => {
               </span>
             </div>
             
-            <div className="relative aspect-video bg-stone-300 overflow-hidden">
+            <div className="relative aspect-video bg-stone-400 overflow-hidden">
               {/* Loading skeleton */}
-              {!imageLoaded && !imageError && (
-                <div className="absolute inset-0 bg-stone-300 animate-pulse flex items-center justify-center">
-                  <div className="text-stone-400 text-sm font-mono">Loading...</div>
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-stone-400 animate-pulse flex items-center justify-center z-10">
+                  <div className="text-stone-600 text-sm font-mono">Loading image...</div>
                 </div>
               )}
               <img
-                src={imageError ? GHOST_ARMY_FALLBACK : currentStage.image}
-                alt="Ghost Army operation"
+                src={currentStage.image}
+                alt="Ghost Army operation - Four soldiers carrying inflatable tank decoy"
                 className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: currentStage.filter,
@@ -241,9 +240,13 @@ const GhostArmySection = () => {
                 }}
                 onLoad={() => setImageLoaded(true)}
                 onError={(e) => {
-                  if (!imageError) {
-                    setImageError(true);
-                    (e.target as HTMLImageElement).src = GHOST_ARMY_FALLBACK;
+                  const img = e.target as HTMLImageElement;
+                  // Try fallback if not already using it
+                  if (img.src !== GHOST_ARMY_FALLBACK) {
+                    img.src = GHOST_ARMY_FALLBACK;
+                  } else {
+                    // Both failed - show placeholder
+                    setImageLoaded(true);
                   }
                 }}
               />
