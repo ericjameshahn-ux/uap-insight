@@ -15,9 +15,9 @@ import {
 import { PageStatusBanner } from '@/components/PageStatusBanner';
 
 // Image paths - Supabase Storage
-const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg.jpg';
+const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg';
 const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
-const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg.jpg';
+const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg';
 
 // ==========================================
 // PART 1: THE CONCEPT
