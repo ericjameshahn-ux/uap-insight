@@ -135,15 +135,15 @@ const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> =
   ],
   k: [
     { title: "Non-human biologics testimony", prompt: "Compile all testimony regarding 'non-human biologics': Grusch's Congressional statement, Varginha medical reports, the officer death from 'novel pathogen.' What is the 'Mudinho' counter-explanation and why do critics find it insufficient?" },
-    { title: "Biological evidence analysis", prompt: "What physical or medical evidence exists for alleged NHI biological encounters? Include autopsy claims, tissue samples, and the credibility assessment of each source." },
+    { title: "Biological evidence chain", prompt: "What would constitute proof of non-human biology? Trace the chain of custody issues, classification barriers, and specific claims about where biological samples allegedly exist." },
   ],
   l: [
     { title: "Defense contractor connections", prompt: "Map the connections between UAP research and defense contractors: Which companies have been named in testimony? What is the IRAD funding mechanism? How does Skywatcher.AI represent a new model of private UAP research?" },
-    { title: "Investment implications", prompt: "What are the investment implications of UAP-related technologies? Analyze the sectors most likely to be affected: aerospace, materials science, energy, and defense contracting." },
+    { title: "Investment landscape", prompt: "What private companies and ventures are actively working on UAP-adjacent technology? Include Skywatcher.AI, To The Stars Academy history, and any defense contractor patents related to exotic propulsion." },
   ],
   m: [
     { title: "Ontological implications", prompt: "What are the profound implications if UAP represent non-human intelligence? Cover: scientific paradigm shifts, religious/theological reframing, the 'dual reality' of public vs classified physics, and what 'ontological shock' means for society." },
-    { title: "Cultural and historical connections", prompt: "How do UAP phenomena connect to historical religious texts, indigenous traditions, and cultural narratives across civilizations? What patterns emerge when comparing modern encounters to ancient accounts?" },
+    { title: "Disclosure scenarios", prompt: "What are the possible disclosure scenarios ranging from 'mundane explanation confirmed' to 'NHI contact acknowledged'? For each scenario, what are the societal, religious, and geopolitical implications?" },
   ],
   n: [
     { title: "Competing theories comparison", prompt: "Compare and contrast the major UAP hypotheses: Extraterrestrial, Ultraterrestrial, Extratemporal (time travel), Interdimensional, and Ancient/Remnant Technology. What evidence supports or contradicts each framework?" },
