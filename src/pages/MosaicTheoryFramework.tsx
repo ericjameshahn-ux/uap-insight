@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll } from 'framer-motion';
 import { 
-  Eye, Filter, Layers, ChevronDown, ChevronUp, ExternalLink, 
+  Eye, Filter, Layers, ChevronDown, ChevronUp, ChevronsDown, ChevronsUp, ExternalLink, 
   AlertTriangle, Lock, Radio, Users, FileText, Building2, 
   Glasses, Check, Square, BookOpen, Search, Shield, Scale,
   TrendingUp, Microscope, History, Target, Brain, Globe,
@@ -650,9 +650,19 @@ const UAPFilterSection = () => {
           </div>
           <button
             onClick={openCards.size === filterMechanisms.length ? collapseAll : expandAll}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
           >
-            {openCards.size === filterMechanisms.length ? 'COLLAPSE ALL' : 'EXPAND ALL'}
+            {openCards.size === filterMechanisms.length ? (
+              <>
+                <ChevronsUp className="w-4 h-4" />
+                COLLAPSE ALL
+              </>
+            ) : (
+              <>
+                <ChevronsDown className="w-4 h-4" />
+                EXPAND ALL
+              </>
+            )}
           </button>
         </div>
         
