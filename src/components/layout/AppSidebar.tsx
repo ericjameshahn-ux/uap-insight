@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Building2,
   Shield,
+  AlertTriangle,
 } from "lucide-react";
 import { NotebookLMModal } from "@/components/NotebookLMModal";
 import {
@@ -62,6 +63,7 @@ const fallbackSections: Section[] = [
 ];
 
 const utilityNav = [
+  { title: "Before You Begin", url: "/before-you-begin", icon: AlertTriangle },
   { title: "My Queue", url: "/saved", icon: Bookmark },
   { title: "Timeline", url: "/timeline", icon: Calendar },
   { title: "Institutional", url: "/institutional", icon: Building2 },

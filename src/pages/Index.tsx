@@ -14,6 +14,9 @@ import {
   Lightbulb,
   Users,
   Layers,
+  Zap,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -381,8 +384,75 @@ export default function Index() {
           </p>
         </div>
 
+        {/* Before You Begin Accordion */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: "280ms" }}>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="before-you-begin" className="border border-slate-700 rounded-lg bg-slate-900/50 overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-slate-800/50 [&[data-state=open]>div]:text-amber-400">
+                <div className="flex items-center gap-3 text-left">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span className="font-semibold text-foreground">Before You Begin: Why Most People Don't Go Here</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 pt-2">
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  This topic requires intellectual prerequisites most people aren't willing to meet.
+                </p>
+                
+                {/* Three category summaries */}
+                <div className="space-y-4 mb-6">
+                  {/* Complexity Barriers */}
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <Zap className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-amber-400 text-sm mb-1">Complexity Barriers</p>
+                      <p className="text-muted-foreground text-sm">
+                        "Don't look if you're not willing to learn about..." fusion physics, 
+                        financial forensics, congressional oversight mechanisms
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Uncomfortable Territory */}
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <Brain className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-purple-400 text-sm mb-1">Uncomfortable Territory</p>
+                      <p className="text-muted-foreground text-sm">
+                        "Don't look if you're uncomfortable with..." revisiting fundamental beliefs,
+                        considering non-human intelligence, having no final answers
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Professional Risks */}
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-red-400 text-sm mb-1">Professional Risks</p>
+                      <p className="text-muted-foreground text-sm">
+                        "Don't look if you can't afford..." career stigma, 100+ hours of 
+                        interdisciplinary homework, guilt by association
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Link to full page */}
+                <Link 
+                  to="/before-you-begin" 
+                  className="inline-flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+                >
+                  See the full list of prerequisites
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
         {/* Primary CTAs - Stack on mobile */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
+        <div className="flex flex-col sm:flex-row gap-4 mb-4 animate-fade-in" style={{ animationDelay: "300ms" }}>
           <Button
             size="lg"
             className="flex-1 min-h-[44px] h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
@@ -405,6 +475,11 @@ export default function Index() {
             </Link>
           </Button>
         </div>
+        
+        {/* Subtle "Still here?" message */}
+        <p className="text-center text-sm text-muted-foreground mb-12 animate-fade-in" style={{ animationDelay: "320ms" }}>
+          Still here? Take the Persona Quiz to find your personalized research path →
+        </p>
 
         {/* Explore the Platform Section */}
         <div className="mb-12 animate-fade-in" style={{ animationDelay: "350ms" }}>
