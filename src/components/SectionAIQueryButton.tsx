@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Copy, Check, ExternalLink, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { Sparkles, Copy, Check, ExternalLink, ChevronDown, ChevronUp, Info, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Collapsible,
@@ -13,6 +13,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface SectionAIQueryButtonProps {
   sectionId: string;
@@ -45,6 +54,18 @@ const personaDisplayNames: Record<string, string> = {
   debunker: "Skeptic",
   meaning_seeker: "Meaning-Seeker"
 };
+
+// Available personas for dropdown selection
+const availablePersonas = [
+  { id: "empiricist", name: "Empiricist" },
+  { id: "historian", name: "Historian" },
+  { id: "strategist", name: "Strategist" },
+  { id: "investigator", name: "Investigator" },
+  { id: "skeptic", name: "Skeptic" },
+  { id: "technologist", name: "Technologist" },
+  { id: "experiencer", name: "Experiencer" },
+  { id: "meaning_seeker", name: "Meaning-Seeker" },
+];
 
 // Detailed prompts tailored to each section
 const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> = {
@@ -112,23 +133,25 @@ export function SectionAIQueryButton({
 }: SectionAIQueryButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [userPersona, setUserPersona] = useState<string | null>(null);
+  const [includePersona, setIncludePersona] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<string>("");
+  const [previewPromptIndex, setPreviewPromptIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Get user's persona from localStorage
+  // Get user's persona from localStorage on mount
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
     if (storedPersona && personaLenses[storedPersona]) {
-      setUserPersona(storedPersona);
+      setSelectedPersona(storedPersona);
     }
   }, []);
 
   const prompts = sectionQuickPrompts[sectionId.toLowerCase()] || [];
 
-  // Build the full prompt with persona lens prepended
+  // Build the full prompt with persona lens prepended (if enabled)
   const buildFullPrompt = (basePrompt: string): string => {
-    if (userPersona && personaLenses[userPersona]) {
-      return `${personaLenses[userPersona]}\n\n${basePrompt}`;
+    if (includePersona && selectedPersona && personaLenses[selectedPersona]) {
+      return `${personaLenses[selectedPersona]}\n\n${basePrompt}`;
     }
     return basePrompt;
   };
@@ -140,8 +163,8 @@ export function SectionAIQueryButton({
       setCopiedIndex(index);
       toast({
         title: "Copied!",
-        description: userPersona 
-          ? `Prompt copied with your ${personaDisplayNames[userPersona]} lens applied.`
+        description: includePersona && selectedPersona
+          ? `Prompt copied with your ${personaDisplayNames[selectedPersona]} lens applied.`
           : "Now open NotebookLM and paste your prompt.",
       });
       setTimeout(() => setCopiedIndex(null), 2000);
@@ -241,46 +264,60 @@ export function SectionAIQueryButton({
         </div>
 
         {prompts.length > 0 && (
-          <CollapsibleContent className="mt-4 space-y-2">
-            {/* Persona context indicator */}
-            {userPersona && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 p-2 bg-background/50 rounded-md border border-border/50">
-                <span className="font-medium text-foreground">
-                  Your {personaDisplayNames[userPersona]} lens will be applied
-                </span>
+          <CollapsibleContent className="mt-4 space-y-3">
+            {/* Persona toggle and dropdown */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-background/50 rounded-md border border-border/50">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="persona-toggle"
+                  checked={includePersona}
+                  onCheckedChange={setIncludePersona}
+                />
+                <Label htmlFor="persona-toggle" className="text-sm font-medium cursor-pointer">
+                  Include persona context
+                </Label>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 cursor-help" />
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
                       <p className="text-xs">
-                        Your research persona customizes how the AI responds. 
-                        The {personaDisplayNames[userPersona]} lens prioritizes 
-                        {userPersona === 'empiricist' && ' sensor data and quantifiable metrics.'}
-                        {userPersona === 'historian' && ' chronological evolution and legislative trails.'}
-                        {userPersona === 'strategist' && ' geopolitical and institutional analysis.'}
-                        {userPersona === 'investigator' && ' witness credibility and case forensics.'}
-                        {userPersona === 'technologist' && ' physics mechanisms and engineering details.'}
-                        {userPersona === 'skeptic' && ' prosaic explanations and critical evaluation.'}
-                        {userPersona === 'debunker' && ' prosaic explanations and critical evaluation.'}
-                        {userPersona === 'experiencer' && ' high strangeness and consciousness aspects.'}
-                        {userPersona === 'meaning_seeker' && ' ontological and philosophical implications.'}
+                        When enabled, a persona-specific instruction will be prepended to your prompt,
+                        guiding the AI to tailor its response to your research style.
                       </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
-            )}
+              
+              {includePersona && (
+                <Select value={selectedPersona} onValueChange={setSelectedPersona}>
+                  <SelectTrigger className="w-[180px] h-8 text-sm">
+                    <SelectValue placeholder="Select persona..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePersonas.map((persona) => (
+                      <SelectItem key={persona.id} value={persona.id}>
+                        {persona.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
             
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-xs text-muted-foreground">
               Click to copy, then paste in NotebookLM:
             </p>
+            
             <div className="grid gap-2 sm:grid-cols-2">
               {prompts.map((prompt, index) => (
                 <button
                   key={index}
                   onClick={() => copyToClipboard(prompt.prompt, index)}
+                  onMouseEnter={() => setPreviewPromptIndex(index)}
+                  onMouseLeave={() => setPreviewPromptIndex(null)}
                   className="flex items-center justify-between gap-2 p-3 text-left rounded-md border border-border hover:border-primary/50 hover:bg-background transition-all text-sm group"
                 >
                   <span className="font-medium group-hover:text-primary transition-colors">
@@ -294,11 +331,22 @@ export function SectionAIQueryButton({
                 </button>
               ))}
             </div>
+
+            {/* Prompt preview */}
+            {previewPromptIndex !== null && prompts[previewPromptIndex] && (
+              <div className="mt-3 p-3 bg-muted/50 rounded-md border border-border text-xs">
+                <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                  <Eye className="h-3.5 w-3.5" />
+                  <span className="font-medium">Preview (what will be copied):</span>
+                </div>
+                <div className="text-foreground/80 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                  {buildFullPrompt(prompts[previewPromptIndex].prompt)}
+                </div>
+              </div>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     </div>
   );
 }
-
-export default SectionAIQueryButton;
