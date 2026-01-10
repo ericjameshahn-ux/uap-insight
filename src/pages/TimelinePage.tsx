@@ -16,9 +16,14 @@ import {
   PlayCircle,
   ExternalLink,
   ChevronDown,
+  ChevronsDown,
+  ChevronsUp,
   Filter,
   Factory,
-  Star
+  Star,
+  Play,
+  Video,
+  Loader2
 } from "lucide-react";
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -83,8 +88,10 @@ export default function TimelinePage() {
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterWilsonDavis, setFilterWilsonDavis] = useState(false);
   const [showMilestonesOnly, setShowMilestonesOnly] = useState(false);
-  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [linkedVideosMap, setLinkedVideosMap] = useState<Record<string, { id: string; title: string; url: string; tier?: string; contextNote?: string }[]>>({});
+  const [loadingVideos, setLoadingVideos] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -169,6 +176,83 @@ export default function TimelinePage() {
 
   const isWilsonDavisEvent = (eventId: string) => eventId.startsWith('wdm-');
 
+  // Toggle individual event
+  const toggleEvent = (eventId: string) => {
+    setExpandedEvents(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId);
+      } else {
+        newSet.add(eventId);
+      }
+      return newSet;
+    });
+  };
+
+  // Expand all visible/filtered events
+  const expandAll = () => {
+    const allIds = new Set(filteredEvents.map(e => e.id));
+    setExpandedEvents(allIds);
+  };
+
+  // Collapse all
+  const collapseAll = () => {
+    setExpandedEvents(new Set());
+  };
+
+  // Check if event is expanded
+  const isEventExpanded = (eventId: string) => expandedEvents.has(eventId);
+
+  // Fetch linked videos from junction table when event is expanded
+  const fetchLinkedVideos = async (eventId: string) => {
+    if (linkedVideosMap[eventId] || loadingVideos.has(eventId)) return;
+    
+    setLoadingVideos(prev => new Set(prev).add(eventId));
+    
+    const { data, error } = await supabase
+      .from('timeline_event_videos')
+      .select(`
+        display_order,
+        context_note,
+        videos (
+          id,
+          title,
+          url,
+          tier
+        )
+      `)
+      .eq('event_id', eventId)
+      .order('display_order');
+    
+    if (data && !error) {
+      const videos = data
+        .filter(row => row.videos)
+        .map(row => {
+          const videoData = row.videos as unknown as { id: string; title: string; url: string; tier?: string };
+          return {
+            ...videoData,
+            contextNote: row.context_note
+          };
+        });
+      setLinkedVideosMap(prev => ({ ...prev, [eventId]: videos }));
+    }
+    
+    setLoadingVideos(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(eventId);
+      return newSet;
+    });
+  };
+
+  // Watch for expanded events and fetch their videos
+  useEffect(() => {
+    expandedEvents.forEach(eventId => {
+      if (!linkedVideosMap[eventId]) {
+        fetchLinkedVideos(eventId);
+      }
+    });
+  }, [expandedEvents]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -196,7 +280,7 @@ export default function TimelinePage() {
                 key={era.label}
                 onClick={() => {
                   setActiveEra(index);
-                  setExpandedEvent(null);
+                  setExpandedEvents(new Set());
                 }}
                 className={`px-3 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
                   activeEra === index
@@ -209,8 +293,8 @@ export default function TimelinePage() {
             ))}
           </div>
 
-          {/* Filter Toggle */}
-          <div className="flex items-center gap-4 mt-3">
+          {/* Filter Toggle & Expand/Collapse */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -218,12 +302,31 @@ export default function TimelinePage() {
               <Filter className="h-4 w-4" />
               Filters
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-              {(filterTier || filterCategory || showMilestonesOnly) && (
+              {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
                 <Badge variant="secondary" className="ml-1">
                   Active
                 </Badge>
               )}
             </button>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={expandAll}
+                disabled={expandedEvents.size === filteredEvents.length}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <ChevronsDown className="w-4 h-4" />
+                Expand All
+              </button>
+              <button
+                onClick={collapseAll}
+                disabled={expandedEvents.size === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+              >
+                <ChevronsUp className="w-4 h-4" />
+                Collapse All
+              </button>
+            </div>
           </div>
 
           {/* Filters Panel */}
@@ -331,8 +434,10 @@ export default function TimelinePage() {
                   <div className="ml-20 space-y-3">
                     {eventsByYear[year].map((event) => {
                       const Icon = categoryIcons[event.category] || FileText;
-                      const isExpanded = expandedEvent === event.id;
+                      const isExpanded = isEventExpanded(event.id);
                       const relatedVideos = getRelatedVideos(event);
+                      const eventLinkedVideos = linkedVideosMap[event.id] || [];
+                      const isLoadingEventVideos = loadingVideos.has(event.id);
 
                       return (
                         <Card
@@ -342,7 +447,7 @@ export default function TimelinePage() {
                               ? "border-l-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20" 
                               : tierBorderColors[event.tier]
                           } ${isExpanded ? "ring-2 ring-primary/50" : ""}`}
-                          onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                          onClick={() => toggleEvent(event.id)}
                         >
                           <CardContent className="p-4">
                             {/* Header */}
@@ -429,8 +534,67 @@ export default function TimelinePage() {
                                   </div>
                                 )}
 
-                                {/* Related Videos (2024-2025 only) */}
-                                {relatedVideos.length > 0 && (
+                                {/* Linked Videos from Junction Table */}
+                                {isLoadingEventVideos ? (
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Loading videos...
+                                  </div>
+                                ) : eventLinkedVideos.length > 0 ? (
+                                  <div>
+                                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                                      <Play className="w-4 h-4" />
+                                      Related Videos ({eventLinkedVideos.length})
+                                    </div>
+                                    <div className="space-y-2">
+                                      {eventLinkedVideos.map((video) => {
+                                        const videoId = getYouTubeId(video.url);
+                                        return (
+                                          <a
+                                            key={video.id}
+                                            href={video.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 group transition-colors"
+                                          >
+                                            <div className="w-28 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-muted relative">
+                                              {videoId ? (
+                                                <img
+                                                  src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                                                  alt={video.title}
+                                                  className="w-full h-full object-cover"
+                                                />
+                                              ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                  <Video className="w-6 h-6 text-muted-foreground" />
+                                                </div>
+                                              )}
+                                              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Play className="w-8 h-8 text-white fill-white" />
+                                              </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-sm font-medium text-foreground group-hover:text-primary truncate">
+                                                {video.title}
+                                              </p>
+                                              {video.contextNote && (
+                                                <p className="text-xs text-primary mt-0.5">{video.contextNote}</p>
+                                              )}
+                                            </div>
+                                            {video.tier === 'HIGH' && (
+                                              <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full">
+                                                HIGH
+                                              </span>
+                                            )}
+                                            <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
+                                          </a>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                ) : relatedVideos.length > 0 ? (
+                                  // Fallback to keyword-based matching for older events
                                   <div>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                                       <PlayCircle className="h-4 w-4" /> Related Videos
@@ -465,7 +629,7 @@ export default function TimelinePage() {
                                       })}
                                     </div>
                                   </div>
-                                )}
+                                ) : null}
 
                                 {/* Source */}
                                 {event.source && (
