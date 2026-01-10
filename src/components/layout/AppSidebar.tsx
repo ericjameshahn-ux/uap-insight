@@ -17,6 +17,7 @@ import {
   Building2,
   Shield,
 } from "lucide-react";
+import { NotebookLMModal } from "@/components/NotebookLMModal";
 import {
   Sidebar,
   SidebarContent,
@@ -86,6 +87,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [sections, setSections] = useState<Section[]>(fallbackSections);
+  const [showNotebookLMModal, setShowNotebookLMModal] = useState(false);
   
   // Path state
   const [userPath, setUserPath] = useState<string[]>([]);
@@ -369,18 +371,16 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {/* AI Research Assistant (External) */}
+              {/* AI Research Assistant (Opens Modal) */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a
-                    href={AI_ASSISTANT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-sidebar-accent/50 text-muted-foreground"
+                  <button
+                    onClick={() => setShowNotebookLMModal(true)}
+                    className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-sidebar-accent/50 text-muted-foreground w-full text-left"
                   >
                     <Sparkles className="w-4 h-4 shrink-0" />
                     {!collapsed && <span className="text-sm">NotebookLM Assistant</span>}
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -446,6 +446,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      {/* NotebookLM Modal */}
+      <NotebookLMModal 
+        isOpen={showNotebookLMModal} 
+        onClose={() => setShowNotebookLMModal(false)} 
+      />
     </Sidebar>
   );
 }

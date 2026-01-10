@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BackButton } from "@/components/BackButton";
 import { Search, BookOpen, Building2, Shield, FlaskConical, Scale, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export interface GlossaryTerm {
   id: string;
@@ -36,6 +37,52 @@ export default function Glossary() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Parse see_also/related_terms field
+  const parseSeeAlso = (seeAlso: string | string[] | null): string[] => {
+    if (!seeAlso) return [];
+    if (Array.isArray(seeAlso)) return seeAlso;
+    return seeAlso.split(',').map(s => s.trim()).filter(Boolean);
+  };
+
+  // Scroll to and highlight a term
+  const scrollToTerm = (termName: string) => {
+    const targetTerm = terms.find(
+      t => t.term.toLowerCase() === termName.toLowerCase().trim()
+    );
+
+    if (targetTerm) {
+      // Switch to "all" category if needed
+      if (activeCategory !== null && targetTerm.category !== activeCategory) {
+        setActiveCategory(null);
+      }
+
+      // Clear search if it would hide the target
+      if (searchQuery && !targetTerm.term.toLowerCase().includes(searchQuery.toLowerCase())) {
+        setSearchQuery('');
+      }
+
+      // Scroll after state updates
+      setTimeout(() => {
+        const element = document.getElementById(`glossary-term-${targetTerm.id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add temporary highlight
+          element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+          }, 2000);
+        }
+      }, 150);
+    } else {
+      toast({
+        title: "Term not found",
+        description: `"${termName}" is not in the glossary.`,
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     async function fetchTerms() {
@@ -91,18 +138,18 @@ export default function Glossary() {
   };
 
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-8">
+    <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <BackButton />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Glossary</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Glossary</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Key terms, acronyms, and concepts used throughout UAP disclosure discussions.
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-6 sm:mb-8">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -113,10 +160,10 @@ export default function Glossary() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
           <Badge
             variant={activeCategory === null ? "default" : "outline"}
-            className="cursor-pointer"
+            className="cursor-pointer min-h-[32px] flex items-center shrink-0"
             onClick={() => setActiveCategory(null)}
           >
             All ({terms.length})
@@ -129,11 +176,13 @@ export default function Glossary() {
               <Badge
                 key={cat}
                 variant={activeCategory === cat ? "default" : "outline"}
-                className="cursor-pointer flex items-center gap-1"
+                className="cursor-pointer flex items-center gap-1 min-h-[32px] shrink-0"
                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
               >
                 <Icon className="h-3 w-3" />
-                {cat} ({count})
+                <span className="hidden sm:inline">{cat}</span>
+                <span className="sm:hidden">{cat.split('/')[0]}</span>
+                ({count})
               </Badge>
             );
           })}
@@ -184,12 +233,17 @@ export default function Glossary() {
               <div className="space-y-4">
                 {categoryTerms.map((term) => {
                   const relatedTerms = getRelatedTerms(term.related_terms);
+                  const seeAlsoTerms = parseSeeAlso(term.related_terms);
                   const sectionLinks = getSectionLinks(term.section_ids);
 
                   return (
-                    <Card key={term.id} className="overflow-hidden">
+                    <Card 
+                      key={term.id} 
+                      id={`glossary-term-${term.id}`}
+                      className="overflow-hidden transition-all duration-300"
+                    >
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
+                        <CardTitle className="text-base sm:text-lg flex flex-wrap items-center gap-2">
                           <span className="font-mono text-primary">{term.term}</span>
                           {term.full_name && (
                             <span className="text-muted-foreground font-normal text-sm">
@@ -199,7 +253,7 @@ export default function Glossary() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <p className="text-foreground">{term.definition}</p>
+                        <p className="text-foreground text-sm sm:text-base">{term.definition}</p>
 
                         {term.context && (
                           <p className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
@@ -207,16 +261,16 @@ export default function Glossary() {
                           </p>
                         )}
 
-                        <div className="flex flex-wrap gap-4 pt-2 text-sm">
+                        <div className="flex flex-wrap gap-3 sm:gap-4 pt-2 text-sm">
                           {sectionLinks.length > 0 && (
                             <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">Sections:</span>
-                              <div className="flex gap-1">
+                              <span className="text-muted-foreground text-xs sm:text-sm">Sections:</span>
+                              <div className="flex gap-1 flex-wrap">
                                 {sectionLinks.map((s) => (
                                   <Link
                                     key={s}
                                     to={`/section/${s.toLowerCase()}`}
-                                    className="w-6 h-6 rounded bg-primary/10 text-primary text-xs font-bold flex items-center justify-center hover:bg-primary/20 transition-colors"
+                                    className="min-w-[28px] min-h-[28px] w-7 h-7 rounded bg-primary/10 text-primary text-xs font-bold flex items-center justify-center hover:bg-primary/20 transition-colors"
                                   >
                                     {s}
                                   </Link>
@@ -225,13 +279,17 @@ export default function Glossary() {
                             </div>
                           )}
 
-                          {relatedTerms.length > 0 && (
+                          {seeAlsoTerms.length > 0 && (
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-muted-foreground">See also:</span>
-                              {relatedTerms.map((rt) => (
-                                <Badge key={rt.id} variant="secondary" className="text-xs">
-                                  {rt.term}
-                                </Badge>
+                              <span className="text-muted-foreground text-xs sm:text-sm">See also:</span>
+                              {seeAlsoTerms.map((termName, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => scrollToTerm(termName)}
+                                  className="text-xs text-primary hover:text-primary/80 hover:underline cursor-pointer"
+                                >
+                                  {termName}{idx < seeAlsoTerms.length - 1 ? ',' : ''}
+                                </button>
                               ))}
                             </div>
                           )}

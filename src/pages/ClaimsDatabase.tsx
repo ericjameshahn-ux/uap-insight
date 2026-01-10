@@ -104,12 +104,12 @@ export default function ClaimsDatabase() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <BackButton />
       
-      <div className="mb-8 animate-fade-in">
-        <h1 className="text-2xl font-bold mb-2">Claims Database</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-6 sm:mb-8 animate-fade-in">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">Claims Database</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Search and explore all documented claims across research sections.
         </p>
       </div>
@@ -124,17 +124,17 @@ export default function ClaimsDatabase() {
             variant="ghost"
             size="sm"
             onClick={clearFigureFilter}
-            className="ml-auto gap-1.5 text-muted-foreground hover:text-foreground"
+            className="ml-auto gap-1.5 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px]"
           >
             <X className="w-4 h-4" />
-            Clear filter
+            <span className="hidden sm:inline">Clear filter</span>
           </Button>
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-        <div className="relative flex-1 min-w-64">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="relative flex-1 min-w-0 sm:min-w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search claims, quotes, sources..."
@@ -145,7 +145,7 @@ export default function ClaimsDatabase() {
         </div>
 
         <Select value={sectionFilter} onValueChange={setSectionFilter}>
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-full sm:w-32 min-h-[44px]">
             <SelectValue placeholder="Section" />
           </SelectTrigger>
           <SelectContent>
@@ -157,14 +157,14 @@ export default function ClaimsDatabase() {
           </SelectContent>
         </Select>
 
-        <div className="flex gap-1 p-1 bg-muted rounded-md">
+        <div className="flex gap-1 p-1 bg-muted rounded-md overflow-x-auto">
           {tierOptions.map((tier) => (
             <Button
               key={tier}
               variant={tierFilter === tier ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setTierFilter(tier)}
-              className="text-xs"
+              className="text-xs min-h-[36px] min-w-[44px] whitespace-nowrap"
             >
               {tier}
             </Button>
@@ -175,10 +175,11 @@ export default function ClaimsDatabase() {
           variant={contestedFilter ? "secondary" : "outline"}
           size="sm"
           onClick={() => setContestedFilter(!contestedFilter)}
-          className="gap-2"
+          className="gap-2 min-h-[44px]"
         >
           <Scale className="w-4 h-4" />
-          Contested/Analyzed
+          <span className="hidden sm:inline">Contested/Analyzed</span>
+          <span className="sm:hidden">Contested</span>
         </Button>
 
         <div className="flex gap-1 p-1 bg-muted rounded-md">
@@ -186,6 +187,7 @@ export default function ClaimsDatabase() {
             variant={viewMode === "list" ? "secondary" : "ghost"}
             size="icon"
             onClick={() => setViewMode("list")}
+            className="min-h-[44px] min-w-[44px]"
           >
             <List className="w-4 h-4" />
           </Button>
@@ -193,6 +195,7 @@ export default function ClaimsDatabase() {
             variant={viewMode === "grid" ? "secondary" : "ghost"}
             size="icon"
             onClick={() => setViewMode("grid")}
+            className="min-h-[44px] min-w-[44px]"
           >
             <Grid className="w-4 h-4" />
           </Button>
@@ -216,7 +219,7 @@ export default function ClaimsDatabase() {
         </div>
       ) : (
         <div className={cn(
-          viewMode === "grid" ? "grid grid-cols-2 gap-4" : "space-y-4"
+          viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"
         )}>
           {filteredClaims.map((claim, i) => (
             <div key={claim.id} className="animate-fade-in" style={{ animationDelay: `${i * 30}ms` }}>

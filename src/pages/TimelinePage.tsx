@@ -255,26 +255,26 @@ export default function TimelinePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <BackButton />
         
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-primary/20 rounded-lg">
-              <Calendar className="h-6 w-6 text-primary" />
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground">Disclosure Timeline</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Disclosure Timeline</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             80+ years of UAP history — from the 1947 Roswell incident to modern Congressional hearings. 
             Click any event to explore details and related videos.
           </p>
         </div>
 
         {/* Era Navigation */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm py-4 mb-6 border-b border-border">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm py-3 sm:py-4 mb-4 sm:mb-6 border-b border-border -mx-4 sm:-mx-6 px-4 sm:px-6">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
             {eras.map((era, index) => (
               <button
                 key={era.label}
@@ -282,7 +282,7 @@ export default function TimelinePage() {
                   setActiveEra(index);
                   setExpandedEvents(new Set());
                 }}
-                className={`px-3 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm transition-all whitespace-nowrap min-h-[44px] flex items-center ${
                   activeEra === index
                     ? "bg-primary text-primary-foreground shadow-lg"
                     : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -297,48 +297,48 @@ export default function TimelinePage() {
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground min-h-[44px] px-2 -ml-2"
             >
               <Filter className="h-4 w-4" />
-              Filters
+              <span className="hidden sm:inline">Filters</span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
               {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
-                <Badge variant="secondary" className="ml-1">
+                <Badge variant="secondary" className="ml-1 text-xs">
                   Active
                 </Badge>
               )}
             </button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={expandAll}
                 disabled={expandedEvents.size === filteredEvents.length}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
               >
                 <ChevronsDown className="w-4 h-4" />
-                Expand All
+                <span className="hidden sm:inline">Expand All</span>
               </button>
               <button
                 onClick={collapseAll}
                 disabled={expandedEvents.size === 0}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
               >
                 <ChevronsUp className="w-4 h-4" />
-                Collapse All
+                <span className="hidden sm:inline">Collapse All</span>
               </button>
             </div>
           </div>
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-3">
+            <div className="mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground">Credibility:</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Credibility:</span>
                 {["HIGH", "MEDIUM", "LOWER"].map((tier) => (
                   <Badge
                     key={tier}
                     variant={filterTier === tier ? "default" : "outline"}
-                    className={`cursor-pointer ${filterTier === tier ? tierColors[tier] : ""}`}
+                    className={`cursor-pointer min-h-[32px] flex items-center ${filterTier === tier ? tierColors[tier] : ""}`}
                     onClick={() => setFilterTier(filterTier === tier ? null : tier)}
                   >
                     {tier}
@@ -347,12 +347,12 @@ export default function TimelinePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground">Category:</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Category:</span>
                 {Object.keys(categoryColors).map((cat) => (
                   <Badge
                     key={cat}
                     variant={filterCategory === cat ? "default" : "outline"}
-                    className={`cursor-pointer text-xs ${filterCategory === cat ? categoryColors[cat] : ""}`}
+                    className={`cursor-pointer text-xs min-h-[28px] flex items-center ${filterCategory === cat ? categoryColors[cat] : ""}`}
                     onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
                   >
                     {cat}
@@ -360,21 +360,22 @@ export default function TimelinePage() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-3 pt-2 border-t border-border/50">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 border-t border-border/50">
                 <button
                   onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[44px] ${
                     showMilestonesOnly 
                       ? "bg-primary text-primary-foreground" 
                       : "bg-muted text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <Star className="h-4 w-4" />
-                  Milestones Only
+                  <span className="hidden sm:inline">Milestones Only</span>
+                  <span className="sm:hidden">Milestones</span>
                 </button>
                 <button
                   onClick={() => setFilterWilsonDavis(!filterWilsonDavis)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[44px] ${
                     filterWilsonDavis 
                       ? "bg-indigo-600 text-white" 
                       : "bg-muted text-muted-foreground hover:text-foreground"
@@ -386,7 +387,7 @@ export default function TimelinePage() {
               </div>
 
               {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="min-h-[44px]">
                   Clear all filters
                 </Button>
               )}
