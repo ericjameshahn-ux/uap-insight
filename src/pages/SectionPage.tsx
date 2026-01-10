@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle } from "lucide-react";
+import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle, Scale, ChevronDown } from "lucide-react";
 import { SectionAIQueryButton } from "@/components/SectionAIQueryButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ConvictionBadge } from "@/components/ConvictionBadge";
 import { ClaimCard } from "@/components/ClaimCard";
 import { VideoCard } from "@/components/VideoCard";
@@ -297,6 +298,64 @@ export default function SectionPage() {
     );
   };
 
+  // Helper to render markdown with bold and line breaks
+  const renderMarkdown = (text: string) => {
+    if (!text) return null;
+    return text.split('\n').map((line, lineIndex) => {
+      const parts = line.split(/\*\*(.*?)\*\*/g);
+      return (
+        <span key={lineIndex}>
+          {parts.map((part, i) => 
+            i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+          )}
+          {lineIndex < text.split('\n').length - 1 && <br />}
+        </span>
+      );
+    });
+  };
+
+  // Counter-Arguments Panel Component
+  const CounterArgumentsPanel = ({ content }: { content: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    return (
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-8">
+        <Card className="border-slate-700 bg-slate-900/30">
+          <CollapsibleTrigger asChild>
+            <button className="w-full text-left">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-5 w-5 text-slate-400" />
+                    <div>
+                      <CardTitle className="text-base text-slate-300">
+                        Strongest Counter-Arguments
+                      </CardTitle>
+                      <CardDescription className="text-xs text-slate-500">
+                        Steel-man the skeptical position
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <ChevronDown 
+                    className={cn(
+                      "h-5 w-5 text-slate-500 transition-transform duration-200",
+                      isOpen && "rotate-180"
+                    )} 
+                  />
+                </div>
+              </CardHeader>
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 text-sm text-slate-400 leading-relaxed">
+              {renderMarkdown(content)}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+    );
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <BackButton />
@@ -373,8 +432,20 @@ export default function SectionPage() {
         )}
       </div>
 
+      {/* Section Summary */}
+      {section.section_summary && (
+        <div className="mb-6 text-muted-foreground leading-relaxed animate-fade-in">
+          {renderMarkdown(section.section_summary)}
+        </div>
+      )}
+
       {/* AI Query Button */}
       <SectionAIQueryButton sectionId={sectionId || ''} sectionTitle={section.title} />
+
+      {/* Counter-Arguments Panel */}
+      {section.counter_arguments && (
+        <CounterArgumentsPanel content={section.counter_arguments} />
+      )}
 
       {/* Wilson-Davis Featured Card for Section G */}
       {sectionId?.toLowerCase() === 'g' && (
