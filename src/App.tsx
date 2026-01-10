@@ -18,8 +18,9 @@ import ChatPage from "./pages/ChatPage";
 import SavedItems from "./pages/SavedItems";
 import MyPath from "./pages/MyPath";
 import TimelinePage from "./pages/TimelinePage";
-import IntroFramework from "./pages/IntroFramework";
-import MosaicTheory from "./pages/MosaicTheory";
+import OldStart1 from "./pages/OldStart1";
+import OldStart2 from "./pages/OldStart2";
+import MosaicTheoryFramework from "./pages/MosaicTheoryFramework";
 import Observables from "./pages/Observables";
 import Hypotheses from "./pages/Hypotheses";
 import SectionN from "./pages/SectionN";
@@ -41,8 +42,10 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/intro" element={<IntroFramework />} />
-            <Route path="/framework" element={<MosaicTheory />} />
+            <Route path="/intro" element={<OldStart1 />} />
+            <Route path="/old-start-1" element={<OldStart1 />} />
+            <Route path="/old-start-2" element={<OldStart2 />} />
+            <Route path="/framework" element={<MosaicTheoryFramework />} />
             <Route path="/observables" element={<Observables />} />
             <Route path="/hypotheses" element={<Hypotheses />} />
             <Route path="/sections" element={<Sections />} />

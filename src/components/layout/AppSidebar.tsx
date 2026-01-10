@@ -37,8 +37,7 @@ import { supabase, Section } from "@/lib/supabase";
 
 // Special sections that should always appear
 const specialSections: Section[] = [
-  { id: 'mosaic-framework', letter: '🧩', title: 'Start Here: Mosaic Theory', conviction: 'INFO', description: '', sort_order: -2 },
-  { id: 'framework', letter: 'START', title: 'Framework Overview', conviction: 'INFO', description: '', sort_order: -1 },
+  { id: 'mosaic-framework', letter: '🧩', title: 'Start Here', conviction: 'INFO', description: '', sort_order: -2 },
   { id: 'observables', letter: '5+1', title: 'The Six Observables', conviction: 'HIGH', description: '', sort_order: 0 },
   { id: 'hypotheses', letter: '🔮', title: 'Emerging Hypotheses', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
 ];
@@ -258,13 +257,11 @@ export function AppSidebar() {
               {sections.filter(section => section.letter != null).map((section) => {
                 const path = section.letter === '🧩'
                   ? '/framework'
-                  : section.letter === 'START' 
-                    ? '/intro' 
-                    : section.letter === '5+1' 
-                      ? '/observables' 
-                      : section.letter === '🔮'
-                        ? '/hypotheses'
-                        : `/section/${section.letter.toLowerCase()}`;
+                  : section.letter === '5+1' 
+                    ? '/observables' 
+                    : section.letter === '🔮'
+                      ? '/hypotheses'
+                      : `/section/${section.letter.toLowerCase()}`;
                 const active = isActive(path);
                 const inPath = isInPath(section.letter);
                 const isNextInPath = userPath.length > 0 && pathIndex < userPath.length && 
