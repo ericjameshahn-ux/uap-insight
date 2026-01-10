@@ -390,31 +390,19 @@ export default function Index() {
           >
             <Link to="/framework">
               <BookOpen className="w-5 h-5 mr-2" />
-              Start Here: The Framework
-            </Link>
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            className="flex-1 min-h-[44px] h-14 text-base"
-            asChild
-          >
-            <Link to="/framework">
-              <Layers className="w-5 h-5 mr-2" />
-              Learn Mosaic Theory
+              Start Here: Learn the Framework
             </Link>
           </Button>
           <Button 
             variant="outline" 
             size="lg" 
-            className="flex-1 min-h-[44px] h-14 text-base"
-            onClick={() => {
-              setSelectedJourney(null);
-              setShowQuiz(true);
-            }}
+            className="flex-1 min-h-[44px] h-14 text-base border-2"
+            asChild
           >
-            <Sparkles className="w-5 h-5 mr-2" />
-            Take the Persona Quiz
+            <Link to="/quiz">
+              <Sparkles className="w-5 h-5 mr-2" />
+              Find Your Path
+            </Link>
           </Button>
         </div>
 

@@ -31,15 +31,15 @@ interface SectionAIQueryButtonProps {
 
 // Persona lenses for AI prompt personalization
 const personaLenses: Record<string, string> = {
-  empiricist: "Please prioritize hard sensor data (radar/FLIR), physical material analyses (isotopic ratios/metamaterials), and quantifiable performance metrics (g-forces/velocities) over anecdotal accounts.",
-  historian: "Frame the answer within the chronological evolution of government programs (from Blue Book to AARO), tracing the legislative paper trail and historical precedents for secrecy mechanisms.",
-  strategist: "Analyze the geopolitical implications, national security risks, and the bureaucratic power struggles (e.g., Title 10 vs. Title 50 jurisdiction) driving the containment or disclosure of this information.",
-  investigator: "Focus on cross-referencing specific witness credibility, corroborating testimonies (e.g., Varginha, Nimitz), and identifying concrete chains of custody for alleged evidence.",
-  experiencer: "Include the 'high strangeness' aspects often filtered out of official reports, such as consciousness interfaces, telepathy, the 'Hitchhiker Effect,' and physiological after-effects.",
-  technologist: "Detail the proposed engineering mechanisms—specifically metric engineering, vacuum polarization, and terahertz waveguides—and how they align with or challenge known physics (e.g., the Schwinger limit).",
-  skeptic: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops).",
-  debunker: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops).",
-  meaning_seeker: "Explore the 'ontological shock,' theological reframing, and the profound paradigm shift in the human worldview that these disclosures imply."
+  empiricist: "As someone who prioritizes sensor data and reproducible evidence,",
+  historian: "As someone focused on historical patterns and the evolution of government programs,",
+  strategist: "As someone focused on national security implications and institutional behavior,",
+  investigator: "As an investigator focused on witness credibility and chains of custody,",
+  experiencer: "As someone open to high-strangeness aspects and consciousness-related phenomena,",
+  technologist: "As someone focused on physics, engineering mechanisms, and technical feasibility,",
+  skeptic: "As a skeptical analyst who values falsification and prosaic explanations first,",
+  debunker: "As a skeptical analyst who values falsification and prosaic explanations first,",
+  meaning_seeker: "As someone exploring the philosophical and existential implications,"
 };
 
 // Display names for personas
