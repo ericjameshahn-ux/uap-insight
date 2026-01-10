@@ -395,18 +395,18 @@ export default function Index() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-6 pt-2">
-                <p className="text-muted-foreground mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   This topic requires intellectual prerequisites most people aren't willing to meet.
                 </p>
                 
                 {/* Three category summaries */}
                 <div className="space-y-4 mb-6">
                   {/* Complexity Barriers */}
-                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/70 rounded-lg border border-slate-600">
                     <Zap className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-amber-400 text-sm mb-1">Complexity Barriers</p>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-slate-200 text-sm">
                         "Don't look if you're not willing to learn about..." fusion physics, 
                         financial forensics, congressional oversight mechanisms
                       </p>
@@ -414,11 +414,11 @@ export default function Index() {
                   </div>
                   
                   {/* Uncomfortable Territory */}
-                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/70 rounded-lg border border-slate-600">
                     <Brain className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-purple-400 text-sm mb-1">Uncomfortable Territory</p>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-slate-200 text-sm">
                         "Don't look if you're uncomfortable with..." revisiting fundamental beliefs,
                         considering non-human intelligence, having no final answers
                       </p>
@@ -426,11 +426,11 @@ export default function Index() {
                   </div>
                   
                   {/* Professional Risks */}
-                  <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                  <div className="flex items-start gap-3 p-4 bg-slate-800/70 rounded-lg border border-slate-600">
                     <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-red-400 text-sm mb-1">Professional Risks</p>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-slate-200 text-sm">
                         "Don't look if you can't afford..." career stigma, 100+ hours of 
                         interdisciplinary homework, guilt by association
                       </p>
