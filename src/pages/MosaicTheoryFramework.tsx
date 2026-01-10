@@ -14,14 +14,13 @@ import {
 } from 'lucide-react';
 import { PageStatusBanner } from '@/components/PageStatusBanner';
 
-// Image paths - Using reliable public domain sources
+// Image paths - Using reliable public domain sources (Wikimedia Commons)
 // Ghost Army inflatable tank - Australian War Memorial photo (public domain)
-const GHOST_ARMY_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg';
-const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
-const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg';
-
-// Secondary fallback for Ghost Army
-const GHOST_ARMY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
+const GHOST_ARMY_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
+// German recon placeholder - using same Ghost Army image for German perspective
+const GERMAN_RECON_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
+// Manhattan Project - Oak Ridge K-25 Plant (public domain)
+const MANHATTAN_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Oak_Ridge_K-25_Plant.jpg/800px-Oak_Ridge_K-25_Plant.jpg';
 
 // ==========================================
 // PART 1: THE CONCEPT
@@ -120,6 +119,7 @@ const GhostArmySection = () => {
   
   const [activeStage, setActiveStage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageTimeout, setImageTimeout] = useState(false);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
@@ -130,9 +130,14 @@ const GhostArmySection = () => {
     });
   }, [scrollYProgress]);
   
-  // Reset image state when stage changes
+  // Reset image state when stage changes + timeout fallback
   useEffect(() => {
     setImageLoaded(false);
+    setImageTimeout(false);
+    const timeout = setTimeout(() => {
+      setImageTimeout(true);
+    }, 3000);
+    return () => clearTimeout(timeout);
   }, [activeStage]);
   
   const stages = [
@@ -223,10 +228,19 @@ const GhostArmySection = () => {
             </div>
             
             <div className="relative aspect-video bg-stone-400 overflow-hidden">
-              {/* Loading skeleton */}
-              {!imageLoaded && (
+              {/* Loading skeleton with timeout */}
+              {!imageLoaded && !imageTimeout && (
                 <div className="absolute inset-0 bg-stone-400 animate-pulse flex items-center justify-center z-10">
                   <div className="text-stone-600 text-sm font-mono">Loading image...</div>
+                </div>
+              )}
+              {/* Timeout fallback */}
+              {!imageLoaded && imageTimeout && (
+                <div className="absolute inset-0 bg-stone-300 flex items-center justify-center z-10">
+                  <div className="text-stone-500 text-sm font-mono text-center px-4">
+                    <p>Ghost Army - Operation Fortitude</p>
+                    <p className="text-xs mt-1">Inflatable tank decoys, 1944</p>
+                  </div>
                 </div>
               )}
               <img
@@ -239,16 +253,7 @@ const GhostArmySection = () => {
                   transformOrigin: 'center 40%'
                 }}
                 onLoad={() => setImageLoaded(true)}
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  // Try fallback if not already using it
-                  if (img.src !== GHOST_ARMY_FALLBACK) {
-                    img.src = GHOST_ARMY_FALLBACK;
-                  } else {
-                    // Both failed - show placeholder
-                    setImageLoaded(true);
-                  }
-                }}
+                onError={() => setImageTimeout(true)}
               />
               
               {currentStage.showRedaction && imageLoaded && (
@@ -337,6 +342,7 @@ const ManhattanProjectSection = () => {
   
   const [activeStage, setActiveStage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageTimeout, setImageTimeout] = useState(false);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
@@ -346,9 +352,14 @@ const ManhattanProjectSection = () => {
     });
   }, [scrollYProgress]);
   
-  // Reset image state when stage changes
+  // Reset image state when stage changes + timeout fallback
   useEffect(() => {
     setImageLoaded(false);
+    setImageTimeout(false);
+    const timeout = setTimeout(() => {
+      setImageTimeout(true);
+    }, 3000);
+    return () => clearTimeout(timeout);
   }, [activeStage]);
   
   const stages = [
@@ -426,20 +437,30 @@ const ManhattanProjectSection = () => {
             </div>
             
             <div className="relative aspect-video bg-slate-800 overflow-hidden">
-              {/* Loading skeleton */}
-              {!imageLoaded && (
-                <div className="absolute inset-0 bg-slate-700 animate-pulse flex items-center justify-center">
+              {/* Loading skeleton with timeout */}
+              {!imageLoaded && !imageTimeout && (
+                <div className="absolute inset-0 bg-slate-700 animate-pulse flex items-center justify-center z-10">
                   <div className="text-slate-500 text-sm font-mono">Loading...</div>
+                </div>
+              )}
+              {/* Timeout fallback */}
+              {!imageLoaded && imageTimeout && (
+                <div className="absolute inset-0 bg-slate-600 flex items-center justify-center z-10">
+                  <div className="text-slate-300 text-sm font-mono text-center px-4">
+                    <p>Oak Ridge K-25 Plant</p>
+                    <p className="text-xs mt-1">Manhattan Project, 1944</p>
+                  </div>
                 </div>
               )}
               <img
                 src={MANHATTAN_IMAGE}
-                alt="The Gadget - first atomic bomb"
+                alt="Oak Ridge K-25 Plant - Manhattan Project"
                 className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: activeStage === 0 ? 'none' : `${currentStage.filter} blur(${currentStage.blur}px)`,
                 }}
                 onLoad={() => setImageLoaded(true)}
+                onError={() => setImageTimeout(true)}
               />
               
               {currentStage.showStamp && imageLoaded && (

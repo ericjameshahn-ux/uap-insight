@@ -441,7 +441,7 @@ export default function Index() {
                 {/* Link to full page */}
                 <Link 
                   to="/before-you-begin" 
-                  className="inline-flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors underline underline-offset-2"
                 >
                   See the full list of prerequisites
                   <ArrowRight className="w-4 h-4" />

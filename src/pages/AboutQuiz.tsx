@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Sparkles, ExternalLink, ArrowLeft, FlaskConical, History, Target, Search, Zap, Scale, Microscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { PersonaQuiz } from "@/components/PersonaQuiz";
+import { PersonaArchetype } from "@/lib/supabase";
 
 const archetypes = [
   {
@@ -42,7 +45,23 @@ const archetypes = [
 ];
 
 export default function AboutQuiz() {
+  const navigate = useNavigate();
+  const [showQuiz, setShowQuiz] = useState(false);
+
+  const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
+    if (path.length > 0) {
+      navigate(`/section/${path[0].toLowerCase()}`);
+    }
+  };
+
   return (
+    <>
+      <PersonaQuiz 
+        isOpen={showQuiz} 
+        onClose={() => setShowQuiz(false)} 
+        onComplete={handleQuizComplete}
+        onExploreFreelyClick={() => setShowQuiz(false)}
+      />
     <div className="max-w-3xl mx-auto px-6 py-12">
       {/* Back Link */}
       <Link 
@@ -138,13 +157,17 @@ export default function AboutQuiz() {
         <p className="text-primary-foreground/80 mb-6">
           Answer 5 quick questions to get your personalized learning path.
         </p>
-        <Link to="/quiz">
-          <Button size="lg" variant="secondary" className="shadow-lg">
-            <Sparkles className="w-5 h-5 mr-2" />
-            Start the Quiz
-          </Button>
-        </Link>
+        <Button 
+          size="lg" 
+          variant="secondary" 
+          className="shadow-lg"
+          onClick={() => setShowQuiz(true)}
+        >
+          <Sparkles className="w-5 h-5 mr-2" />
+          Start the Quiz
+        </Button>
       </div>
     </div>
+    </>
   );
 }
