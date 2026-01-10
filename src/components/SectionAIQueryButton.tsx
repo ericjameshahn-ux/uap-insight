@@ -29,42 +29,58 @@ interface SectionAIQueryButtonProps {
   variant?: "inline" | "card" | "floating";
 }
 
-// Persona lenses for AI prompt personalization
-const personaLenses: Record<string, string> = {
-  empiricist: "As someone who prioritizes sensor data and reproducible evidence,",
-  historian: "As someone focused on historical patterns and the evolution of government programs,",
-  strategist: "As someone focused on national security implications and institutional behavior,",
-  investigator: "As an investigator focused on witness credibility and chains of custody,",
-  experiencer: "As someone open to high-strangeness aspects and consciousness-related phenomena,",
-  technologist: "As someone focused on physics, engineering mechanisms, and technical feasibility,",
-  skeptic: "As a skeptical analyst who values falsification and prosaic explanations first,",
-  debunker: "As a skeptical analyst who values falsification and prosaic explanations first,",
-  meaning_seeker: "As someone exploring the philosophical and existential implications,"
+// Persona lenses for AI prompt personalization - with full descriptions
+const personaLenses: Record<string, { label: string; description: string; prompt: string }> = {
+  empiricist: {
+    label: "🔬 The Empiricist",
+    description: "Evidence-first, data-driven analysis",
+    prompt: "As someone who prioritizes sensor data and reproducible evidence,"
+  },
+  historian: {
+    label: "📚 The Historian",
+    description: "Patterns across time and policy",
+    prompt: "As someone focused on historical patterns and the evolution of government programs,"
+  },
+  strategist: {
+    label: "♟️ The Strategist",
+    description: "National security and policy implications",
+    prompt: "As someone focused on national security implications and institutional behavior,"
+  },
+  investigator: {
+    label: "🔍 The Investigator",
+    description: "Case-by-case forensic examination",
+    prompt: "As an investigator focused on witness credibility and chains of custody,"
+  },
+  technologist: {
+    label: "⚡ The Technologist",
+    description: "Physics, propulsion, and tech applications",
+    prompt: "As someone focused on physics, engineering mechanisms, and technical feasibility,"
+  },
+  skeptic: {
+    label: "⚖️ The Skeptical Analyst",
+    description: "Rigorous prosaic explanation testing",
+    prompt: "As a skeptical analyst who values falsification and prosaic explanations first,"
+  },
 };
 
-// Display names for personas
+// Display names for personas (for toast messages)
 const personaDisplayNames: Record<string, string> = {
   empiricist: "Empiricist",
   historian: "Historian",
   strategist: "Strategist",
   investigator: "Investigator",
-  experiencer: "Experiencer",
   technologist: "Technologist",
-  skeptic: "Skeptic",
-  debunker: "Skeptic",
-  meaning_seeker: "Meaning-Seeker"
+  skeptic: "Skeptical Analyst",
 };
 
-// Available personas for dropdown selection
+// Available personas for dropdown selection (6 research-focused personas)
 const availablePersonas = [
-  { id: "empiricist", name: "Empiricist" },
-  { id: "historian", name: "Historian" },
-  { id: "strategist", name: "Strategist" },
-  { id: "investigator", name: "Investigator" },
-  { id: "skeptic", name: "Skeptic" },
-  { id: "technologist", name: "Technologist" },
-  { id: "experiencer", name: "Experiencer" },
-  { id: "meaning_seeker", name: "Meaning-Seeker" },
+  { id: "empiricist", label: "🔬 The Empiricist", description: "Evidence-first, data-driven analysis" },
+  { id: "historian", label: "📚 The Historian", description: "Patterns across time and policy" },
+  { id: "strategist", label: "♟️ The Strategist", description: "National security and policy implications" },
+  { id: "investigator", label: "🔍 The Investigator", description: "Case-by-case forensic examination" },
+  { id: "technologist", label: "⚡ The Technologist", description: "Physics, propulsion, and tech applications" },
+  { id: "skeptic", label: "⚖️ The Skeptical Analyst", description: "Rigorous prosaic explanation testing" },
 ];
 
 // Detailed prompts tailored to each section
@@ -155,12 +171,13 @@ export function SectionAIQueryButton({
 
   const prompts = sectionQuickPrompts[sectionId.toLowerCase()] || [];
 
-  // Build the full prompt with persona lens prepended (if enabled)
+  // Build the full prompt with structured persona lens prepended (if enabled)
   const buildFullPrompt = (basePrompt: string): string => {
     if (includePersona && selectedPersona && personaLenses[selectedPersona]) {
-      return `${personaLenses[selectedPersona]}\n\n${basePrompt}`;
+      const persona = personaLenses[selectedPersona];
+      return `Research Persona: ${persona.prompt}\n\nResearch Starter Focus: ${basePrompt}`;
     }
-    return basePrompt;
+    return `Research Starter Focus: ${basePrompt}`;
   };
 
   const copyToClipboard = async (text: string, index: number) => {
@@ -300,13 +317,16 @@ export function SectionAIQueryButton({
               
               {includePersona && (
                 <Select value={selectedPersona} onValueChange={setSelectedPersona}>
-                  <SelectTrigger className="w-[180px] h-8 text-sm">
-                    <SelectValue placeholder="Select persona..." />
+                  <SelectTrigger className="w-[280px] h-9 text-sm">
+                    <SelectValue placeholder="Select research persona..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[320px]">
                     {availablePersonas.map((persona) => (
-                      <SelectItem key={persona.id} value={persona.id}>
-                        {persona.name}
+                      <SelectItem key={persona.id} value={persona.id} className="py-2">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{persona.label}</span>
+                          <span className="text-xs text-muted-foreground">{persona.description}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
