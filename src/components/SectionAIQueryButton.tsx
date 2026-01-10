@@ -115,12 +115,19 @@ const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> =
   ],
   k: [
     { title: "Non-human biologics testimony", prompt: "Compile all testimony regarding 'non-human biologics': Grusch's Congressional statement, Varginha medical reports, the officer death from 'novel pathogen.' What is the 'Mudinho' counter-explanation and why do critics find it insufficient?" },
+    { title: "Biological evidence analysis", prompt: "What physical or medical evidence exists for alleged NHI biological encounters? Include autopsy claims, tissue samples, and the credibility assessment of each source." },
   ],
   l: [
     { title: "Defense contractor connections", prompt: "Map the connections between UAP research and defense contractors: Which companies have been named in testimony? What is the IRAD funding mechanism? How does Skywatcher.AI represent a new model of private UAP research?" },
+    { title: "Investment implications", prompt: "What are the investment implications of UAP-related technologies? Analyze the sectors most likely to be affected: aerospace, materials science, energy, and defense contracting." },
   ],
   m: [
     { title: "Ontological implications", prompt: "What are the profound implications if UAP represent non-human intelligence? Cover: scientific paradigm shifts, religious/theological reframing, the 'dual reality' of public vs classified physics, and what 'ontological shock' means for society." },
+    { title: "Cultural and historical connections", prompt: "How do UAP phenomena connect to historical religious texts, indigenous traditions, and cultural narratives across civilizations? What patterns emerge when comparing modern encounters to ancient accounts?" },
+  ],
+  n: [
+    { title: "Competing theories comparison", prompt: "Compare and contrast the major UAP hypotheses: Extraterrestrial, Ultraterrestrial, Extratemporal (time travel), Interdimensional, and Ancient/Remnant Technology. What evidence supports or contradicts each framework?" },
+    { title: "Framework evaluation criteria", prompt: "What criteria should we use to evaluate competing UAP hypotheses? Consider: explanatory power, falsifiability, consistency with known physics, and alignment with witness testimony. Which framework best explains the Five Observables?" },
   ],
 };
 
@@ -226,7 +233,7 @@ export function SectionAIQueryButton({
                 Query Section {sectionId.toUpperCase()} with AI
               </h3>
               <p className="text-xs text-muted-foreground">
-                Get AI-powered answers from 65+ source documents
+                Get AI-powered answers from 100+ source documents
               </p>
             </div>
           </div>
