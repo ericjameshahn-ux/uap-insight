@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle } from "lucide-react";
+import { SectionAIQueryButton } from "@/components/SectionAIQueryButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -371,6 +372,9 @@ export default function SectionPage() {
           <p className="text-muted-foreground leading-relaxed mt-3">{section.description}</p>
         )}
       </div>
+
+      {/* AI Query Button */}
+      <SectionAIQueryButton sectionId={sectionId || ''} sectionTitle={section.title} />
 
       {/* Wilson-Davis Featured Card for Section G */}
       {sectionId?.toLowerCase() === 'g' && (
