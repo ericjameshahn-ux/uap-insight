@@ -57,12 +57,18 @@ export default function AboutQuiz() {
   const { toast } = useToast();
 
   const handleSelectProfile = (archetype: typeof archetypes[0]) => {
+    // Save persona to localStorage
     localStorage.setItem('uap_primary_archetype', archetype.id);
+    localStorage.setItem('uap_archetype_name', archetype.name);
+    
+    // Show confirmation
     toast({
       title: `Research profile set to ${archetype.name}`,
       description: "Your personalized path is now active.",
     });
-    navigate('/mosaic');
+    
+    // Navigate to Start Here (framework page)
+    navigate('/framework');
   };
   const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
     if (path.length > 0) {
@@ -94,7 +100,7 @@ export default function AboutQuiz() {
           <Sparkles className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Understanding Your Research Profile</h1>
+          <h1 className="text-2xl font-bold">Find Your Path</h1>
           <p className="text-muted-foreground">Personalized navigation through UAP evidence</p>
         </div>
       </div>

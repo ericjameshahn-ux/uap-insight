@@ -17,6 +17,7 @@ import {
   Building2,
   Shield,
   AlertTriangle,
+  Compass,
 } from "lucide-react";
 import { NotebookLMModal } from "@/components/NotebookLMModal";
 import {
@@ -40,6 +41,7 @@ import { supabase, Section } from "@/lib/supabase";
 // Special sections that should always appear
 const specialSections: Section[] = [
   { id: 'mosaic-framework', letter: '🧩', title: 'Start Here', conviction: 'INFO', description: '', sort_order: -2 },
+  { id: 'find-your-path', letter: '🧭', title: 'Find Your Path', conviction: 'INFO', description: '', sort_order: -1.5 },
   { id: 'observables', letter: '5+1', title: 'The Six Observables', conviction: 'HIGH', description: '', sort_order: 0 },
   { id: 'hypotheses', letter: '🔮', title: 'Hypothesis Explorer', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
 ];
@@ -262,11 +264,13 @@ export function AppSidebar() {
               {sections.filter(section => section.letter != null).map((section) => {
                 const sectionPath = section.letter === '🧩'
                   ? '/framework'
-                  : section.letter === '5+1' 
-                    ? '/observables' 
-                    : section.letter === '🔮'
-                      ? '/hypotheses'
-                      : `/section/${section.letter.toLowerCase()}`;
+                  : section.letter === '🧭'
+                    ? '/quiz'
+                    : section.letter === '5+1' 
+                      ? '/observables' 
+                      : section.letter === '🔮'
+                        ? '/hypotheses'
+                        : `/section/${section.letter.toLowerCase()}`;
                 // Use exact match for section routes to prevent false positives
                 const active = location.pathname === sectionPath || 
                   (sectionPath.startsWith('/section/') && location.pathname.startsWith(sectionPath + '/'));
@@ -433,16 +437,16 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
-                    to="/about-quiz"
+                    to="/quiz"
                     className={cn(
                       "flex items-center gap-3 px-4 py-2 rounded-md transition-colors",
-                      isActive('/about-quiz')
+                      isActive('/quiz') || isActive('/about-quiz')
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
                         : "hover:bg-sidebar-accent/50"
                     )}
                   >
-                    <HelpCircle className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span className="text-sm">About the Quiz</span>}
+                    <Compass className="w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="text-sm">Find Your Path</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

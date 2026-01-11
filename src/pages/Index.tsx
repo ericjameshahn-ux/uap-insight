@@ -93,44 +93,40 @@ const journeys = [
 
 const explorePlatformCards = [
   {
+    id: "start",
+    icon: BookOpen,
+    title: "Start Here",
+    description: "Learn the Mosaic Theory framework—how to evaluate evidence in environments of deliberate information suppression.",
+    buttonText: "Start Here",
+    link: "/framework",
+    priority: true,
+  },
+  {
     id: "quiz",
     icon: Compass,
-    title: "Personalized Learning Path",
-    description: "Take a short quiz to discover your research style. Get a curated journey through chapters tailored to your interests—whether you're a skeptic, policy analyst, or experiencer.",
-    buttonText: "Take the Quiz",
+    title: "Find Your Path",
+    description: "Take a short quiz to discover your research style. Get a curated journey through chapters tailored to your interests.",
+    buttonText: "Find Your Path",
     link: "/quiz",
+    priority: true,
   },
   {
     id: "timeline",
     icon: Calendar,
     title: "Evidence Timeline",
-    description: "Explore key events from 1933 to present in chronological order. See official statements, congressional hearings, and documented encounters on an interactive timeline.",
+    description: "Explore key events from 1933 to present in chronological order. See official statements, congressional hearings, and documented encounters.",
     buttonText: "View Timeline",
     link: "/timeline",
+    priority: false,
   },
   {
     id: "faq",
     icon: HelpCircle,
     title: "Common Questions",
-    description: "Browse frequently asked questions and see exactly where each is answered across our source materials. Find answers to 'Is this real?' 'Why the secrecy?' and more.",
+    description: "Browse 110+ frequently asked questions and see where each is answered across our source materials.",
     buttonText: "Browse FAQs",
     link: "/faq",
-  },
-  {
-    id: "hypotheses",
-    icon: Lightbulb,
-    title: "Hypotheses & Theories",
-    description: "What do experts actually believe? Review the leading explanations—from advanced foreign tech to non-human intelligence—with evidence for and against each.",
-    buttonText: "Explore Hypotheses",
-    link: "/hypotheses",
-  },
-  {
-    id: "sections",
-    icon: BookOpen,
-    title: "Deep Dive Chapters",
-    description: "Thirteen evidence categories from 'UAP Exist' to 'Consciousness Claims.' Each section contains sourced claims, key figures, and recommended videos. Save topics to your reading list.",
-    buttonText: "Browse Sections",
-    link: "/sections",
+    priority: false,
   },
   {
     id: "figures",
@@ -139,6 +135,16 @@ const explorePlatformCards = [
     description: "Meet the whistleblowers, officials, and researchers. Filter by credibility tier, see their credentials, and watch their most important interviews.",
     buttonText: "View Figures",
     link: "/figures",
+    priority: false,
+  },
+  {
+    id: "claims",
+    icon: Layers,
+    title: "Claims Database",
+    description: "Browse 180+ falsifiable claims with credibility tiers and source attribution. Track what's been verified vs. alleged.",
+    buttonText: "Browse Claims",
+    link: "/claims",
+    priority: false,
   },
 ];
 
@@ -476,16 +482,40 @@ export default function Index() {
           </Button>
         </div>
         
-        {/* Subtle "Still here?" message */}
+        {/* Subtle hint message */}
         <p className="text-center text-sm text-muted-foreground mb-12 animate-fade-in" style={{ animationDelay: "320ms" }}>
-          Still here? Take the Persona Quiz to find your personalized research path →
+          Not sure where to start? Take the quiz to find your personalized research path →
         </p>
 
-        {/* Explore the Platform Section */}
+        {/* Explore the Platform Section - Reorganized */}
         <div className="mb-12 animate-fade-in" style={{ animationDelay: "350ms" }}>
-          <h2 className="text-lg font-semibold mb-4">Explore the Platform</h2>
+          {/* Priority Cards - Start Here & Find Your Path */}
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-primary mb-3">Recommended Starting Points</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {explorePlatformCards.filter(card => card.priority).map((card) => (
+              <div 
+                key={card.id} 
+                className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 rounded-xl p-6 flex flex-col hover:shadow-lg hover:border-primary/40 transition-all"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                  <card.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{card.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{card.description}</p>
+                <Button 
+                  className="w-full min-h-[44px]"
+                  asChild
+                >
+                  <Link to={card.link}>{card.buttonText}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+          
+          {/* Secondary Cards - Explore by Format */}
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Explore by Format</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {explorePlatformCards.map((card) => (
+            {explorePlatformCards.filter(card => !card.priority).map((card) => (
               <div 
                 key={card.id} 
                 className="bg-card border border-border rounded-xl p-6 flex flex-col hover:shadow-lg transition-shadow"
@@ -548,8 +578,8 @@ export default function Index() {
               <Sparkles className="w-6 h-6" />
             </div>
             <div className="text-left">
-              <div className="font-semibold text-lg">Take the Persona Quiz</div>
-              <div className="text-sm opacity-80">Get your personalized research path</div>
+              <div className="font-semibold text-lg">Find Your Path</div>
+              <div className="text-sm opacity-80">Take the quiz for a personalized journey</div>
             </div>
           </button>
           <Link
