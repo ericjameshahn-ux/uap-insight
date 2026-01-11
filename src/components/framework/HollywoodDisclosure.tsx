@@ -48,7 +48,7 @@ export function HollywoodDisclosure() {
         <div className="mb-8">
           <p className="text-slate-500 text-xs font-mono tracking-widest mb-2">CONTROLLED DISCLOSURE</p>
           <h2 className="text-2xl md:text-3xl font-bold text-white">Hollywood as a Policy Tool</h2>
-          <p className="text-slate-400 mt-2 text-sm max-w-2xl">
+          <p className="text-slate-300 mt-2 text-sm max-w-2xl">
             Evidence suggests entertainment media has been used to manage public perception of UAP—both to debunk and to gradually acclimate.
           </p>
         </div>
