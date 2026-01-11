@@ -106,6 +106,29 @@ const FinancialFramework = () => {
   );
 };
 
+// Preload images utility
+const useImagePreloader = (imageUrls: string[]) => {
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    imageUrls.forEach((url) => {
+      if (loadedImages[url] || failedImages[url]) return;
+      
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImages((prev) => ({ ...prev, [url]: true }));
+      };
+      img.onerror = () => {
+        setFailedImages((prev) => ({ ...prev, [url]: true }));
+      };
+      img.src = url;
+    });
+  }, [imageUrls, loadedImages, failedImages]);
+
+  return { loadedImages, failedImages };
+};
+
 // --- 2. OPERATION FORTITUDE (Scroll-Triggered) ---
 const GhostArmySection = () => {
   const containerRef = useRef<HTMLElement>(null);
@@ -115,8 +138,9 @@ const GhostArmySection = () => {
   });
   
   const [activeStage, setActiveStage] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageTimeout, setImageTimeout] = useState(false);
+  
+  // Preload both images on mount
+  const { loadedImages, failedImages } = useImagePreloader([GHOST_ARMY_IMAGE, GERMAN_RECON_IMAGE]);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
@@ -127,22 +151,13 @@ const GhostArmySection = () => {
     });
   }, [scrollYProgress]);
   
-  // Reset image state when stage changes + timeout fallback
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageTimeout(false);
-    const timeout = setTimeout(() => {
-      setImageTimeout(true);
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [activeStage]);
-  
   const stages = [
     { 
       title: "GROUND TRUTH", 
       subtitle: "Full Context Available",
       description: "Four American soldiers easily carry a 'tank.' The 93-lb rubber decoy is part of the 23rd Headquarters Special Troops—the Ghost Army.",
       image: GHOST_ARMY_IMAGE,
+      fallbackText: "Ghost Army - Inflatable Tank Decoy, 1944",
       filter: "none", 
       transform: "scale(1)", 
       showRedaction: false, 
@@ -153,6 +168,7 @@ const GhostArmySection = () => {
       subtitle: "Classification Applied",
       description: "The image is marked classified. A redaction bar obscures the soldiers. Grain and age effects suggest archival reconnaissance footage.",
       image: GHOST_ARMY_IMAGE,
+      fallbackText: "Ghost Army - Classified View",
       filter: "grayscale(100%) contrast(120%) sepia(20%)", 
       transform: "scale(1)", 
       showRedaction: true, 
@@ -163,6 +179,7 @@ const GhostArmySection = () => {
       subtitle: "Context Lost",
       description: "Cropped to just the tank. Without the soldiers for scale, this appears to be genuine heavy armor—exactly what the deception intended.",
       image: GHOST_ARMY_IMAGE,
+      fallbackText: "Ghost Army - Cropped Tank View",
       filter: "grayscale(100%) contrast(150%) brightness(90%)", 
       transform: "scale(2.5) translate(-10%, -25%)", 
       showRedaction: false, 
@@ -173,6 +190,7 @@ const GhostArmySection = () => {
       subtitle: "False Conclusion",
       description: "German aerial reconnaissance confirms: FUSAG staging area with armored divisions at Calais. The assessment is methodologically sound—built entirely on controlled information.",
       image: GERMAN_RECON_IMAGE,
+      fallbackText: "German Reconnaissance - FUSAG Assessment",
       filter: "grayscale(100%) contrast(110%)", 
       transform: "scale(1)", 
       showRedaction: false, 
@@ -225,39 +243,37 @@ const GhostArmySection = () => {
             </div>
             
             <div className="relative aspect-video bg-stone-400 overflow-hidden">
-              {/* Loading skeleton with timeout */}
-              {!imageLoaded && !imageTimeout && (
+              {/* Loading state - only show if image not loaded yet */}
+              {!loadedImages[currentStage.image] && !failedImages[currentStage.image] && (
                 <div className="absolute inset-0 bg-stone-400 animate-pulse flex items-center justify-center z-10">
                   <div className="text-stone-600 text-sm font-mono">Loading image...</div>
                 </div>
               )}
-              {/* Timeout fallback */}
-              {!imageLoaded && imageTimeout && (
+              {/* Error fallback with descriptive text */}
+              {failedImages[currentStage.image] && (
                 <div className="absolute inset-0 bg-stone-300 flex items-center justify-center z-10">
-                  <div className="text-stone-500 text-sm font-mono text-center px-4">
-                    <p>Ghost Army - Operation Fortitude</p>
-                    <p className="text-xs mt-1">Inflatable tank decoys, 1944</p>
+                  <div className="text-stone-600 text-sm font-mono text-center px-4">
+                    <p className="font-semibold">{currentStage.fallbackText}</p>
+                    <p className="text-xs mt-2 text-stone-500">Historical imagery from Operation Fortitude</p>
                   </div>
                 </div>
               )}
               <img
                 src={currentStage.image}
                 alt="Ghost Army operation - Four soldiers carrying inflatable tank decoy"
-                className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-full h-full object-cover transition-all duration-700 ${loadedImages[currentStage.image] ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: currentStage.filter,
                   transform: currentStage.transform,
                   transformOrigin: 'center 40%'
                 }}
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageTimeout(true)}
               />
               
-              {currentStage.showRedaction && imageLoaded && (
+              {currentStage.showRedaction && loadedImages[currentStage.image] && (
                 <div className="absolute bottom-0 left-0 right-0 h-[35%] bg-black"></div>
               )}
               
-              {currentStage.showHUD && imageLoaded && (
+              {currentStage.showHUD && loadedImages[currentStage.image] && (
                 <div className="absolute inset-0 bg-green-900/40 border-4 border-green-500/60">
                   <div className="absolute top-3 left-3 text-green-400 font-mono text-xs space-y-1">
                     <p className="font-bold">LUFTWAFFE AUFKLÄRUNG</p>
@@ -338,8 +354,9 @@ const ManhattanProjectSection = () => {
   });
   
   const [activeStage, setActiveStage] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageTimeout, setImageTimeout] = useState(false);
+  
+  // Preload image on mount
+  const { loadedImages, failedImages } = useImagePreloader([MANHATTAN_IMAGE]);
   
   useEffect(() => {
     return scrollYProgress.on("change", (v) => {
@@ -349,21 +366,12 @@ const ManhattanProjectSection = () => {
     });
   }, [scrollYProgress]);
   
-  // Reset image state when stage changes + timeout fallback
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageTimeout(false);
-    const timeout = setTimeout(() => {
-      setImageTimeout(true);
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [activeStage]);
-  
   const stages = [
     { 
       title: "GROUND TRUTH", 
       subtitle: "Unfiltered Reality",
       description: "Workers pose with 'The Gadget'—the first atomic bomb, July 1945. The Manhattan Project employed 125,000 people across 30+ sites.",
+      fallbackText: "Oak Ridge K-25 Plant - Manhattan Project",
       filter: "none", 
       blur: 0, 
       showStamp: false, 
@@ -373,6 +381,7 @@ const ManhattanProjectSection = () => {
       title: "THE FILTER", 
       subtitle: "Atomic Energy Act Classification",
       description: "Under the 1946 Atomic Energy Act, all nuclear weapons information is 'born classified.' The DOE—not DoD—controls access. Even the Vice President was excluded.",
+      fallbackText: "Manhattan Project - Classified View",
       filter: "grayscale(100%) contrast(80%)", 
       blur: 8, 
       showStamp: true, 
@@ -382,6 +391,7 @@ const ManhattanProjectSection = () => {
       title: "THE MOSAIC", 
       subtitle: "What Analysts Actually Saw",
       description: "To outside observers: a large industrial facility, possibly a boiler or chemical processing unit. No military significance detected.",
+      fallbackText: "Manhattan Project - Industrial Assessment",
       filter: "grayscale(100%) contrast(200%) brightness(70%)", 
       blur: 15, 
       showStamp: false, 
@@ -434,33 +444,31 @@ const ManhattanProjectSection = () => {
             </div>
             
             <div className="relative aspect-video bg-slate-800 overflow-hidden">
-              {/* Loading skeleton with timeout */}
-              {!imageLoaded && !imageTimeout && (
+              {/* Loading state */}
+              {!loadedImages[MANHATTAN_IMAGE] && !failedImages[MANHATTAN_IMAGE] && (
                 <div className="absolute inset-0 bg-slate-700 animate-pulse flex items-center justify-center z-10">
-                  <div className="text-slate-500 text-sm font-mono">Loading...</div>
+                  <div className="text-slate-500 text-sm font-mono">Loading image...</div>
                 </div>
               )}
-              {/* Timeout fallback */}
-              {!imageLoaded && imageTimeout && (
+              {/* Error fallback */}
+              {failedImages[MANHATTAN_IMAGE] && (
                 <div className="absolute inset-0 bg-slate-600 flex items-center justify-center z-10">
                   <div className="text-slate-300 text-sm font-mono text-center px-4">
-                    <p>Oak Ridge K-25 Plant</p>
-                    <p className="text-xs mt-1">Manhattan Project, 1944</p>
+                    <p className="font-semibold">{currentStage.fallbackText}</p>
+                    <p className="text-xs mt-2 text-slate-400">Historical imagery from the Manhattan Project</p>
                   </div>
                 </div>
               )}
               <img
                 src={MANHATTAN_IMAGE}
                 alt="Oak Ridge K-25 Plant - Manhattan Project"
-                className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-full h-full object-cover transition-all duration-700 ${loadedImages[MANHATTAN_IMAGE] ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   filter: activeStage === 0 ? 'none' : `${currentStage.filter} blur(${currentStage.blur}px)`,
                 }}
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageTimeout(true)}
               />
               
-              {currentStage.showStamp && imageLoaded && (
+              {currentStage.showStamp && loadedImages[MANHATTAN_IMAGE] && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="border-4 border-red-600 px-8 py-4 bg-black/70 rotate-[-10deg]">
                     <p className="text-red-500 font-bold text-xl tracking-widest">RESTRICTED DATA</p>
@@ -469,7 +477,7 @@ const ManhattanProjectSection = () => {
                 </div>
               )}
               
-              {currentStage.showHUD && imageLoaded && (
+              {currentStage.showHUD && loadedImages[MANHATTAN_IMAGE] && (
                 <div className="absolute bottom-4 left-4 right-4 bg-amber-900/90 border-2 border-amber-500 p-4 rounded">
                   <p className="text-amber-300 font-mono text-xs mb-1">INDUSTRIAL SURVEY ASSESSMENT</p>
                   <p className="text-amber-100 font-mono text-sm">
