@@ -931,7 +931,7 @@ const UAPMosaicSection = () => {
   
   const categories: MosaicCategoryWithCounter[] = [
     {
-      id: 'physical',
+      id: 'physical-reality',
       title: 'Physical Reality & Capabilities',
       tier: 'HIGH',
       leadClaim: 'UAP are real physical objects exhibiting sensor-verified "Five Observables"',
@@ -943,73 +943,76 @@ const UAPMosaicSection = () => {
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'Skeptics argue many "observables" are artifacts of sensor systems (radar spoofing, parallax error where slow objects appear fast due to camera angle). Some objects may be adversarial electronic warfare designed to trick sensors.',
-        rebuttal: 'Does not account for multi-sensor corroboration occurring simultaneously, nor active engagement/mirroring behaviors observed visually by pilots like Cmdr. Fravor.'
+        text: 'Many "observables" may be sensor artifacts—radar spoofing, parallax error (slow objects appearing fast due to camera angle), thermal bloom, or bokeh effects. Some objects could be adversarial electronic warfare designed to trick sensors.',
+        rebuttal: 'Does not account for multi-sensor corroboration occurring simultaneously across different platforms, nor the active engagement/mirroring behaviors observed visually by trained pilots like Cmdr. David Fravor.'
       }
     },
     {
-      id: 'government',
+      id: 'government-knowledge',
       title: 'Government Knowledge & Programs',
       tier: 'HIGH',
       leadClaim: 'A "Legacy Program" for crash retrieval exists, hidden via IRAD and Title 50',
       claims: [
         { text: 'ICIG found Grusch complaint "credible and urgent"', source: 'Official determination 2022' },
-        { text: 'Senators wrote legislation targeting specific programs based on "credible evidence"', source: 'Schumer-Rounds UAPDA' },
+        { text: 'Senators wrote legislation targeting specific programs', source: 'Schumer-Rounds UAPDA' },
         { text: 'Multiple Presidents claim they were denied access', source: 'Clinton, Obama statements' },
-        { text: 'Wilson-Davis memo describes Admiral denied access by contractor', source: 'Leaked 2002 notes' }
+        { text: 'Wilson-Davis memo describes Admiral denied access', source: 'Leaked 2002 notes' }
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'AARO and Dr. Sean Kirkpatrick argue the "Legacy Program" narrative is "circular reporting"—a small group of interconnected true believers feeding the same rumors to each other for decades, creating an echo chamber with no physical proof.',
-        rebuttal: 'The ICIG found Grusch credible based on classified evidence, not rumors. Senior Senators wrote legislation based on "credible evidence and testimony" from vetted insiders.'
+        text: 'AARO argues the "Legacy Program" narrative is a "textbook example of circular reporting"—a small group of interconnected true believers feeding the same rumors to each other for decades, creating an echo chamber without physical proof.',
+        rebuttal: 'The ICIG found Grusch credible based on classified evidence unavailable to AARO critics. Senior Senators with clearances wrote legislation based on "credible evidence and testimony" from vetted insiders with firsthand knowledge.'
       }
     },
     {
-      id: 'retrieval',
+      id: 'retrieval-possession',
       title: 'Retrieval & Possession',
       tier: 'MEDIUM',
       leadClaim: 'U.S. possesses craft with "no intakes, exhaust, wings, or fuel tanks"',
       claims: [
         { text: 'Grusch testified to recovery of "intact and partially intact vehicles"', source: 'Congressional testimony 2023' },
-        { text: 'Schumer Amendment included eminent domain over private materials', source: 'UAPDA draft language' },
-        { text: 'Multiple firsthand witnesses named to Congress', source: 'Classified briefings' }
+        { text: 'Schumer Amendment included eminent domain provisions', source: 'UAPDA draft language' },
+        { text: 'Multiple firsthand witnesses named to Congress', source: 'Classified briefings' },
+        { text: 'Lacatski confirmed "ichthyoid craft of unknown origin" in book', source: 'Inside the US Government Covert UFO Program' }
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'No publicly verifiable chain-of-custody for any alleged recovered material. AARO states it has found no evidence of crash retrieval programs. Claims rely on secondhand testimony.',
-        rebuttal: 'Whistleblowers claim evidence exists in classified settings. The legislative language explicitly targeting "technologies of unknown origin" in private hands suggests Congress believes materials exist.'
+        text: 'No publicly verifiable chain-of-custody exists for any alleged recovered material. AARO states it has found no evidence of crash retrieval programs. All claims rely on secondhand or classified testimony that cannot be independently verified.',
+        rebuttal: 'Whistleblowers claim evidence exists in classified settings inaccessible to public review. The legislative language explicitly targeting "technologies of unknown origin" held by private contractors suggests Congress believes materials exist based on briefings.'
       }
     },
     {
-      id: 'biologics',
+      id: 'non-human-biologics',
       title: 'Non-Human Biologics & Intelligence',
       tier: 'MEDIUM',
       leadClaim: '"Non-human biologics" recovered alongside crashed craft',
       claims: [
         { text: 'Grusch testified under oath to recovery of "non-human biologics"', source: 'Congressional testimony 2023' },
         { text: 'Dr. Garry Nolan identified brain anomalies in experiencers', source: 'Stanford research' },
-        { text: 'Varginha incident includes medical testimony of non-human entity', source: 'Brazilian witnesses' }
+        { text: 'Col. Karl Nell stated "zero doubt" NHI has interacted with humanity', source: 'SOL Foundation 2024' },
+        { text: 'Varginha incident includes medical testimony', source: 'Brazilian witnesses 1996' }
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'Descriptions of "Greys" are too anthropomorphic—convergent evolution is unlikely to produce bipedal humanoids. Reports of telepathy are dismissed as hallucinations or high-stress psychological states.',
-        rebuttal: 'Medical professionals (Dr. Venturelli) testified to direct interaction. Dr. Nolan\'s research identified physical biomarkers (caudate-putamen density) in experiencers, suggesting measurable effects.'
+        text: 'Descriptions of "Greys" are suspiciously anthropomorphic—convergent evolution producing bipedal humanoids is statistically improbable. Reports of telepathic communication are dismissed as hallucinations, false memories, or high-stress psychological states.',
+        rebuttal: 'Medical professionals (Dr. Venturelli in Varginha) testified to direct physical interaction with non-human entities. Dr. Nolan\'s research identified measurable physical biomarkers (caudate-putamen density) in experiencers, suggesting phenomenon produces real effects.'
       }
     },
     {
-      id: 'physics',
+      id: 'physics-technology',
       title: 'Physics & Technology',
       tier: 'MEDIUM',
       leadClaim: 'Sensor data confirms Mach 30+ movement with no sonic boom',
       claims: [
         { text: 'Navy filed patents for "inertial mass reduction" technology', source: 'USPTO filings 2016-2019' },
         { text: 'Metamaterials with anomalous isotope ratios analyzed', source: 'TTSA, Nolan research' },
-        { text: 'Theoretical frameworks exist (Alcubierre metric)', source: 'Peer-reviewed physics' }
+        { text: 'Alcubierre metric shows warp drives theoretically possible', source: 'Peer-reviewed physics' },
+        { text: 'DIRDs covered warp drive, wormholes, exotic propulsion', source: 'AATIP documents' }
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'The Navy\'s HEEMFG experiment ($508K) failed to produce measurable mass reduction—the "Pais Effect" could not be proven. Energy density required approaches the Schwinger Limit, currently impossible to engineer.',
-        rebuttal: 'Proponents argue failure was due to material limitations (dielectric breakdown), not flawed physics. The theory remains mathematically consistent with General Relativity.'
+        text: 'The Navy\'s HEEMFG experiment ($508K) failed to produce any measurable mass reduction—the "Pais Effect" could not be demonstrated. Energy density required for metric engineering approaches the Schwinger Limit, which is currently impossible to engineer with known materials.',
+        rebuttal: 'Proponents argue the experiment\'s failure was due to material limitations (dielectric breakdown) rather than flawed physics. The underlying theory remains mathematically consistent with General Relativity, suggesting engineering challenges rather than impossibility.'
       }
     },
     {
@@ -1020,12 +1023,13 @@ const UAPMosaicSection = () => {
       claims: [
         { text: 'Multiple nations have official UAP investigation programs', source: 'France, UK, Brazil, etc.' },
         { text: 'China reportedly established dedicated UAP research unit', source: 'Liberation Times 2023' },
-        { text: 'Former officials warn of "catastrophic intelligence failure" if adversary tech', source: 'Congressional testimony' }
+        { text: 'Former officials warn of "catastrophic intelligence failure"', source: 'Congressional testimony' },
+        { text: 'Competition for exotic tech may explain secrecy', source: 'Strategic analysis' }
       ],
       counterArgument: {
         title: 'Strongest Counter',
-        text: 'If adversaries had breakthrough propulsion, they would likely use it for strategic advantage rather than buzzing US carriers. No confirmed evidence any nation has achieved exotic propulsion.',
-        rebuttal: 'The lack of visible deployment could indicate the technology is not yet weaponizable, or that all parties are in similar stages of reverse-engineering attempts.'
+        text: 'If any adversary had achieved breakthrough propulsion from reverse-engineering, they would likely deploy it for strategic advantage rather than buzzing US carriers with it. No confirmed evidence exists that any nation has successfully weaponized exotic propulsion.',
+        rebuttal: 'The lack of visible deployment could indicate the technology is not yet weaponizable, or that all parties are in similar early stages of reverse-engineering attempts. Mutual secrecy benefits all parties if no one has achieved a decisive breakthrough.'
       }
     }
   ];
