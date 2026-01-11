@@ -1,42 +1,49 @@
 import { useState } from "react";
-import { Sparkles, ExternalLink, ArrowLeft, FlaskConical, History, Target, Search, Zap, Scale, Microscope } from "lucide-react";
+import { Sparkles, ExternalLink, ArrowLeft, FlaskConical, History, Target, Search, Zap, Scale, Microscope, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
 import { PersonaArchetype } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 const archetypes = [
   {
+    id: "empiricist",
     icon: Microscope,
     emoji: "🔬",
     name: "The Empiricist",
     description: "Sensor data and multi-source confirmation first",
   },
   {
+    id: "historian",
     icon: History,
     emoji: "📚",
     name: "The Historian",
     description: "Patterns across decades and policy evolution",
   },
   {
+    id: "strategist",
     icon: Target,
     emoji: "♟️",
     name: "The Strategist",
     description: "National security and institutional behavior",
   },
   {
+    id: "investigator",
     icon: Search,
     emoji: "🔍",
     name: "The Investigator",
     description: "Case forensics and witness credibility",
   },
   {
+    id: "debunker", // Database ID - displays as "The Skeptic"
     icon: Scale,
     emoji: "⚖️",
     name: "The Skeptic",
     description: "Falsification and prosaic explanations first",
   },
   {
+    id: "technologist",
     icon: Zap,
     emoji: "⚡",
     name: "The Technologist",
@@ -47,7 +54,16 @@ const archetypes = [
 export default function AboutQuiz() {
   const navigate = useNavigate();
   const [showQuiz, setShowQuiz] = useState(false);
+  const { toast } = useToast();
 
+  const handleSelectProfile = (archetype: typeof archetypes[0]) => {
+    localStorage.setItem('uap_primary_archetype', archetype.id);
+    toast({
+      title: `Research profile set to ${archetype.name}`,
+      description: "Your personalized path is now active.",
+    });
+    navigate('/mosaic');
+  };
   const handleQuizComplete = (primary: PersonaArchetype, secondary: PersonaArchetype, path: string[]) => {
     if (path.length > 0) {
       navigate(`/section/${path[0].toLowerCase()}`);
@@ -95,18 +111,32 @@ export default function AboutQuiz() {
       {/* Archetypes Grid */}
       <div className="mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
         <h2 className="text-lg font-semibold mb-4">The 6 Research Profiles</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Each research profile offers a curated path through the UAP Navigator's evidence sections. 
+          Select your profile below to see content prioritized for your analytical approach.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {archetypes.map((archetype) => (
-            <div 
-              key={archetype.name} 
-              className="card-elevated p-4 flex items-start gap-3"
+            <button
+              key={archetype.id}
+              onClick={() => handleSelectProfile(archetype)}
+              className="w-full text-left p-4 rounded-lg border border-border/50 bg-card/30 
+                         hover:bg-card/60 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10
+                         transition-all duration-200 cursor-pointer group"
             >
-              <span className="text-2xl">{archetype.emoji}</span>
-              <div>
-                <h3 className="font-semibold">{archetype.name}</h3>
-                <p className="text-sm text-muted-foreground">{archetype.description}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">{archetype.emoji}</span>
+                  <div>
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {archetype.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{archetype.description}</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
