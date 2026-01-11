@@ -9,11 +9,10 @@ import {
   Eye, Filter, Layers, ChevronDown, ChevronUp, ChevronsDown, ChevronsUp,
   AlertTriangle, Lock, Radio, FileText, Building2, 
   Glasses, Check, BookOpen, Search, Shield, Scale,
-  Microscope, History, Target, Zap,
+  Microscope, History, Target, Zap, Network, ArrowRight, Clock, Users,
   Banknote, GraduationCap, MessageCircle
 } from 'lucide-react';
 import { PageStatusBanner } from '@/components/PageStatusBanner';
-import { GroundTruthHypotheses } from '@/components/framework/GroundTruthHypotheses';
 import { ClassificationQuotes } from '@/components/framework/ClassificationQuotes';
 import { HollywoodDisclosure } from '@/components/framework/HollywoodDisclosure';
 
@@ -538,6 +537,108 @@ const TransitionSection = () => (
       <p className="text-slate-300">
         You've seen how filters work. Now apply this framework to UAP.
       </p>
+    </div>
+  </section>
+);
+
+// --- GROUND TRUTH CTA (Links to Hypothesis Explorer) ---
+const GroundTruthCTA = () => (
+  <section className="py-16 px-6 bg-slate-800">
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <p className="text-blue-400 text-sm tracking-widest mb-2">APPLYING THE FRAMEWORK</p>
+        <h2 className="text-3xl font-bold text-white mb-4">Ground Truth: The Space of Possibilities</h2>
+        <p className="text-slate-300 max-w-2xl mx-auto">
+          By definition, we're working with incomplete information. The "ground truth" is unknown. 
+          What we CAN do is map the space of what COULD be happening.
+        </p>
+      </div>
+
+      {/* Quick Preview - 7 Category Pills */}
+      <div className="flex flex-wrap justify-center gap-2 mb-8">
+        <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm">Prosaic</span>
+        <span className="px-3 py-1 bg-blue-900 text-blue-300 rounded-full text-sm">Physical Non-Human</span>
+        <span className="px-3 py-1 bg-purple-900 text-purple-300 rounded-full text-sm">Meta-Physical</span>
+        <span className="px-3 py-1 bg-indigo-900 text-indigo-300 rounded-full text-sm">Consciousness</span>
+        <span className="px-3 py-1 bg-amber-900 text-amber-300 rounded-full text-sm">Spiritual</span>
+        <span className="px-3 py-1 bg-rose-900 text-rose-300 rounded-full text-sm">Hybrid</span>
+        <span className="px-3 py-1 bg-slate-700 text-slate-300 rounded-full text-sm">Other/Unknown</span>
+      </div>
+
+      {/* CTA Button */}
+      <div className="text-center mb-10">
+        <Link 
+          to="/hypotheses"
+          className="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105 shadow-lg"
+        >
+          <Network className="w-5 h-5" />
+          Explore All 7 Hypothesis Categories
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+        <p className="text-slate-400 text-sm mt-3">
+          Detailed breakdown with proponents, evidence, and counter-arguments
+        </p>
+      </div>
+
+      {/* Keep the AARO Semantics Callout - This is important context */}
+      <div className="bg-amber-900/30 border border-amber-500/50 rounded-lg p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
+          <div>
+            <h4 className="text-amber-400 font-semibold mb-2">Critical Semantic Note: "ET" vs "NHI"</h4>
+            <p className="text-slate-300 text-sm mb-3">
+              AARO has repeatedly denied finding evidence of <strong className="text-white">"extraterrestrial"</strong> activity. 
+              However, they carefully <strong className="text-white">avoid</strong> using the term <strong className="text-white">"Non-Human Intelligence" (NHI)</strong>—the 
+              term Congress uses in legislation.
+            </p>
+            <p className="text-slate-400 text-sm italic">
+              If the phenomenon is interdimensional, cryptoterrestrial, or extra-temporal, it is technically 
+              NOT "extraterrestrial." This allows truthful denial while avoiding the broader question.
+            </p>
+            <p className="text-amber-400 text-sm mt-3 font-medium">
+              — Dr. James Lacatski (DIA) confirmed the US has a "craft of unknown origin" but carefully 
+              avoided the word "extraterrestrial," saying only: "We can be pretty well sure we're not dealing with humans."
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// --- CONTINUE YOUR INVESTIGATION SECTION ---
+const ContinueInvestigationSection = () => (
+  <section className="py-12 px-6 bg-slate-900 border-t border-slate-800">
+    <div className="max-w-4xl mx-auto text-center">
+      <p className="text-slate-500 text-sm tracking-widest mb-2">CONTINUE YOUR INVESTIGATION</p>
+      <h2 className="text-2xl font-bold text-white mb-8">Dig Deeper</h2>
+      
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link to="/hypotheses" className="p-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group text-left">
+          <Network className="w-6 h-6 text-blue-400 mb-2" />
+          <h3 className="font-semibold text-white">Hypothesis Explorer</h3>
+          <p className="text-sm text-slate-400">7 origin categories</p>
+        </Link>
+        
+        <Link to="/claims" className="p-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group text-left">
+          <FileText className="w-6 h-6 text-green-400 mb-2" />
+          <h3 className="font-semibold text-white">Claims Database</h3>
+          <p className="text-sm text-slate-400">180+ falsifiable claims</p>
+        </Link>
+        
+        <Link to="/timeline" className="p-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group text-left">
+          <Clock className="w-6 h-6 text-purple-400 mb-2" />
+          <h3 className="font-semibold text-white">Timeline</h3>
+          <p className="text-sm text-slate-400">128 key events</p>
+        </Link>
+        
+        <Link to="/quiz" className="p-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group text-left">
+          <Users className="w-6 h-6 text-amber-400 mb-2" />
+          <h3 className="font-semibold text-white">Find Your Lens</h3>
+          <p className="text-sm text-slate-400">Take the persona quiz</p>
+        </Link>
+      </div>
     </div>
   </section>
 );
@@ -1276,8 +1377,8 @@ export default function MosaicTheoryFramework() {
       <ManhattanProjectSection />
       <TransitionSection />
       
-      {/* PART 2: GROUND TRUTH - The Space of Possibilities */}
-      <GroundTruthHypotheses />
+      {/* PART 2: GROUND TRUTH - CTA to Hypothesis Explorer */}
+      <GroundTruthCTA />
       
       {/* PART 3: THE FILTER - Enhanced with Classification Quotes + Hollywood */}
       <ClassificationQuotes />
@@ -1290,6 +1391,9 @@ export default function MosaicTheoryFramework() {
       {/* PART 5: OBSERVER LENS */}
       <AssumptionsAuditSection />
       <PersonaFooter />
+      
+      {/* Continue Your Investigation Links */}
+      <ContinueInvestigationSection />
     </div>
   );
 }
