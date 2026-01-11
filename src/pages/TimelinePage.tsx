@@ -13,7 +13,6 @@ import {
   Microscope,
   Scale,
   MessageSquare,
-  PlayCircle,
   ExternalLink,
   ChevronDown,
   ChevronsDown,
@@ -81,7 +80,7 @@ function getYouTubeId(url: string): string | null {
 
 export default function TimelinePage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [videos, setVideos] = useState<{ id: string; title: string; url: string; description: string | null; section_id: string | null }[]>([]);
+  // Removed: videos state - now only using junction table
   const [loading, setLoading] = useState(true);
   const [activeEra, setActiveEra] = useState(4);
   const [filterTier, setFilterTier] = useState<string | null>(null);
@@ -113,16 +112,7 @@ export default function TimelinePage() {
       setEvents(eventsData || []);
     }
 
-    // Fetch videos
-    const { data: videosData, error: videosError } = await supabase
-      .from("videos")
-      .select("id, title, url, description, section_id");
-
-    if (videosError) {
-      console.error("Error fetching videos:", videosError);
-    } else {
-      setVideos(videosData || []);
-    }
+    // Note: Videos are fetched per-event via fetchLinkedVideos using junction table
 
     // Fetch video counts for all events (for showing video badges on cards)
     const { data: videoCountsData, error: videoCountsError } = await supabase
@@ -165,27 +155,8 @@ export default function TimelinePage() {
   const filteredMilestones = filteredEvents.filter(e => e.is_milestone).length;
   const filteredHighCredibility = filteredEvents.filter(e => e.tier === "HIGH").length;
 
-  const getRelatedVideos = (event: TimelineEvent) => {
-    if (event.year < 2024) return [];
-    
-    return videos.filter((video) => {
-      if (event.key_figures) {
-        for (const figure of event.key_figures) {
-          const figureName = figure.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-          if (video.title.toLowerCase().includes(figureName.toLowerCase())) {
-            return true;
-          }
-        }
-      }
-      const keywords = event.title.toLowerCase().split(" ").filter(w => w.length > 4);
-      for (const keyword of keywords) {
-        if (video.title.toLowerCase().includes(keyword)) {
-          return true;
-        }
-      }
-      return false;
-    }).slice(0, 3);
-  };
+  // REMOVED: Old keyword-based getRelatedVideos function
+  // Videos are now ONLY fetched from timeline_event_videos junction table
 
   const clearFilters = () => {
     setFilterTier(null);
@@ -500,7 +471,6 @@ export default function TimelinePage() {
                     {eventsByYear[year].map((event) => {
                       const Icon = categoryIcons[event.category] || FileText;
                       const isExpanded = isEventExpanded(event.id);
-                      const relatedVideos = getRelatedVideos(event);
                       const eventLinkedVideos = linkedVideosMap[event.id] || [];
                       const isLoadingEventVideos = loadingVideos.has(event.id);
 
@@ -660,42 +630,6 @@ export default function TimelinePage() {
                                               </span>
                                             )}
                                             <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
-                                          </a>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                ) : relatedVideos.length > 0 ? (
-                                  // Fallback to keyword-based matching for older events
-                                  <div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                                      <PlayCircle className="h-4 w-4" /> Related Videos
-                                    </div>
-                                    <div className="space-y-2">
-                                      {relatedVideos.map((video) => {
-                                        const videoId = getYouTubeId(video.url);
-                                        return (
-                                          <a
-                                            key={video.id}
-                                            href={video.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="flex items-center gap-3 p-2 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
-                                          >
-                                            {videoId && (
-                                              <img
-                                                src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-                                                alt=""
-                                                className="w-24 h-14 object-cover rounded"
-                                              />
-                                            )}
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                                                {video.title}
-                                              </p>
-                                            </div>
-                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
                                           </a>
                                         );
                                       })}
