@@ -22,7 +22,7 @@ import OldStart1 from "./pages/OldStart1";
 import OldStart2 from "./pages/OldStart2";
 import MosaicTheoryFramework from "./pages/MosaicTheoryFramework";
 import Observables from "./pages/Observables";
-import Hypotheses from "./pages/Hypotheses";
+import HypothesisExplorer from "./pages/HypothesisExplorer";
 import SectionN from "./pages/SectionN";
 import Institutional from "./pages/Institutional";
 import HowSecrecyWorks from "./pages/HowSecrecyWorks";
@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/old-start-2" element={<OldStart2 />} />
             <Route path="/framework" element={<MosaicTheoryFramework />} />
             <Route path="/observables" element={<Observables />} />
-            <Route path="/hypotheses" element={<Hypotheses />} />
+            <Route path="/hypotheses" element={<HypothesisExplorer />} />
             <Route path="/sections" element={<Sections />} />
             <Route path="/section/n" element={<SectionN />} />
             <Route path="/section/:sectionId" element={<SectionPage />} />
