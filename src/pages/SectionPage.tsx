@@ -320,25 +320,25 @@ export default function SectionPage() {
     
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-8">
-        <Card className="border-slate-700 bg-slate-900/30">
+        <Card className="border-indigo-700 bg-indigo-900/90">
           <CollapsibleTrigger asChild>
             <button className="w-full text-left">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-slate-400" />
+                    <Scale className="h-5 w-5 text-amber-400" />
                     <div>
-                      <CardTitle className="text-base text-slate-300">
+                      <CardTitle className="text-base text-amber-400 font-semibold">
                         Strongest Counter-Arguments
                       </CardTitle>
-                      <CardDescription className="text-xs text-slate-500">
+                      <CardDescription className="text-xs text-indigo-200">
                         Steel-man the skeptical position
                       </CardDescription>
                     </div>
                   </div>
                   <ChevronDown 
                     className={cn(
-                      "h-5 w-5 text-slate-500 transition-transform duration-200",
+                      "h-5 w-5 text-indigo-300 transition-transform duration-200",
                       isOpen && "rotate-180"
                     )} 
                   />
@@ -347,7 +347,7 @@ export default function SectionPage() {
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="pt-0 text-sm text-slate-200 leading-relaxed">
+            <CardContent className="pt-0 text-sm text-white leading-relaxed [&_strong]:text-amber-300 [&_em]:text-indigo-100">
               {renderMarkdown(content)}
             </CardContent>
           </CollapsibleContent>
