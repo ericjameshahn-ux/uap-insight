@@ -143,6 +143,24 @@ export interface GlossaryTerm {
   created_at?: string;
 }
 
+export interface SectionPrompt {
+  id: string;
+  section_id: string;
+  title: string;
+  prompt: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
+export interface PersonaLens {
+  id: string;
+  name: string;
+  short_desc: string;
+  icon: string;
+  lens: string;
+  sort_order: number;
+}
+
 // Helper to get or create user ID
 export function getUserId(): string {
   let userId = localStorage.getItem('uap_user_id');
