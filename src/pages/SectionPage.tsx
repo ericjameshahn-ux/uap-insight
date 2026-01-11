@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, X, Play, Video as VideoIcon, ChevronRight, FileText, Sparkles, MessageCircle, Scale, ChevronDown } from "lucide-react";
 import { SectionAIQueryButton } from "@/components/SectionAIQueryButton";
+import { SectionExecutiveSummary } from "@/components/SectionExecutiveSummary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -438,6 +439,9 @@ export default function SectionPage() {
           {renderMarkdown(section.section_summary)}
         </div>
       )}
+
+      {/* Executive Summary - Key Insight */}
+      <SectionExecutiveSummary sectionId={sectionId || ''} />
 
       {/* AI Query Button */}
       <SectionAIQueryButton sectionId={sectionId || ''} sectionTitle={section.title} />
