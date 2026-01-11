@@ -46,7 +46,7 @@ export function HollywoodDisclosure() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-slate-500 text-xs font-mono tracking-widest mb-2">CONTROLLED DISCLOSURE</p>
+          <p className="text-slate-400 text-xs font-mono tracking-widest mb-2">CONTROLLED DISCLOSURE</p>
           <h2 className="text-2xl md:text-3xl font-bold text-white">Hollywood as a Policy Tool</h2>
           <p className="text-slate-300 mt-2 text-sm max-w-2xl">
             Evidence suggests entertainment media has been used to manage public perception of UAP—both to debunk and to gradually acclimate.
@@ -68,7 +68,7 @@ export function HollywoodDisclosure() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-white text-sm">{item.title}</h3>
-                    <p className="text-slate-500 text-xs">{item.date}</p>
+                    <p className="text-slate-400 text-xs">{item.date}</p>
                   </div>
                 </div>
                 
@@ -80,7 +80,7 @@ export function HollywoodDisclosure() {
                   {item.content}
                 </p>
                 
-                <p className="text-slate-500 text-xs italic">
+                <p className="text-slate-400 text-xs italic">
                   Source: {item.source}
                 </p>
               </div>
