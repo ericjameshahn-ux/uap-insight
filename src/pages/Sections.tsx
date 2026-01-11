@@ -57,7 +57,7 @@ const Sections = () => {
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sections?.map((section, i) => (
+        {sections?.filter(section => section.letter).map((section, i) => (
           <Link 
             key={section.id} 
             to={`/section/${section.letter.toLowerCase()}`}
