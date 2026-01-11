@@ -194,7 +194,7 @@ export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMM
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
     const personaMap: Record<string, string> = {
-      'skeptic': 'debunker',
+      'debunker': 'skeptic',
       'experiencer': 'empiricist',
       'meaning_seeker': 'historian',
     };

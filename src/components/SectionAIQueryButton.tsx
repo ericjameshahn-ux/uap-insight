@@ -110,9 +110,9 @@ export function SectionAIQueryButton({
   // Load user's persona preference from localStorage
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
-    // Map old persona keys to new ones if needed
+    // Map old persona keys to new ones (map old values to new)
     const personaMap: Record<string, string> = {
-      'skeptic': 'debunker',
+      'debunker': 'skeptic',
       'experiencer': 'empiricist',
       'meaning_seeker': 'historian',
     };

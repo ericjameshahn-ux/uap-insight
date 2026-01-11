@@ -87,7 +87,7 @@ const journeys = [
     duration: "55 min",
     description: "UAP and consciousness research",
     gradient: "from-emerald-500/10 to-teal-500/10",
-    personas: ["Experiencer", "Meaning-Seeker"],
+    personas: ["Empiricist", "Historian"],
   },
 ];
 

@@ -260,14 +260,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {sections.filter(section => section.letter != null).map((section) => {
-                const path = section.letter === '🧩'
+                const sectionPath = section.letter === '🧩'
                   ? '/framework'
                   : section.letter === '5+1' 
                     ? '/observables' 
                     : section.letter === '🔮'
                       ? '/hypotheses'
                       : `/section/${section.letter.toLowerCase()}`;
-                const active = isActive(path);
+                // Use exact match for section routes to prevent false positives
+                const active = location.pathname === sectionPath || 
+                  (sectionPath.startsWith('/section/') && location.pathname.startsWith(sectionPath + '/'));
                 const inPath = isInPath(section.letter);
                 const isNextInPath = userPath.length > 0 && pathIndex < userPath.length && 
                   section.letter.toLowerCase() === userPath[pathIndex];
@@ -277,7 +279,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={section.id}>
                     <SidebarMenuButton asChild>
                       <Link
-                        to={path}
+                        to={sectionPath}
                         className={cn(
                           "flex items-center gap-3 px-4 py-2 rounded-md transition-all relative",
                           // Active page styling - prominent left border
