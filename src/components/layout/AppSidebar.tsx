@@ -41,7 +41,7 @@ import { supabase, Section } from "@/lib/supabase";
 const specialSections: Section[] = [
   { id: 'mosaic-framework', letter: '🧩', title: 'Start Here', conviction: 'INFO', description: '', sort_order: -2 },
   { id: 'observables', letter: '5+1', title: 'The Six Observables', conviction: 'HIGH', description: '', sort_order: 0 },
-  { id: 'hypotheses', letter: '🔮', title: 'Emerging Hypotheses', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
+  { id: 'hypotheses', letter: '🔮', title: 'Hypothesis Explorer', conviction: 'MEDIUM', description: '', sort_order: 0.5 },
 ];
 
 // Fallback sections data when database isn't connected
