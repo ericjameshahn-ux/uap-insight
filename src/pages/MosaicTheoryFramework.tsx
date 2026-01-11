@@ -800,10 +800,35 @@ interface MosaicCategory {
 }
 
 // --- 5. UAP MOSAIC CATEGORIES (6 Categories) ---
+interface MosaicCategoryWithCounter {
+  id: string;
+  title: string;
+  tier: 'HIGH' | 'MEDIUM';
+  leadClaim: string;
+  claims: { text: string; source: string }[];
+  counterArgument: {
+    title: string;
+    text: string;
+    rebuttal: string;
+  };
+}
+
 const UAPMosaicSection = () => {
-  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [openCards, setOpenCards] = useState<Set<string>>(new Set());
   
-  const categories: MosaicCategory[] = [
+  const toggleCard = (id: string) => {
+    setOpenCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+  
+  const categories: MosaicCategoryWithCounter[] = [
     {
       id: 'physical',
       title: 'Physical Reality & Capabilities',
@@ -814,7 +839,12 @@ const UAPMosaicSection = () => {
         { text: 'Instantaneous acceleration exceeding 100g (Nimitz Tic Tac)', source: 'Fravor testimony' },
         { text: 'Transmedium travel without hydrodynamic disruption', source: 'USS Omaha footage' },
         { text: 'Objects lack visible propulsion, wings, or control surfaces', source: 'Multiple pilot accounts' }
-      ]
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'Skeptics argue many "observables" are artifacts of sensor systems (radar spoofing, parallax error where slow objects appear fast due to camera angle). Some objects may be adversarial electronic warfare designed to trick sensors.',
+        rebuttal: 'Does not account for multi-sensor corroboration occurring simultaneously, nor active engagement/mirroring behaviors observed visually by pilots like Cmdr. Fravor.'
+      }
     },
     {
       id: 'government',
@@ -822,11 +852,16 @@ const UAPMosaicSection = () => {
       tier: 'HIGH',
       leadClaim: 'A "Legacy Program" for crash retrieval exists, hidden via IRAD and Title 50',
       claims: [
-        { text: 'ICIG deemed Grusch complaint "credible and urgent"', source: 'ICIG finding 2023' },
-        { text: '"Immaculate Constellation" consolidates UAP imagery using AI', source: 'Brown report 2024' },
-        { text: '"Kona Blue" may be active despite AARO denial', source: 'Lacatski 2025' },
-        { text: 'Programs nested in Waived SAPs, evading Gang of Eight', source: 'Grusch testimony' }
-      ]
+        { text: 'ICIG found Grusch complaint "credible and urgent"', source: 'Official determination 2022' },
+        { text: 'Senators wrote legislation targeting specific programs based on "credible evidence"', source: 'Schumer-Rounds UAPDA' },
+        { text: 'Multiple Presidents claim they were denied access', source: 'Clinton, Obama statements' },
+        { text: 'Wilson-Davis memo describes Admiral denied access by contractor', source: 'Leaked 2002 notes' }
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'AARO and Dr. Sean Kirkpatrick argue the "Legacy Program" narrative is "circular reporting"—a small group of interconnected true believers feeding the same rumors to each other for decades, creating an echo chamber with no physical proof.',
+        rebuttal: 'The ICIG found Grusch credible based on classified evidence, not rumors. Senior Senators wrote legislation based on "credible evidence and testimony" from vetted insiders.'
+      }
     },
     {
       id: 'retrieval',
@@ -834,11 +869,15 @@ const UAPMosaicSection = () => {
       tier: 'MEDIUM',
       leadClaim: 'U.S. possesses craft with "no intakes, exhaust, wings, or fuel tanks"',
       claims: [
-        { text: 'Craft interior accessed per DOPSR-cleared publication', source: 'Lacatski book' },
-        { text: '1933 Magenta, Italy recovery transferred to US 1944-45', source: 'Grusch testimony' },
-        { text: 'Metamaterials (Bi/Mg layers) with anomalous isotopic ratios', source: 'Nolan analysis' },
-        { text: '"Over 10" craft in custody per insider claims', source: 'Puthoff 2025' }
-      ]
+        { text: 'Grusch testified to recovery of "intact and partially intact vehicles"', source: 'Congressional testimony 2023' },
+        { text: 'Schumer Amendment included eminent domain over private materials', source: 'UAPDA draft language' },
+        { text: 'Multiple firsthand witnesses named to Congress', source: 'Classified briefings' }
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'No publicly verifiable chain-of-custody for any alleged recovered material. AARO states it has found no evidence of crash retrieval programs. Claims rely on secondhand testimony.',
+        rebuttal: 'Whistleblowers claim evidence exists in classified settings. The legislative language explicitly targeting "technologies of unknown origin" in private hands suggests Congress believes materials exist.'
+      }
     },
     {
       id: 'biologics',
@@ -846,11 +885,15 @@ const UAPMosaicSection = () => {
       tier: 'MEDIUM',
       leadClaim: '"Non-human biologics" recovered alongside crashed craft',
       claims: [
-        { text: 'Bodies/pilots recovered per sworn Congressional testimony', source: 'Grusch 2023' },
-        { text: 'Telepathic communication reported by neurosurgeon (Varginha)', source: 'Venturelli testimony' },
-        { text: 'Brain anomalies (caudate-putamen) in experiencers', source: 'Nolan research' },
-        { text: '"Non-human intelligence exists" per Army Task Force lead', source: 'Karl Nell' }
-      ]
+        { text: 'Grusch testified under oath to recovery of "non-human biologics"', source: 'Congressional testimony 2023' },
+        { text: 'Dr. Garry Nolan identified brain anomalies in experiencers', source: 'Stanford research' },
+        { text: 'Varginha incident includes medical testimony of non-human entity', source: 'Brazilian witnesses' }
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'Descriptions of "Greys" are too anthropomorphic—convergent evolution is unlikely to produce bipedal humanoids. Reports of telepathy are dismissed as hallucinations or high-stress psychological states.',
+        rebuttal: 'Medical professionals (Dr. Venturelli) testified to direct interaction. Dr. Nolan\'s research identified physical biomarkers (caudate-putamen density) in experiencers, suggesting measurable effects.'
+      }
     },
     {
       id: 'physics',
@@ -858,11 +901,15 @@ const UAPMosaicSection = () => {
       tier: 'MEDIUM',
       leadClaim: 'Sensor data confirms Mach 30+ movement with no sonic boom',
       claims: [
-        { text: 'Pais Effect: Inertial mass reduction via vacuum polarization', source: 'Navy patents' },
-        { text: 'Metamaterials as terahertz waveguides for propulsion', source: 'Puthoff/Nolan' },
-        { text: 'Low Power Warp via Fröhlich condensates (theoretical)', source: 'Sarfatti papers' },
-        { text: 'Nuclear correlation: UAP activity at weapons facilities', source: 'Salas testimony' }
-      ]
+        { text: 'Navy filed patents for "inertial mass reduction" technology', source: 'USPTO filings 2016-2019' },
+        { text: 'Metamaterials with anomalous isotope ratios analyzed', source: 'TTSA, Nolan research' },
+        { text: 'Theoretical frameworks exist (Alcubierre metric)', source: 'Peer-reviewed physics' }
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'The Navy\'s HEEMFG experiment ($508K) failed to produce measurable mass reduction—the "Pais Effect" could not be proven. Energy density required approaches the Schwinger Limit, currently impossible to engineer.',
+        rebuttal: 'Proponents argue failure was due to material limitations (dielectric breakdown), not flawed physics. The theory remains mathematically consistent with General Relativity.'
+      }
     },
     {
       id: 'geopolitical',
@@ -870,66 +917,120 @@ const UAPMosaicSection = () => {
       tier: 'MEDIUM',
       leadClaim: 'US, China, and Russia racing to reverse-engineer UAP technology',
       claims: [
-        { text: 'US "absolutely" racing adversaries on reverse engineering', source: 'Lacatski 2025' },
-        { text: 'Disclosure framed as strategic necessity vs. China', source: 'Burchett/Luna' },
-        { text: 'Game theory equilibrium at mutual non-disclosure', source: 'Guthrie analysis' },
-        { text: 'Aerospace lobby killed Schumer disclosure provisions', source: 'Legislative record' }
-      ]
+        { text: 'Multiple nations have official UAP investigation programs', source: 'France, UK, Brazil, etc.' },
+        { text: 'China reportedly established dedicated UAP research unit', source: 'Liberation Times 2023' },
+        { text: 'Former officials warn of "catastrophic intelligence failure" if adversary tech', source: 'Congressional testimony' }
+      ],
+      counterArgument: {
+        title: 'Strongest Counter',
+        text: 'If adversaries had breakthrough propulsion, they would likely use it for strategic advantage rather than buzzing US carriers. No confirmed evidence any nation has achieved exotic propulsion.',
+        rebuttal: 'The lack of visible deployment could indicate the technology is not yet weaponizable, or that all parties are in similar stages of reverse-engineering attempts.'
+      }
     }
   ];
+  
+  const expandAll = () => setOpenCards(new Set(categories.map(c => c.id)));
+  const collapseAll = () => setOpenCards(new Set());
   
   return (
     <section className="bg-white py-16 px-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">THE AVAILABLE PIECES</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-zinc-900">The UAP Mosaic</h2>
-          <p className="text-zinc-600 mt-2">When you lay all fragments on the table, what picture emerges?</p>
+        {/* Header with Expand All button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="text-center sm:text-left flex-1">
+            <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">THE AVAILABLE PIECES</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900">The UAP Mosaic</h2>
+            <p className="text-zinc-600 mt-2">When you lay all fragments on the table, what picture emerges?</p>
+          </div>
+          <button 
+            onClick={openCards.size === categories.length ? collapseAll : expandAll}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white text-sm font-medium transition-colors"
+          >
+            {openCards.size === categories.length ? (
+              <>
+                <ChevronsUp className="w-4 h-4" />
+                COLLAPSE ALL
+              </>
+            ) : (
+              <>
+                <ChevronsDown className="w-4 h-4" />
+                EXPAND ALL
+              </>
+            )}
+          </button>
         </div>
         
         <div className="space-y-3">
-          {categories.map((category) => (
-            <div 
-              key={category.id}
-              className="border border-zinc-200 rounded-lg overflow-hidden"
-            >
-              <button
-                onClick={() => setOpenCategory(openCategory === category.id ? null : category.id)}
-                className="w-full p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors text-left"
+          {categories.map((category) => {
+            const isOpen = openCards.has(category.id);
+            
+            return (
+              <div 
+                key={category.id}
+                className="border border-zinc-200 rounded-lg overflow-hidden bg-white"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1 flex-wrap">
-                    <span className={`px-2 py-1 text-xs font-mono rounded ${
-                      category.tier === 'HIGH' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      {category.tier}
-                    </span>
-                    <h3 className="font-semibold text-zinc-900">{category.title}</h3>
+                <button
+                  onClick={() => toggleCard(category.id)}
+                  className="w-full p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors text-left"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <span className={`px-2 py-1 text-xs font-mono rounded ${
+                        category.tier === 'HIGH' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {category.tier}
+                      </span>
+                      <h3 className="font-semibold text-zinc-900">{category.title}</h3>
+                    </div>
+                    <p className="text-zinc-600 text-sm">{category.leadClaim}</p>
                   </div>
-                  <p className="text-zinc-600 text-sm">{category.leadClaim}</p>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform flex-shrink-0 ml-4 ${
-                  openCategory === category.id ? 'rotate-180' : ''
-                }`} />
-              </button>
-              
-              {openCategory === category.id && (
-                <div className="px-4 pb-4 border-t border-zinc-100 bg-zinc-50">
-                  <ul className="mt-3 space-y-3">
-                    {category.claims.map((claim, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <span className="text-zinc-700">{claim.text}</span>
-                          <span className="text-zinc-400 ml-1">— {claim.source}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
+                  <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform flex-shrink-0 ml-4 ${
+                    isOpen ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                
+                {isOpen && (
+                  <div className="px-4 pb-4 border-t border-zinc-100">
+                    {/* Supporting Evidence */}
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold text-green-600 uppercase tracking-wider mb-2">
+                        Supporting Evidence
+                      </p>
+                      <ul className="space-y-2">
+                        {category.claims.map((claim, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <span className="text-zinc-700">{claim.text}</span>
+                              <span className="text-zinc-400 ml-1">— {claim.source}</span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    {/* Counter-Argument Section */}
+                    <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-100">
+                      <p className="text-xs font-semibold text-red-600 uppercase tracking-wider mb-2">
+                        {category.counterArgument.title}
+                      </p>
+                      <p className="text-sm text-red-800 mb-3">
+                        {category.counterArgument.text}
+                      </p>
+                      <div className="pt-3 border-t border-red-200">
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                          Why It May Be Insufficient
+                        </p>
+                        <p className="text-sm text-slate-600 italic">
+                          {category.counterArgument.rebuttal}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
