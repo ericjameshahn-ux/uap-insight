@@ -1,18 +1,21 @@
-// Master Mosaic Theory Framework Page v2
-// Updated with NotebookLM research - Jan 2026
-// 6 Personas, 9 Filters, 6 Mosaic Categories
+// Master Mosaic Theory Framework Page v3
+// Restructured: Historical Examples → Ground Truth → Filter → Mosaic → Observer Lens
+// Updated January 2026
 
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll } from 'framer-motion';
 import { 
-  Eye, Filter, Layers, ChevronDown, ChevronUp, ChevronsDown, ChevronsUp, ExternalLink, 
-  AlertTriangle, Lock, Radio, Users, FileText, Building2, 
-  Glasses, Check, Square, BookOpen, Search, Shield, Scale,
-  TrendingUp, Microscope, History, Target, Brain, Globe,
-  Banknote, GraduationCap, MessageCircle, Zap
+  Eye, Filter, Layers, ChevronDown, ChevronUp, ChevronsDown, ChevronsUp,
+  AlertTriangle, Lock, Radio, FileText, Building2, 
+  Glasses, Check, BookOpen, Search, Shield, Scale,
+  Microscope, History, Target, Zap,
+  Banknote, GraduationCap, MessageCircle
 } from 'lucide-react';
 import { PageStatusBanner } from '@/components/PageStatusBanner';
+import { GroundTruthHypotheses } from '@/components/framework/GroundTruthHypotheses';
+import { ClassificationQuotes } from '@/components/framework/ClassificationQuotes';
+import { HollywoodDisclosure } from '@/components/framework/HollywoodDisclosure';
 
 // Image paths - Using Supabase storage
 const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg.jpg';
@@ -1159,9 +1162,9 @@ export default function MosaicTheoryFramework() {
       <div className="px-6 pt-6">
         <div className="max-w-4xl mx-auto">
           <PageStatusBanner
-            lastUpdated="January 10, 2026"
-            status="under-construction"
-            statusNote="Restructuring Ground Truth → Filter → Mosaic flow"
+            lastUpdated="January 11, 2026"
+            status="stable"
+            statusNote="Restructured: Historical → Ground Truth → Filter → Mosaic → Observer"
           />
         </div>
       </div>
@@ -1172,9 +1175,18 @@ export default function MosaicTheoryFramework() {
       <ManhattanProjectSection />
       <TransitionSection />
       
-      {/* PART 2: THE APPLICATION */}
+      {/* PART 2: GROUND TRUTH - The Space of Possibilities */}
+      <GroundTruthHypotheses />
+      
+      {/* PART 3: THE FILTER - Enhanced with Classification Quotes + Hollywood */}
+      <ClassificationQuotes />
+      <HollywoodDisclosure />
       <UAPFilterSection />
+      
+      {/* PART 4: THE MOSAIC - What We Actually See */}
       <UAPMosaicSection />
+      
+      {/* PART 5: OBSERVER LENS */}
       <AssumptionsAuditSection />
       <PersonaFooter />
     </div>
