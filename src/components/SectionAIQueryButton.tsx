@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Copy, Check, ExternalLink, Info, Eye, ChevronDown } from "lucide-react";
+import { Sparkles, Copy, Check, ExternalLink, Info, Eye, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import {
   Tooltip,
   TooltipContent,
@@ -17,8 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SectionAIQueryButtonProps {
   sectionId: string;
@@ -26,193 +27,87 @@ interface SectionAIQueryButtonProps {
   variant?: "inline" | "card" | "floating";
 }
 
-// Persona lenses for AI prompt personalization - 6 research-focused personas only
-const personaLenses: Record<string, { name: string; icon: string; description: string; lens: string }> = {
-  empiricist: {
-    name: "The Empiricist",
-    icon: "🔬",
-    description: "Evidence-first, data-driven analysis",
-    lens: "Please prioritize hard sensor data (radar/FLIR), physical material analyses (isotopic ratios/metamaterials), and quantifiable performance metrics (g-forces/velocities) over anecdotal accounts."
-  },
-  historian: {
-    name: "The Historian",
-    icon: "📚",
-    description: "Patterns across time and policy",
-    lens: "Frame the answer within the chronological evolution of government programs (from Blue Book to AARO), tracing the legislative paper trail and historical precedents for secrecy mechanisms."
-  },
-  strategist: {
-    name: "The Strategist",
-    icon: "♟️",
-    description: "National security implications",
-    lens: "Analyze the geopolitical implications, national security risks, and the bureaucratic power struggles (e.g., Title 10 vs. Title 50 jurisdiction) driving the containment or disclosure of this information."
-  },
-  investigator: {
-    name: "The Investigator",
-    icon: "🔍",
-    description: "Forensic case examination",
-    lens: "Focus on cross-referencing specific witness credibility, corroborating testimonies (e.g., Varginha, Nimitz), and identifying concrete chains of custody for alleged evidence."
-  },
-  technologist: {
-    name: "The Technologist",
-    icon: "⚡",
-    description: "Physics and engineering focus",
-    lens: "Detail the proposed engineering mechanisms—specifically metric engineering, vacuum polarization, and terahertz waveguides—and how they align with or challenge known physics (e.g., the Schwinger limit)."
-  },
-  debunker: {
-    name: "The Skeptical Analyst",
-    icon: "⚖️",
-    description: "Rigorous counter-arguments",
-    lens: "Critically evaluate the evidence by highlighting potential prosaic explanations, instances of circular reporting, and the possibility of disinformation or psychological operations (psyops)."
-  }
+interface SectionPrompt {
+  id: string;
+  section_id: string;
+  title: string;
+  prompt: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
+interface PersonaLens {
+  id: string;
+  name: string;
+  short_desc: string;
+  icon: string;
+  lens: string;
+  sort_order: number;
+}
+
+// Hook to fetch section prompts from Supabase
+const useSectionPrompts = (sectionId: string) => {
+  return useQuery({
+    queryKey: ['section-prompts', sectionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('section_prompts')
+        .select('*')
+        .eq('section_id', sectionId.toLowerCase())
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      return data as SectionPrompt[];
+    },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 };
 
-// Available personas for dropdown selection (6 research-focused personas)
-const availablePersonas = Object.entries(personaLenses).map(([id, data]) => ({
-  id,
-  icon: data.icon,
-  name: data.name,
-  description: data.description,
-}));
-
-// Detailed prompts tailored to each section
-const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> = {
-  a: [
-    { title: "Official acknowledgments timeline", prompt: "Create a comprehensive timeline of official US government acknowledgments that UAP are real, including quotes from Presidents (Obama, Clinton), DNIs (Ratcliffe, Haines, Brennan), and Pentagon officials. Note each speaker's clearance level and the specific claims they made." },
-    { title: "Multi-source corroboration", prompt: "Which UAP claims have been independently corroborated by multiple credentialed sources? Map the overlapping testimonies between Grusch, Elizondo, Mellon, and Congressional witnesses." },
-  ],
-  b: [
-    { title: "Sensor data analysis", prompt: "Detail all known multi-sensor UAP encounters where radar, FLIR/infrared, and visual observation occurred simultaneously. For each case, explain what makes sensor artifacts or spoofing an insufficient explanation." },
-    { title: "Nimitz encounter breakdown", prompt: "Provide a minute-by-minute reconstruction of the 2004 Nimitz/Tic Tac encounter including: Kevin Day's radar observations, Fravor's visual engagement, the CAP point pre-positioning anomaly, and the subsequent data seizure allegations." },
-    { title: "Counter-argument: Sensor glitches", prompt: "What is the strongest skeptical explanation for the Five Observables (parallax error, radar spoofing, electronic warfare)? Then explain what evidence contradicts these explanations." },
-  ],
-  c: [
-    { title: "Five Observables with data", prompt: "For each of the Five Observables (instant acceleration, hypersonic velocity, low observability, transmedium travel, positive lift with no visible propulsion), provide the specific measured values from documented encounters and explain why conventional physics cannot account for them." },
-    { title: "Pais Effect analysis", prompt: "Explain the Pais Effect (Inertial Mass Reduction) theory, the Navy's $508K HEEMFG experiment results, the Schwinger Limit constraint, and why proponents argue the experiment's failure was due to material limitations rather than flawed physics." },
-    { title: "Metamaterials evidence", prompt: "Summarize what we know about alleged UAP metamaterials (Bismuth/Magnesium layers, 'Art's Parts'), including AARO/ORNL analysis results, the isotopic ratio debate, and the terahertz waveguide hypothesis." },
-  ],
-  d: [
-    { title: "Pre-2000 case patterns", prompt: "Analyze the most well-documented UAP cases before 2000 (Roswell 1947, Belgian Wave 1989-90, Rendlesham Forest 1980, Tehran 1976). What characteristics persist across decades and what does this pattern suggest?" },
-    { title: "Government program evolution", prompt: "Trace the evolution of US government UAP programs chronologically: Sign → Grudge → Blue Book → Robertson Panel → Condon Report → AAWSAP → AATIP → UAPTF → AARO. What changed and what stayed the same?" },
-  ],
-  e: [
-    { title: "International military encounters", prompt: "List documented UAP encounters from non-US military sources (Belgian Air Force, Peruvian Air Force, Brazilian military at Varginha, French GEIPAN). How do international accounts corroborate or differ from US reports?" },
-    { title: "Nuclear correlation evidence", prompt: "What evidence supports the claim that UAP activity correlates with nuclear facilities? Include Malmstrom AFB 1967 ICBM shutdowns, and explain why the 'coincidence/technical malfunction' counter-argument may be insufficient." },
-  ],
-  f: [
-    { title: "Guthrie legal framework", prompt: "Summarize Dillon Guthrie's key findings from his Yale presentation and Harvard National Security Journal article: Why has no one been prosecuted for disclosing classified info to Congress? What do SF-312 and SAP NDAs actually say about Congressional disclosure?" },
-    { title: "Classification mechanisms", prompt: "Explain the specific mechanisms used to hide UAP programs: Title 10 vs Title 50 jurisdiction, waived/unacknowledged SAPs, IRAD loopholes, Atomic Energy Act exploitation, and FASAB Statement 56. How do these create legal 'black holes'?" },
-    { title: "AARO statutory failures", prompt: "What is AARO's statutory mandate under 50 U.S.C. § 3373(c)(5) regarding threat assessment? What evidence suggests they have not fulfilled this mandate?" },
-  ],
-  g: [
-    { title: "Crash retrieval testimony", prompt: "Compile all crash retrieval program claims with witness credentials: Grusch (NGA/NRO), Lacatski (AAWSAP), Elizondo (AATIP), Eric Davis. What specific programs or locations have been named? What did the ICIG conclude about Grusch's complaint?" },
-    { title: "Circular reporting counter", prompt: "What is the 'circular reporting' criticism of crash retrieval claims (Kirkpatrick's argument)? Then explain what evidence contradicts this—specifically the ICIG finding and the Schumer/Rounds legislation basis." },
-    { title: "1933 Magenta Italy claim", prompt: "What is the evidence for the 1933 Magenta, Italy recovery claim? Include Grusch's testimony, the alleged Vatican/OSS connection, and the strongest counter-arguments (forgery, lack of documentation)." },
-  ],
-  h: [
-    { title: "Breakaway civilization thesis", prompt: "Explain the 'Breakaway Civilization' hypothesis as articulated by Catherine Austin Fitts and Jason Jorjani. What is the evidence (missing trillions, FASAB 56, deep underground bases)? What are the strongest counter-arguments?" },
-    { title: "Private contractor custody", prompt: "What evidence suggests private aerospace companies (Lockheed, contractors) possess UAP technology? Explain the IRAD loophole, the 'corporate risk/shareholder duty' counter-argument, and why some argue the technology may be 'too dangerous to monetize.'" },
-  ],
-  i: [
-    { title: "Consciousness interface evidence", prompt: "What evidence connects UAP phenomena to consciousness? Include: Stargate/remote viewing programs, Dr. Garry Nolan's caudate-putamen research, the 'Hitchhiker Effect,' and credentialed experiencer testimony (Bledsoe, Ilyumzhinov)." },
-    { title: "Telepathy claims analysis", prompt: "Summarize testimony about telepathic communication with UAP/entities. Include Dr. Venturelli (Varginha), Kirsan Ilyumzhinov, and the strongest counter-argument (psychological projection/hallucination). What makes the 'anthropomorphism' criticism potentially insufficient?" },
-  ],
-  j: [
-    { title: "Propulsion physics theories", prompt: "Compare the leading theoretical frameworks for UAP propulsion: Pais Effect (vacuum polarization), Alcubierre metric (warp drive), Puthoff's polarizable vacuum, and metamaterial waveguides. Which has the most experimental support? Which faces the biggest physics constraints?" },
-    { title: "Bob Lazar assessment", prompt: "Provide a balanced analysis of Bob Lazar's claims: Element 115 prediction (confirmed), S-4 facility details, biometric scanner verification, versus credential gaps (MIT/Caltech), Moscovium instability problem, and 'Gravity A' physics issues." },
-  ],
-  k: [
-    { title: "Non-human biologics testimony", prompt: "Compile all testimony regarding 'non-human biologics': Grusch's Congressional statement, Varginha medical reports, the officer death from 'novel pathogen.' What is the 'Mudinho' counter-explanation and why do critics find it insufficient?" },
-    { title: "Biological evidence chain", prompt: "What would constitute proof of non-human biology? Trace the chain of custody issues, classification barriers, and specific claims about where biological samples allegedly exist." },
-  ],
-  l: [
-    { title: "Defense contractor connections", prompt: "Map the connections between UAP research and defense contractors: Which companies have been named in testimony? What is the IRAD funding mechanism? How does Skywatcher.AI represent a new model of private UAP research?" },
-    { title: "Investment landscape", prompt: "What private companies and ventures are actively working on UAP-adjacent technology? Include Skywatcher.AI, To The Stars Academy history, and any defense contractor patents related to exotic propulsion." },
-  ],
-  m: [
-    { title: "Ontological implications", prompt: "What are the profound implications if UAP represent non-human intelligence? Cover: scientific paradigm shifts, religious/theological reframing, the 'dual reality' of public vs classified physics, and what 'ontological shock' means for society." },
-    { title: "Disclosure scenarios", prompt: "What are the possible disclosure scenarios ranging from 'mundane explanation confirmed' to 'NHI contact acknowledged'? For each scenario, what are the societal, religious, and geopolitical implications?" },
-  ],
-  n: [
-    { title: "Competing theories comparison", prompt: "Compare and contrast the major UAP hypotheses: Extraterrestrial, Ultraterrestrial, Extratemporal (time travel), Interdimensional, and Ancient/Remnant Technology. What evidence supports or contradicts each framework?" },
-    { title: "Framework evaluation criteria", prompt: "What criteria should we use to evaluate competing UAP hypotheses? Consider: explanatory power, falsifiability, consistency with known physics, and alignment with witness testimony. Which framework best explains the Five Observables?" },
-  ],
+// Hook to fetch persona lenses from Supabase
+const usePersonaLenses = () => {
+  return useQuery({
+    queryKey: ['persona-lenses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('persona_lenses')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      return data as PersonaLens[];
+    },
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour - personas don't change often
+  });
 };
 
 const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
-
-// Accordion component for expandable prompts
-interface PromptAccordionProps {
-  prompt: { title: string; prompt: string };
-  index: number;
-  copiedIndex: number | null;
-  onCopy: () => void;
-}
-
-function PromptAccordion({ prompt, index, copiedIndex, onCopy }: PromptAccordionProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors">
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between gap-2 p-3 text-left text-sm group hover:bg-muted/50 transition-colors">
-            <span className="font-medium group-hover:text-primary transition-colors">
-              {prompt.title}
-            </span>
-            <ChevronDown 
-              className={cn(
-                "h-4 w-4 text-muted-foreground transition-transform duration-200",
-                isOpen && "rotate-180"
-              )} 
-            />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-3 pb-3 space-y-3 border-t border-border/50 pt-3 bg-muted/30">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {prompt.prompt}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full gap-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCopy();
-              }}
-            >
-              {copiedIndex === index ? (
-                <>
-                  <Check className="h-3.5 w-3.5 text-green-500" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3.5 w-3.5" />
-                  Copy This Prompt
-                </>
-              )}
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
-  );
-}
 
 export function SectionAIQueryButton({ 
   sectionId, 
   sectionTitle,
   variant = "card" 
 }: SectionAIQueryButtonProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [includePersona, setIncludePersona] = useState(true);
-  const [selectedPersona, setSelectedPersona] = useState<string>("debunker"); // Default to Skeptic
-  const [lastCopiedPrompt, setLastCopiedPrompt] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Fetch data from Supabase
+  const { data: prompts, isLoading: promptsLoading } = useSectionPrompts(sectionId);
+  const { data: personas, isLoading: personasLoading } = usePersonaLenses();
+  
+  // State for selections
+  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
+  const [includePersonaLens, setIncludePersonaLens] = useState(true);
+  const [copied, setCopied] = useState(false);
 
-  // Get user's persona from localStorage on mount (default to debunker/Skeptic if none)
+  // Initialize default prompt when data loads
+  useEffect(() => {
+    if (prompts && prompts.length > 0 && !selectedPromptId) {
+      const primary = prompts.find(p => p.is_primary);
+      setSelectedPromptId(primary?.id || prompts[0].id);
+    }
+  }, [prompts, selectedPromptId]);
+
+  // Load user's persona preference from localStorage
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
     // Map old persona keys to new ones if needed
@@ -223,46 +118,51 @@ export function SectionAIQueryButton({
     };
     const mappedPersona = personaMap[storedPersona || ''] || storedPersona;
     
-    if (mappedPersona && personaLenses[mappedPersona]) {
-      setSelectedPersona(mappedPersona);
+    if (mappedPersona) {
+      setSelectedPersonaId(mappedPersona);
     }
-    // If no stored persona, keep default "debunker" (Skeptic)
   }, []);
 
-  const prompts = sectionQuickPrompts[sectionId.toLowerCase()] || [];
-  const suggestedPrompt = prompts[0]; // First prompt is the "suggested" one
+  // Set default persona from Supabase data if none stored
+  useEffect(() => {
+    if (personas && personas.length > 0 && !selectedPersonaId) {
+      // Default to 'debunker' if exists, otherwise first persona
+      const defaultPersona = personas.find(p => p.id === 'debunker') || personas[0];
+      setSelectedPersonaId(defaultPersona.id);
+    }
+  }, [personas, selectedPersonaId]);
 
-  // Get display name for current persona
-  const currentPersona = personaLenses[selectedPersona];
-  const personaDisplayName = currentPersona?.name || "Skeptical Analyst";
+  // Get currently selected objects
+  const selectedPrompt = prompts?.find(p => p.id === selectedPromptId);
+  const selectedPersona = personas?.find(p => p.id === selectedPersonaId);
 
-  // Build the full prompt with structured persona lens prepended
-  const buildFullPrompt = (basePrompt: string): string => {
-    if (includePersona && selectedPersona && personaLenses[selectedPersona]) {
-      const persona = personaLenses[selectedPersona];
-      return `**Research Persona:** ${persona.lens}\n\n**Research Focus:** ${basePrompt}`;
+  // Compute the full prompt preview
+  const fullPromptPreview = useMemo(() => {
+    if (!selectedPrompt) return '';
+    
+    const basePrompt = selectedPrompt.prompt;
+    
+    if (selectedPersona && includePersonaLens) {
+      return `**Research Persona:** ${selectedPersona.lens}\n\n**Research Focus:** ${basePrompt}`;
     }
     return `**Research Focus:** ${basePrompt}`;
-  };
+  }, [selectedPrompt, selectedPersona, includePersonaLens]);
 
-  const copyToClipboard = async (text: string, index: number, isInitialCopy = false) => {
+  const copyToClipboard = async () => {
+    if (!fullPromptPreview) return;
+    
     try {
-      const fullPrompt = buildFullPrompt(text);
-      await navigator.clipboard.writeText(fullPrompt);
-      setCopiedIndex(index);
-      setLastCopiedPrompt(fullPrompt);
+      await navigator.clipboard.writeText(fullPromptPreview);
+      setCopied(true);
       
       toast({
         title: "Prompt copied!",
-        description: `Copied with your ${personaDisplayName} lens!`,
+        description: selectedPersona && includePersonaLens 
+          ? `Copied with your ${selectedPersona.name} lens!`
+          : "Prompt copied to clipboard!",
       });
 
-      // Expand after first copy
-      if (isInitialCopy && !isExpanded) {
-        setIsExpanded(true);
-      }
-
-      setTimeout(() => setCopiedIndex(null), 2000);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
         title: "Copy failed",
@@ -275,6 +175,8 @@ export function SectionAIQueryButton({
   const launchNotebookLM = () => {
     window.open(NOTEBOOKLM_URL, '_blank');
   };
+
+  const isLoading = promptsLoading || personasLoading;
 
   // Inline variant - just a button
   if (variant === "inline") {
@@ -307,7 +209,7 @@ export function SectionAIQueryButton({
     );
   }
 
-  // Card variant - progressive disclosure (default)
+  // Card variant - unified prompt selector (default)
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
       {/* Header */}
@@ -325,54 +227,21 @@ export function SectionAIQueryButton({
         </div>
       </div>
 
-      {/* Initial View: Two buttons side by side */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {suggestedPrompt && (
-          <Button
-            variant="default"
-            className="flex-1 gap-2"
-            onClick={() => copyToClipboard(suggestedPrompt.prompt, 0, true)}
-          >
-            {copiedIndex === 0 ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-            📋 Copy Suggested Prompt
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          className="flex-1 gap-2"
-          onClick={launchNotebookLM}
-        >
-          🚀 Open NotebookLM
-        </Button>
-      </div>
-
-      {/* Expanded View: Shows after first copy */}
-      {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-primary/20 space-y-4">
-          {/* What was just copied */}
-          {lastCopiedPrompt && (
-            <div className="p-3 bg-background/50 rounded-md border border-border text-xs">
-              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                <Eye className="h-3.5 w-3.5" />
-                <span className="font-medium">What was just copied:</span>
-              </div>
-              <div className="text-foreground/80 whitespace-pre-wrap max-h-32 overflow-y-auto">
-                {lastCopiedPrompt}
-              </div>
-            </div>
-          )}
-
-          {/* Persona selection */}
-          <div className="flex flex-col gap-3 p-3 bg-background/50 rounded-md border border-border/50">
+      {isLoading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Persona Toggle + Selector */}
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Switch
                 id="persona-toggle"
-                checked={includePersona}
-                onCheckedChange={setIncludePersona}
+                checked={includePersonaLens}
+                onCheckedChange={setIncludePersonaLens}
               />
               <Label htmlFor="persona-toggle" className="text-sm font-medium cursor-pointer">
                 Include persona lens
@@ -384,35 +253,36 @@ export function SectionAIQueryButton({
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs">
                     <p className="text-xs">
-                      When enabled, a persona-specific instruction guides the AI to tailor responses to your research style.
+                      Adds research perspective based on your archetype
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            
-            {includePersona && (
-              <Select value={selectedPersona} onValueChange={setSelectedPersona}>
+
+            {/* Persona Dropdown - only show if toggle is ON */}
+            {includePersonaLens && personas && personas.length > 0 && (
+              <Select value={selectedPersonaId || ''} onValueChange={setSelectedPersonaId}>
                 <SelectTrigger className="w-full h-auto py-2 text-sm">
                   <SelectValue placeholder="Select research persona...">
-                    {selectedPersona && personaLenses[selectedPersona] && (
+                    {selectedPersona && (
                       <span className="flex items-center gap-2">
-                        <span>{personaLenses[selectedPersona].icon}</span>
-                        <span>{personaLenses[selectedPersona].name}</span>
+                        <span>{selectedPersona.icon}</span>
+                        <span>{selectedPersona.name}</span>
                         <span className="text-muted-foreground hidden sm:inline">—</span>
-                        <span className="text-muted-foreground text-xs hidden sm:inline">{personaLenses[selectedPersona].description}</span>
+                        <span className="text-muted-foreground text-xs hidden sm:inline">{selectedPersona.short_desc}</span>
                       </span>
                     )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="w-[400px] bg-popover">
-                  {availablePersonas.map((persona) => (
+                  {personas.map((persona) => (
                     <SelectItem key={persona.id} value={persona.id} className="py-3">
                       <div className="flex items-start gap-2">
                         <span className="text-lg">{persona.icon}</span>
                         <div className="flex flex-col">
                           <span className="font-medium">{persona.name}</span>
-                          <span className="text-xs text-muted-foreground">— {persona.description}</span>
+                          <span className="text-xs text-muted-foreground">— {persona.short_desc}</span>
                         </div>
                       </div>
                     </SelectItem>
@@ -422,40 +292,85 @@ export function SectionAIQueryButton({
             )}
           </div>
 
-          {/* Additional prompts - Collapsible accordions */}
-          {prompts.length > 1 && (
+          {/* Prompt Selector */}
+          {prompts && prompts.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                More prompts for this section:
-              </p>
-              <div className="space-y-2">
-                {prompts.slice(1).map((prompt, index) => (
-                  <PromptAccordion
-                    key={index + 1}
-                    prompt={prompt}
-                    index={index + 1}
-                    copiedIndex={copiedIndex}
-                    onCopy={() => copyToClipboard(prompt.prompt, index + 1)}
-                  />
-                ))}
+              <Label className="text-xs text-muted-foreground font-medium">
+                Research prompt:
+              </Label>
+              <Select value={selectedPromptId || ''} onValueChange={setSelectedPromptId}>
+                <SelectTrigger className="w-full h-auto py-2 text-sm">
+                  <SelectValue placeholder="Select a prompt...">
+                    {selectedPrompt && (
+                      <span className="flex items-center gap-2">
+                        {selectedPrompt.is_primary && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />}
+                        <span>{selectedPrompt.title}</span>
+                      </span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {prompts.map((prompt) => (
+                    <SelectItem key={prompt.id} value={prompt.id} className="py-2">
+                      <span className="flex items-center gap-2">
+                        {prompt.is_primary && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />}
+                        <span>{prompt.title}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* No prompts fallback */}
+          {prompts && prompts.length === 0 && (
+            <p className="text-sm text-muted-foreground italic">
+              No prompts available for this section yet.
+            </p>
+          )}
+
+          {/* LIVE PREVIEW - Always visible, updates dynamically */}
+          {fullPromptPreview && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Eye className="h-3.5 w-3.5" />
+                <span className="font-medium">Prompt Preview</span>
+              </div>
+              <div className="p-3 bg-background/50 rounded-md border border-border text-xs text-foreground/80 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                {fullPromptPreview}
               </div>
             </div>
           )}
 
-          {/* Full launch button */}
-          <div className="pt-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               variant="default"
-              className="w-full gap-2"
+              className="flex-1 gap-2"
+              onClick={copyToClipboard}
+              disabled={!fullPromptPreview}
+            >
+              {copied ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              {copied ? "Copied!" : "Copy Prompt"}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
               onClick={launchNotebookLM}
             >
               <ExternalLink className="h-4 w-4" />
-              Launch NotebookLM — Query 100+ Research Documents
+              Open NotebookLM
             </Button>
-            <p className="text-xs text-center text-muted-foreground mt-2">
-              Opens in a new tab. Paste your copied prompt in the chat.
-            </p>
           </div>
+          
+          <p className="text-xs text-center text-muted-foreground">
+            Opens in a new tab. Paste your copied prompt in the chat.
+          </p>
         </div>
       )}
     </div>
