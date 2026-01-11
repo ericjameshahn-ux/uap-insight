@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Copy, Check, ExternalLink, Info, Eye } from "lucide-react";
+import { Sparkles, Copy, Check, ExternalLink, Info, Eye, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface SectionAIQueryButtonProps {
   sectionId: string;
@@ -137,6 +139,66 @@ const sectionQuickPrompts: Record<string, { title: string; prompt: string }[]> =
 };
 
 const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
+
+// Accordion component for expandable prompts
+interface PromptAccordionProps {
+  prompt: { title: string; prompt: string };
+  index: number;
+  copiedIndex: number | null;
+  onCopy: () => void;
+}
+
+function PromptAccordion({ prompt, index, copiedIndex, onCopy }: PromptAccordionProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors">
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center justify-between gap-2 p-3 text-left text-sm group hover:bg-muted/50 transition-colors">
+            <span className="font-medium group-hover:text-primary transition-colors">
+              {prompt.title}
+            </span>
+            <ChevronDown 
+              className={cn(
+                "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                isOpen && "rotate-180"
+              )} 
+            />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="px-3 pb-3 space-y-3 border-t border-border/50 pt-3 bg-muted/30">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {prompt.prompt}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopy();
+              }}
+            >
+              {copiedIndex === index ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy This Prompt
+                </>
+              )}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
 
 export function SectionAIQueryButton({ 
   sectionId, 
@@ -360,28 +422,21 @@ export function SectionAIQueryButton({
             )}
           </div>
 
-          {/* Additional prompts */}
+          {/* Additional prompts - Collapsible accordions */}
           {prompts.length > 1 && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">
                 More prompts for this section:
               </p>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="space-y-2">
                 {prompts.slice(1).map((prompt, index) => (
-                  <button
+                  <PromptAccordion
                     key={index + 1}
-                    onClick={() => copyToClipboard(prompt.prompt, index + 1)}
-                    className="flex items-center justify-between gap-2 p-3 text-left rounded-md border border-border hover:border-primary/50 hover:bg-background transition-all text-sm group"
-                  >
-                    <span className="font-medium group-hover:text-primary transition-colors">
-                      {prompt.title}
-                    </span>
-                    {copiedIndex === index + 1 ? (
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                    ) : (
-                      <Copy className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
-                    )}
-                  </button>
+                    prompt={prompt}
+                    index={index + 1}
+                    copiedIndex={copiedIndex}
+                    onCopy={() => copyToClipboard(prompt.prompt, index + 1)}
+                  />
                 ))}
               </div>
             </div>
