@@ -180,11 +180,11 @@ const GhostArmySection = () => {
     { 
       title: "THE MOSAIC", 
       subtitle: "Context Lost",
-      description: "Cropped to just the tank. Without the soldiers for scale, this appears to be genuine heavy armor—exactly what the deception intended.",
-      image: GHOST_ARMY_IMAGE,
-      fallbackText: "Ghost Army - Cropped Tank View",
-      filter: "grayscale(100%) contrast(150%) brightness(90%)", 
-      transform: "scale(2.5) translate(-10%, -25%)", 
+      description: "Cropped aerial reconnaissance: just the tanks visible. Without the full camp or scale reference, this appears to be genuine armored staging—exactly what the deception intended.",
+      image: GERMAN_RECON_IMAGE,
+      fallbackText: "Aerial reconnaissance - partial view",
+      filter: "grayscale(100%) contrast(130%) brightness(90%)", 
+      transform: "scale(2.2) translate(12%, -8%)", 
       showRedaction: false, 
       showHUD: false 
     },
