@@ -143,7 +143,7 @@ export function SectionAIQueryButton({
     const basePrompt = selectedPrompt.prompt;
     
     if (selectedPersona && includePersonaLens) {
-      return `**Research Persona:** ${selectedPersona.lens}\n\n**Research Focus:** ${basePrompt}`;
+      return `**Research Persona (${selectedPersona.name}):** ${selectedPersona.lens}\n\n**Research Focus:** ${basePrompt}`;
     }
     return `**Research Focus:** ${basePrompt}`;
   }, [selectedPrompt, selectedPersona, includePersonaLens]);
