@@ -92,12 +92,14 @@ export default function TimelinePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [linkedVideosMap, setLinkedVideosMap] = useState<Record<string, { id: string; title: string; url: string; tier?: string; contextNote?: string }[]>>({});
   const [loadingVideos, setLoadingVideos] = useState<Set<string>>(new Set());
+  const [eventVideoCountMap, setEventVideoCountMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+    // Fetch events
     const { data: eventsData, error: eventsError } = await supabase
       .from("timeline_events")
       .select("*")
@@ -111,6 +113,7 @@ export default function TimelinePage() {
       setEvents(eventsData || []);
     }
 
+    // Fetch videos
     const { data: videosData, error: videosError } = await supabase
       .from("videos")
       .select("id, title, url, description, section_id");
@@ -119,6 +122,19 @@ export default function TimelinePage() {
       console.error("Error fetching videos:", videosError);
     } else {
       setVideos(videosData || []);
+    }
+
+    // Fetch video counts for all events (for showing video badges on cards)
+    const { data: videoCountsData, error: videoCountsError } = await supabase
+      .from("timeline_event_videos")
+      .select("event_id");
+
+    if (!videoCountsError && videoCountsData) {
+      const countMap: Record<string, number> = {};
+      videoCountsData.forEach(row => {
+        countMap[row.event_id] = (countMap[row.event_id] || 0) + 1;
+      });
+      setEventVideoCountMap(countMap);
     }
 
     setLoading(false);
@@ -144,6 +160,10 @@ export default function TimelinePage() {
   const years = Object.keys(eventsByYear)
     .map(Number)
     .sort((a, b) => b - a);
+
+  // Stats for current era (filtered)
+  const filteredMilestones = filteredEvents.filter(e => e.is_milestone).length;
+  const filteredHighCredibility = filteredEvents.filter(e => e.tier === "HIGH").length;
 
   const getRelatedVideos = (event: TimelineEvent) => {
     if (event.year < 2024) return [];
@@ -175,6 +195,7 @@ export default function TimelinePage() {
   };
 
   const isWilsonDavisEvent = (eventId: string) => eventId.startsWith('wdm-');
+  const hasActiveFilters = filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis;
 
   // Toggle individual event
   const toggleEvent = (eventId: string) => {
@@ -202,6 +223,9 @@ export default function TimelinePage() {
 
   // Check if event is expanded
   const isEventExpanded = (eventId: string) => expandedEvents.has(eventId);
+
+  // Get video count for event
+  const getEventVideoCount = (eventId: string) => eventVideoCountMap[eventId] || 0;
 
   // Fetch linked videos from junction table when event is expanded
   const fetchLinkedVideos = async (eventId: string) => {
@@ -272,8 +296,9 @@ export default function TimelinePage() {
           </p>
         </div>
 
-        {/* Era Navigation */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm py-3 sm:py-4 mb-4 sm:mb-6 border-b border-border -mx-4 sm:-mx-6 px-4 sm:px-6">
+        {/* Sticky Header with Era Navigation, Stats & Filters */}
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm py-3 sm:py-4 mb-4 sm:mb-6 border-b border-border -mx-4 sm:-mx-6 px-4 sm:px-6">
+          {/* Era Buttons Row */}
           <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
             {eras.map((era, index) => (
               <button
@@ -293,27 +318,61 @@ export default function TimelinePage() {
             ))}
           </div>
 
-          {/* Filter Toggle & Expand/Collapse */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground min-h-[44px] px-2 -ml-2"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Filters</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-              {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  Active
-                </Badge>
-              )}
-            </button>
+          {/* Stats + Filter Toggle + Expand/Collapse Row */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 gap-2">
+            {/* Inline Stats */}
+            <div className="hidden sm:flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground">{filteredEvents.length}</span>
+                <span className="text-muted-foreground">events</span>
+              </div>
+              <div className="w-px h-4 bg-border" />
+              <div className="flex items-center gap-1.5">
+                <Star className="w-3 h-3 text-primary fill-primary" />
+                <span className="font-bold text-primary">{filteredMilestones}</span>
+                <span className="text-muted-foreground">milestones</span>
+              </div>
+              <div className="w-px h-4 bg-border" />
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-green-500">{filteredHighCredibility}</span>
+                <span className="text-muted-foreground">high</span>
+              </div>
+            </div>
+
+            {/* Mobile Stats */}
+            <div className="flex sm:hidden items-center gap-2 text-xs">
+              <span className="font-bold text-foreground">{filteredEvents.length}</span>
+              <span className="text-muted-foreground">|</span>
+              <span className="font-bold text-primary">{filteredMilestones}</span>
+              <Star className="w-3 h-3 text-primary fill-primary" />
+            </div>
             
+            {/* Filter Toggle & Expand/Collapse */}
             <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+                  hasActiveFilters
+                    ? "bg-primary/20 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">
+                    Active
+                  </Badge>
+                )}
+              </button>
+              
+              <div className="w-px h-6 bg-border" />
+              
               <button
                 onClick={expandAll}
                 disabled={expandedEvents.size === filteredEvents.length}
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50 min-h-[36px]"
               >
                 <ChevronsDown className="w-4 h-4" />
                 <span className="hidden sm:inline">Expand All</span>
@@ -321,24 +380,24 @@ export default function TimelinePage() {
               <button
                 onClick={collapseAll}
                 disabled={expandedEvents.size === 0}
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 min-h-[36px]"
               >
                 <ChevronsUp className="w-4 h-4" />
-                <span className="hidden sm:inline">Collapse All</span>
+                <span className="hidden sm:inline">Collapse</span>
               </button>
             </div>
           </div>
 
-          {/* Filters Panel */}
+          {/* Filters Panel - Also Sticky */}
           {showFilters && (
-            <div className="mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg space-y-3">
+            <div className="mt-3 p-3 sm:p-4 bg-muted/50 rounded-lg space-y-3 border border-border/50">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs sm:text-sm text-muted-foreground">Credibility:</span>
+                <span className="text-xs sm:text-sm text-muted-foreground font-medium">Credibility:</span>
                 {["HIGH", "MEDIUM", "LOWER"].map((tier) => (
                   <Badge
                     key={tier}
                     variant={filterTier === tier ? "default" : "outline"}
-                    className={`cursor-pointer min-h-[32px] flex items-center ${filterTier === tier ? tierColors[tier] : ""}`}
+                    className={`cursor-pointer min-h-[28px] flex items-center transition-all ${filterTier === tier ? tierColors[tier] : "hover:bg-muted"}`}
                     onClick={() => setFilterTier(filterTier === tier ? null : tier)}
                   >
                     {tier}
@@ -347,12 +406,12 @@ export default function TimelinePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs sm:text-sm text-muted-foreground">Category:</span>
+                <span className="text-xs sm:text-sm text-muted-foreground font-medium">Category:</span>
                 {Object.keys(categoryColors).map((cat) => (
                   <Badge
                     key={cat}
                     variant={filterCategory === cat ? "default" : "outline"}
-                    className={`cursor-pointer text-xs min-h-[28px] flex items-center ${filterCategory === cat ? categoryColors[cat] : ""}`}
+                    className={`cursor-pointer text-xs min-h-[26px] flex items-center transition-all ${filterCategory === cat ? categoryColors[cat] : "hover:bg-muted"}`}
                     onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
                   >
                     {cat}
@@ -363,10 +422,10 @@ export default function TimelinePage() {
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 border-t border-border/50">
                 <button
                   onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[44px] ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[36px] ${
                     showMilestonesOnly 
                       ? "bg-primary text-primary-foreground" 
-                      : "bg-muted text-muted-foreground hover:text-foreground"
+                      : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
                   <Star className="h-4 w-4" />
@@ -375,22 +434,27 @@ export default function TimelinePage() {
                 </button>
                 <button
                   onClick={() => setFilterWilsonDavis(!filterWilsonDavis)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[44px] ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-colors min-h-[36px] ${
                     filterWilsonDavis 
                       ? "bg-indigo-600 text-white" 
-                      : "bg-muted text-muted-foreground hover:text-foreground"
+                      : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
                   <FileText className="h-4 w-4" />
                   Wilson-Davis
                 </button>
+                
+                {hasActiveFilters && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={clearFilters} 
+                    className="min-h-[36px] ml-auto text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    Clear all
+                  </Button>
+                )}
               </div>
-
-              {(filterTier || filterCategory || showMilestonesOnly || filterWilsonDavis) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="min-h-[44px]">
-                  Clear all filters
-                </Button>
-              )}
             </div>
           )}
         </div>
@@ -452,7 +516,7 @@ export default function TimelinePage() {
                         >
                           <CardContent className="p-4">
                             {/* Header */}
-                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start justify-between gap-3">
                               <div className="flex items-start gap-3">
                                 <div className={`p-2 rounded-lg ${
                                   isWilsonDavisEvent(event.id) 
@@ -479,6 +543,13 @@ export default function TimelinePage() {
                                       <Badge variant="default" className="bg-primary flex items-center gap-1">
                                         <Star className="h-3 w-3 fill-current" />
                                         MILESTONE
+                                      </Badge>
+                                    )}
+                                    {/* Video count badge */}
+                                    {getEventVideoCount(event.id) > 0 && (
+                                      <Badge variant="secondary" className="bg-rose-500/20 text-rose-300 border-rose-500/50 flex items-center gap-1">
+                                        <Video className="h-3 w-3" />
+                                        {getEventVideoCount(event.id)}
                                       </Badge>
                                     )}
                                   </div>
@@ -651,20 +722,21 @@ export default function TimelinePage() {
           )}
         </div>
 
-        {/* Stats Footer */}
+        {/* Stats Footer - Full database stats */}
         <div className="mt-12 pt-8 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center mb-4">Full Database Statistics</p>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
+            <div className="p-4 rounded-lg bg-muted/30">
               <p className="text-2xl font-bold text-foreground">{events.length}</p>
               <p className="text-sm text-muted-foreground">Total Events</p>
             </div>
-            <div>
+            <div className="p-4 rounded-lg bg-primary/10">
               <p className="text-2xl font-bold text-primary">
                 {events.filter((e) => e.is_milestone).length}
               </p>
               <p className="text-sm text-muted-foreground">Key Milestones</p>
             </div>
-            <div>
+            <div className="p-4 rounded-lg bg-green-500/10">
               <p className="text-2xl font-bold text-green-500">
                 {events.filter((e) => e.tier === "HIGH").length}
               </p>
