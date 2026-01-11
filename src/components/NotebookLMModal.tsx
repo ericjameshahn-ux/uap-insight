@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Copy, Check, ExternalLink, Keyboard, Info } from "lucide-react";
+import { Sparkles, Copy, Check, ExternalLink, Keyboard, Info, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -36,7 +36,7 @@ interface NotebookLMModalProps {
   currentSection?: string;
 }
 
-// Persona lenses for AI prompt personalization
+// Persona lenses for AI prompt personalization - 6 research-focused personas only
 const personaLenses: Record<string, { name: string; icon: string; description: string; lens: string }> = {
   empiricist: {
     name: "The Empiricist",
@@ -76,7 +76,7 @@ const personaLenses: Record<string, { name: string; icon: string; description: s
   }
 };
 
-// Available personas for dropdown selection
+// Available personas for dropdown selection (6 research-focused personas)
 const availablePersonas = Object.entries(personaLenses).map(([id, data]) => ({
   id,
   icon: data.icon,
@@ -183,13 +183,14 @@ const suggestedPrompts: Record<string, SuggestedPrompt[]> = {
 const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/66050f25-44cd-4b42-9de0-46ba9979aad7';
 
 export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMModalProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [includePersona, setIncludePersona] = useState(false);
-  const [selectedPersona, setSelectedPersona] = useState<string>("");
-  const [detectedPersona, setDetectedPersona] = useState<string | null>(null);
+  const [includePersona, setIncludePersona] = useState(true);
+  const [selectedPersona, setSelectedPersona] = useState<string>("debunker"); // Default to Skeptic
+  const [lastCopiedPrompt, setLastCopiedPrompt] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Get user's persona from localStorage on mount
+  // Get user's persona from localStorage on mount (default to debunker/Skeptic if none)
   useEffect(() => {
     const storedPersona = localStorage.getItem('uap_primary_archetype');
     const personaMap: Record<string, string> = {
@@ -201,10 +202,17 @@ export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMM
     
     if (mappedPersona && personaLenses[mappedPersona]) {
       setSelectedPersona(mappedPersona);
-      setDetectedPersona(mappedPersona);
-      setIncludePersona(true);
     }
+    // If no stored persona, keep default "debunker" (Skeptic)
   }, []);
+
+  // Reset expanded state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsExpanded(false);
+      setLastCopiedPrompt(null);
+    }
+  }, [isOpen]);
 
   // Get prompts based on current section
   const getPrompts = (): SuggestedPrompt[] => {
@@ -214,6 +222,11 @@ export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMM
   };
 
   const prompts = getPrompts();
+  const suggestedPrompt = prompts[0]; // First prompt is the "suggested" one
+
+  // Get display name for current persona
+  const currentPersona = personaLenses[selectedPersona];
+  const personaDisplayName = currentPersona?.name || "Skeptical Analyst";
 
   // Build the full prompt with structured persona lens
   const buildFullPrompt = (basePrompt: string): string => {
@@ -224,17 +237,23 @@ export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMM
     return `**Research Focus:** ${basePrompt}`;
   };
 
-  const copyToClipboard = async (text: string, index: number) => {
+  const copyToClipboard = async (text: string, index: number, isInitialCopy = false) => {
     try {
       const fullPrompt = buildFullPrompt(text);
       await navigator.clipboard.writeText(fullPrompt);
       setCopiedIndex(index);
+      setLastCopiedPrompt(fullPrompt);
+      
       toast({
-        title: "Copied!",
-        description: includePersona && selectedPersona
-          ? `Prompt copied with your ${personaLenses[selectedPersona].name} lens applied.`
-          : "Prompt copied to clipboard. Now paste it in NotebookLM.",
+        title: "Prompt copied!",
+        description: `Copied with your ${personaDisplayName} lens!`,
       });
+
+      // Expand after first copy
+      if (isInitialCopy && !isExpanded) {
+        setIsExpanded(true);
+      }
+
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
       toast({
@@ -271,136 +290,169 @@ export function NotebookLMModal({ isOpen, onClose, currentSection }: NotebookLMM
           </DialogTitle>
           <DialogDescription>
             Our NotebookLM knowledge base contains 100+ primary source documents.
-            Copy a suggested prompt below, then paste it into NotebookLM to get AI-powered answers with citations.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Auto-detected persona indicator */}
-        {detectedPersona && personaLenses[detectedPersona] && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-md text-sm">
-            <span className="text-lg">{personaLenses[detectedPersona].icon}</span>
-            <span className="text-primary font-medium">
-              🎯 Your {personaLenses[detectedPersona].name} lens will be applied to prompts
-            </span>
-          </div>
-        )}
-
-        {/* Persona toggle and dropdown */}
-        <div className="flex flex-col gap-3 p-3 bg-muted/50 rounded-md border border-border/50">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="modal-persona-toggle"
-              checked={includePersona}
-              onCheckedChange={setIncludePersona}
-            />
-            <Label htmlFor="modal-persona-toggle" className="text-sm font-medium cursor-pointer">
-              Include persona context
-            </Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-xs">
-                    When enabled, a persona-specific instruction will be prepended to your prompt,
-                    guiding the AI to tailor its response to your research style.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          
-          {includePersona && (
-            <Select value={selectedPersona} onValueChange={setSelectedPersona}>
-              <SelectTrigger className="w-full h-auto py-2 text-sm">
-                <SelectValue placeholder="Select research persona...">
-                  {selectedPersona && personaLenses[selectedPersona] && (
-                    <span className="flex items-center gap-2">
-                      <span>{personaLenses[selectedPersona].icon}</span>
-                      <span>{personaLenses[selectedPersona].name}</span>
-                      <span className="text-muted-foreground">—</span>
-                      <span className="text-muted-foreground text-xs">{personaLenses[selectedPersona].description}</span>
-                    </span>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="w-[400px]">
-                {availablePersonas.map((persona) => (
-                  <SelectItem key={persona.id} value={persona.id} className="py-3">
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg">{persona.icon}</span>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{persona.name}</span>
-                        <span className="text-xs text-muted-foreground">— {persona.description}</span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Initial View: Two buttons side by side */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {suggestedPrompt && (
+            <Button
+              variant="default"
+              className="flex-1 gap-2"
+              onClick={() => copyToClipboard(suggestedPrompt.prompt, 0, true)}
+            >
+              {copiedIndex === 0 ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              📋 Copy Suggested Prompt
+            </Button>
           )}
+          <Button
+            variant="outline"
+            className="flex-1 gap-2"
+            onClick={launchNotebookLM}
+          >
+            🚀 Open NotebookLM
+          </Button>
         </div>
 
-        {/* Keyboard Shortcut Hint */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
-          <Keyboard className="h-3 w-3" />
-          <span>Tip: Press <kbd className="px-1.5 py-0.5 bg-background rounded border text-[10px] font-mono">Ctrl/⌘ + K</kbd> anywhere to open this dialog</span>
-        </div>
+        {/* Expanded View: Shows after first copy */}
+        {isExpanded && (
+          <div className="space-y-4 pt-4 border-t">
+            {/* What was just copied */}
+            {lastCopiedPrompt && (
+              <div className="p-3 bg-muted/50 rounded-md border border-border text-xs">
+                <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                  <Eye className="h-3.5 w-3.5" />
+                  <span className="font-medium">What was just copied:</span>
+                </div>
+                <div className="text-foreground/80 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                  {lastCopiedPrompt}
+                </div>
+              </div>
+            )}
 
-        {/* Section Context */}
-        {currentSection && (
-          <div className="text-sm text-primary bg-primary/10 px-3 py-2 rounded-md">
-            Showing prompts relevant to Section {currentSection.toUpperCase()}
+            {/* Persona selection */}
+            <div className="flex flex-col gap-3 p-3 bg-muted/50 rounded-md border border-border/50">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="modal-persona-toggle"
+                  checked={includePersona}
+                  onCheckedChange={setIncludePersona}
+                />
+                <Label htmlFor="modal-persona-toggle" className="text-sm font-medium cursor-pointer">
+                  Include persona lens
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-xs">
+                        When enabled, a persona-specific instruction guides the AI to tailor responses to your research style.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              {includePersona && (
+                <Select value={selectedPersona} onValueChange={setSelectedPersona}>
+                  <SelectTrigger className="w-full h-auto py-2 text-sm">
+                    <SelectValue placeholder="Select research persona...">
+                      {selectedPersona && personaLenses[selectedPersona] && (
+                        <span className="flex items-center gap-2">
+                          <span>{personaLenses[selectedPersona].icon}</span>
+                          <span>{personaLenses[selectedPersona].name}</span>
+                          <span className="text-muted-foreground hidden sm:inline">—</span>
+                          <span className="text-muted-foreground text-xs hidden sm:inline">{personaLenses[selectedPersona].description}</span>
+                        </span>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="w-[400px] bg-popover">
+                    {availablePersonas.map((persona) => (
+                      <SelectItem key={persona.id} value={persona.id} className="py-3">
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">{persona.icon}</span>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{persona.name}</span>
+                            <span className="text-xs text-muted-foreground">— {persona.description}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* Keyboard Shortcut Hint */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
+              <Keyboard className="h-3 w-3" />
+              <span>Tip: Press <kbd className="px-1.5 py-0.5 bg-background rounded border text-[10px] font-mono">Ctrl/⌘ + K</kbd> anywhere to open this dialog</span>
+            </div>
+
+            {/* Section Context */}
+            {currentSection && (
+              <div className="text-sm text-primary bg-primary/10 px-3 py-2 rounded-md">
+                Showing prompts relevant to Section {currentSection.toUpperCase()}
+              </div>
+            )}
+
+            {/* Additional Prompts */}
+            {prompts.length > 1 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Copy className="h-4 w-4" />
+                  More prompts to try:
+                </p>
+
+                <div className="space-y-2">
+                  {prompts.slice(1).map((item, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => copyToClipboard(item.prompt, index + 1)}
+                      className="w-full text-left p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {item.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {item.prompt}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-muted-foreground group-hover:text-primary">
+                          {copiedIndex === index + 1 ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Launch Button */}
+            <div className="pt-4 border-t">
+              <Button onClick={launchNotebookLM} className="w-full" size="lg">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Launch NotebookLM — Query 100+ Research Documents
+              </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Opens in a new tab. Paste your copied prompt in the chat.
+              </p>
+            </div>
           </div>
         )}
-
-        {/* Suggested Prompts */}
-        <div className="space-y-3">
-          <p className="text-sm font-medium flex items-center gap-2">
-            <Copy className="h-4 w-4" />
-            Click to copy a suggested prompt:
-          </p>
-
-          <div className="space-y-2">
-            {prompts.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => copyToClipboard(item.prompt, index)}
-                className="w-full text-left p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm group-hover:text-primary transition-colors">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {item.prompt}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 text-muted-foreground group-hover:text-primary">
-                    {copiedIndex === index ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Launch Button */}
-        <div className="pt-4 border-t">
-          <Button onClick={launchNotebookLM} className="w-full" size="lg">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Launch NotebookLM Knowledge Base
-          </Button>
-          <p className="text-xs text-center text-muted-foreground mt-2">
-            Opens in a new tab. Paste your copied prompt in the chat.
-          </p>
-        </div>
       </DialogContent>
     </Dialog>
   );
