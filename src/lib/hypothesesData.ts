@@ -203,31 +203,141 @@ export const hypotheses: Hypothesis[] = [
     additionalVideos: [
       { title: 'American Cosmic - Extended Interview', url: 'https://youtu.be/aQhikls5Ye8' }
     ]
+  },
+  {
+    id: 6,
+    title: 'Extraterrestrial (ETH)',
+    icon: '🛸',
+    gradient: 'from-indigo-600 to-blue-800',
+    summary: 'UAP are spacecraft from other star systems piloted by non-human biological or AI entities. This is the most widely recognized hypothesis in popular culture and is supported by testimony from credentialed government insiders claiming direct knowledge of recovered non-human craft.',
+    investmentImplications: 'Space Domain Awareness (Galileo Project sensors), SETI Infrastructure (optical/radio monitoring), Propulsion Research (interstellar travel), Astrobiology (biosignature detection).',
+    figures: [
+      {
+        name: 'Dr. Avi Loeb',
+        role: 'Professor of Astronomy, Harvard University',
+        credentials: 'Chair of Harvard Astronomy Dept; Founded Galileo Project; Author of "Extraterrestrial"; Former chair of Board on Physics and Astronomy',
+        icon: '🔭'
+      },
+      {
+        name: 'David Grusch',
+        role: 'Intelligence Officer (NGA/NRO)',
+        credentials: 'Former senior intelligence officer; Testified to Congress about recovered non-human craft; ICIG found complaint "credible and urgent"',
+        icon: '🎖️'
+      }
+    ],
+    claims: [
+      { text: 'Grusch testified under oath that recovered craft are of "non-human intelligence" origin', tier: 'HIGH' },
+      { text: 'Interstellar object \'Oumuamua exhibited anomalous acceleration inconsistent with natural objects', tier: 'MEDIUM' },
+      { text: 'Multiple credentialed witnesses describe craft with performance exceeding human technology by centuries', tier: 'MEDIUM' }
+    ],
+    featuredVideo: {
+      title: 'Avi Loeb on Lex Fridman Podcast',
+      url: 'https://www.youtube.com/watch?v=plcc6E-E1uU',
+      description: 'Discussion of Oumuamua, Galileo Project, and extraterrestrial hypothesis'
+    },
+    additionalVideos: [
+      { title: 'Grusch Congressional Testimony', url: 'https://www.youtube.com/watch?v=KQ7Dw-739VY' },
+      { title: 'Avi Loeb - Galileo Project Update', url: 'https://www.youtube.com/watch?v=bnUmhvuA2wg' }
+    ]
+  },
+  {
+    id: 7,
+    title: 'Interdimensional (IDH)',
+    icon: '🌀',
+    gradient: 'from-violet-600 to-purple-800',
+    summary: 'UAP originate from parallel dimensions or alternate realities, not outer space. Their behavior—instantaneous appearance/disappearance, reality distortion effects—is more consistent with dimensional shifting than interstellar travel. This framework connects UAP to centuries of "supernatural" encounters across cultures.',
+    investmentImplications: 'Quantum Computing (dimensional modeling), Metamaterials (spacetime manipulation), Consciousness Tech (interface research), Advanced Physics (vacuum engineering).',
+    figures: [
+      {
+        name: 'Dr. Jacques Vallée',
+        role: 'Computer Scientist, Ufologist',
+        credentials: 'PhD Computer Science; Former NASA/DOD consultant; Author of "Dimensions" and "Passport to Magonia"; Pioneered interdimensional hypothesis',
+        icon: '💻'
+      },
+      {
+        name: 'Dr. Hal Puthoff',
+        role: 'Physicist, EarthTech International',
+        credentials: 'PhD Physics Stanford; Former NSA/CIA; Founded government remote viewing program; AATIP consultant',
+        icon: '⚛️'
+      }
+    ],
+    claims: [
+      { text: 'UAP behavior (instantaneous appearance/disappearance) more consistent with dimensional shift than space travel', tier: 'MEDIUM' },
+      { text: 'Vallée\'s research shows UAP characteristics match historical "supernatural" encounters across cultures', tier: 'MEDIUM' },
+      { text: 'Puthoff\'s "metric engineering" framework suggests manipulation of spacetime itself', tier: 'MEDIUM' },
+      { text: 'Witness reports of "reality distortion" near craft suggest dimensional interface', tier: 'LOWER' }
+    ],
+    featuredVideo: {
+      title: 'Jacques Vallée - Dimensions of the Phenomenon',
+      url: 'https://www.youtube.com/watch?v=FslxSrzI-oc',
+      description: 'Vallée discusses the interdimensional hypothesis and historical patterns'
+    },
+    additionalVideos: [
+      { title: 'Hal Puthoff - Metric Engineering', url: 'https://www.youtube.com/watch?v=pPAXBgUAr_o' },
+      { title: 'Vallée - Passport to Magonia Discussion', url: 'https://www.youtube.com/watch?v=WfbMxWlx2Rs' }
+    ]
+  },
+  {
+    id: 8,
+    title: 'Cryptoterrestrial',
+    icon: '🏠',
+    gradient: 'from-teal-600 to-cyan-800',
+    summary: 'UAP originate from hidden Earth-based civilizations—underwater, underground, or otherwise concealed from human detection. The high proportion of transmedium (air-to-water) UAP reports and persistent USO (Unidentified Submerged Object) sightings suggest an oceanic origin. A 2024 Harvard paper formally proposes this hypothesis for academic consideration.',
+    investmentImplications: 'Ocean Exploration (deep sea tech, AUVs), Underwater Sensing (sonar, hydrophones), Marine Mining (strategic minerals), Submarine Tech (advanced propulsion).',
+    figures: [
+      {
+        name: 'Tim Gallaudet',
+        role: 'Rear Admiral USN (Ret.)',
+        credentials: 'Former NOAA Administrator; Co-authored Harvard cryptoterrestrial paper (2024); Oceanographer',
+        icon: '⚓'
+      },
+      {
+        name: 'Dr. Mac Tonnies',
+        role: 'Author, Researcher (deceased)',
+        credentials: 'Coined term "cryptoterrestrial"; Author of "The Cryptoterrestrials"; Pioneered indigenous NHI hypothesis',
+        icon: '📖'
+      }
+    ],
+    claims: [
+      { text: 'Harvard paper (Gallaudet co-author) formally proposes cryptoterrestrial hypothesis for academic consideration', tier: 'MEDIUM' },
+      { text: '50%+ of UAP reports involve transmedium (air-to-water) capability suggesting ocean origin', tier: 'MEDIUM' },
+      { text: 'USO (Unidentified Submerged Object) reports predate modern aviation', tier: 'MEDIUM' },
+      { text: 'Alleged underwater bases (e.g., Catalina Island, Puerto Rico Trench) cited by multiple witnesses', tier: 'LOWER' }
+    ],
+    featuredVideo: {
+      title: 'Tim Gallaudet - USO Evidence',
+      url: 'https://www.youtube.com/watch?v=rYkGBiyXgD4',
+      description: 'Rear Admiral Gallaudet discusses underwater UAP encounters'
+    },
+    additionalVideos: [
+      { title: 'Gallaudet - Harvard Cryptoterrestrial Paper', url: 'https://www.youtube.com/watch?v=1QJH_b5NYwo' },
+      { title: 'USO Compilation - Historical Cases', url: 'https://www.youtube.com/watch?v=AXJb_R5jBQs' }
+    ]
   }
 ];
 
 export const comparisonMatrix = {
-  headers: ['Feature', 'Ancient Tech', 'Time Travel', 'Orbital Grid', 'Multiple Species', 'Religious'],
+  headers: ['Feature', 'Ancient Tech', 'Time Travel', 'Orbital Grid', 'Multi-Species', 'Religious', 'ETH', 'IDH', 'Crypto'],
   rows: [
     {
       feature: 'Origin',
-      values: ['Ancient Earth', 'Future Earth', 'Earth Orbit', 'Interstellar', 'Metaphysical']
+      values: ['Ancient Earth', 'Future Earth', 'Earth Orbit', 'Interstellar', 'Metaphysical', 'Other Stars', 'Parallel Dims', 'Hidden Earth']
     },
     {
       feature: 'Nature',
-      values: ['AI/Automated', 'Human Descendants', 'Defense Grid', 'Biological Entities', 'NHI/Teachers']
+      values: ['AI/Automated', 'Human Desc.', 'Defense Grid', 'Bio Entities', 'NHI/Teachers', 'Bio/AI', 'Unknown', 'Unknown']
     },
     {
       feature: 'Intent',
-      values: ['Dormant/Defensive', 'Study/Harvest', 'Monitoring', 'Observation/Hybrid', 'Guidance/Donation']
+      values: ['Dormant', 'Study/Harvest', 'Monitoring', 'Obs./Hybrid', 'Guidance', 'Observation', 'Unknown', 'Coexistence']
     },
     {
-      feature: 'Primary Evidence',
-      values: ['Sensor Data', 'Anatomy', 'Photo Plates', 'Materials/Isotopes', 'Archives/Innovation']
+      feature: 'Evidence',
+      values: ['Sensor Data', 'Anatomy', 'Photo Plates', 'Materials', 'Archives', 'Testimony', 'Behavior', 'Transmedium']
     },
     {
       feature: 'Key Market',
-      values: ['Defense/AI', 'Biotech', 'Space/SETI', 'Materials', 'Human Perf.']
+      values: ['Defense/AI', 'Biotech', 'Space/SETI', 'Materials', 'Human Perf.', 'Space/SETI', 'Quantum', 'Ocean Tech']
     }
   ]
 };

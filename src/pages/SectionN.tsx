@@ -26,15 +26,21 @@ const hypothesisColors = [
   { border: "border-l-amber-500", bg: "bg-amber-500", text: "text-amber-600", light: "bg-amber-50 dark:bg-amber-950/30" },
   { border: "border-l-violet-500", bg: "bg-violet-500", text: "text-violet-600", light: "bg-violet-50 dark:bg-violet-950/30" },
   { border: "border-l-pink-500", bg: "bg-pink-500", text: "text-pink-600", light: "bg-pink-50 dark:bg-pink-950/30" },
+  { border: "border-l-indigo-500", bg: "bg-indigo-500", text: "text-indigo-600", light: "bg-indigo-50 dark:bg-indigo-950/30" },
+  { border: "border-l-purple-500", bg: "bg-purple-500", text: "text-purple-600", light: "bg-purple-50 dark:bg-purple-950/30" },
+  { border: "border-l-teal-500", bg: "bg-teal-500", text: "text-teal-600", light: "bg-teal-50 dark:bg-teal-950/30" },
 ];
 
-// Reorder hypotheses to match the user's requested order
+// Reorder hypotheses to match the user's requested order (original 5 + 3 new)
 const reorderedHypotheses = [
   hypotheses[0], // Ancient/Remnant Technology
   hypotheses[2], // Orbital Monitoring System
   hypotheses[3], // Multiple Species
   hypotheses[4], // Historical/Religious Continuity
   hypotheses[1], // Extratemporal (Time Travel)
+  hypotheses[5], // Extraterrestrial (ETH)
+  hypotheses[6], // Interdimensional (IDH)
+  hypotheses[7], // Cryptoterrestrial
 ];
 
 const getTierVariant = (tier: HypothesisClaim['tier']) => {
@@ -159,6 +165,9 @@ function HypothesisCard({
     3: "Earth is surrounded by an automated surveillance network predating the Space Age",
     4: "UAP involve distinct biological species with different characteristics and intentions",
     5: "UAP represent persistent NHI interacting with humanity throughout history",
+    6: "UAP are spacecraft from other star systems piloted by non-human biological or AI entities",
+    7: "UAP originate from parallel dimensions or alternate realities, not outer space",
+    8: "UAP originate from hidden Earth-based civilizations—underwater, underground, or concealed",
   };
   
   return (
@@ -412,7 +421,7 @@ export default function SectionN() {
           </h1>
           
           <p className="text-lg text-slate-300 mb-4">
-            Five competing frameworks for understanding UAP phenomena
+            Eight competing frameworks for understanding UAP phenomena
           </p>
           
           <div className="bg-slate-700/50 border-l-4 border-primary p-4 rounded-r">
