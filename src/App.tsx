@@ -30,6 +30,7 @@ import FAQ from "./pages/FAQ";
 import Glossary from "./pages/Glossary";
 import WilsonDavisCaseStudy from "./pages/WilsonDavisCaseStudy";
 import BeforeYouBegin from "./pages/BeforeYouBegin";
+import UAPTaxonomy from "./pages/UAPTaxonomy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/framework" element={<MosaicTheoryFramework />} />
             <Route path="/observables" element={<Observables />} />
             <Route path="/hypotheses" element={<HypothesisExplorer />} />
+            <Route path="/taxonomy" element={<UAPTaxonomy />} />
             <Route path="/sections" element={<Sections />} />
             <Route path="/section/n" element={<SectionN />} />
             <Route path="/section/:sectionId" element={<SectionPage />} />
