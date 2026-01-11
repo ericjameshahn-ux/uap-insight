@@ -14,13 +14,10 @@ import {
 } from 'lucide-react';
 import { PageStatusBanner } from '@/components/PageStatusBanner';
 
-// Image paths - Using reliable public domain sources (Wikimedia Commons)
-// Ghost Army inflatable tank - Australian War Memorial photo (public domain)
-const GHOST_ARMY_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
-// German recon placeholder - using same Ghost Army image for German perspective
-const GERMAN_RECON_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dummy_tank_%28AWM_P02584.002%29.jpg/800px-Dummy_tank_%28AWM_P02584.002%29.jpg';
-// Manhattan Project - Oak Ridge K-25 Plant (public domain)
-const MANHATTAN_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Oak_Ridge_K-25_Plant.jpg/800px-Oak_Ridge_K-25_Plant.jpg';
+// Image paths - Using Supabase storage
+const GHOST_ARMY_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/ghost-army.jpg.jpg';
+const GERMAN_RECON_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/german-recon-fusag.jpg';
+const MANHATTAN_IMAGE = 'https://tlfnowncwmvcupghitak.supabase.co/storage/v1/object/public/images/manhattan-project.jpg.jpg';
 
 // ==========================================
 // PART 1: THE CONCEPT
