@@ -100,8 +100,8 @@ export default function AboutQuiz() {
           <Sparkles className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Find Your Path</h1>
-          <p className="text-muted-foreground">Personalized navigation through UAP evidence</p>
+          <h1 className="text-2xl font-bold">Research Lens Quiz</h1>
+          <p className="text-muted-foreground">Discover your analytical approach to evaluating UAP evidence</p>
         </div>
       </div>
 

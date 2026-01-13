@@ -461,34 +461,34 @@ export default function Index() {
           </Accordion>
         </div>
 
-        {/* Primary CTAs - Stack on mobile */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-4 animate-fade-in" style={{ animationDelay: "300ms" }}>
+        {/* Dual CTA Buttons - Equally prominent */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
           <Button
             size="lg"
-            className="flex-1 min-h-[44px] h-14 text-base animate-pulse hover:animate-none shadow-lg shadow-primary/25"
-            asChild
-          >
-            <Link to="/framework">
-              <BookOpen className="w-5 h-5 mr-2" />
-              Start Here: Learn the Framework
-            </Link>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="flex-1 min-h-[44px] h-14 text-base border-2"
+            className="flex-1 min-h-[56px] h-14 text-base bg-primary hover:bg-primary/90 shadow-lg"
             asChild
           >
             <Link to="/quiz">
               <Sparkles className="w-5 h-5 mr-2" />
-              Find Your Path
+              Take the Research Lens Quiz
             </Link>
+          </Button>
+          <Button 
+            size="lg" 
+            className="flex-1 min-h-[56px] h-14 text-base bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-lg border-2 border-border"
+            onClick={() => {
+              localStorage.setItem('uap_navigation_mode', 'free');
+              window.location.href = '/sections';
+            }}
+          >
+            <BookOpen className="w-5 h-5 mr-2" />
+            Explore Evidence Directly
           </Button>
         </div>
         
         {/* Subtle hint message */}
         <p className="text-center text-sm text-muted-foreground mb-12 animate-fade-in" style={{ animationDelay: "320ms" }}>
-          Not sure where to start? Take the quiz to find your personalized research path →
+          Choose your path: guided quiz for personalized recommendations, or dive straight into the evidence
         </p>
 
         {/* Explore the Platform Section - Reorganized */}
