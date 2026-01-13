@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PersonaQuiz } from "@/components/PersonaQuiz";
 import { supabase, PersonaArchetype } from "@/lib/supabase";
+import { LensSelector } from "@/components/LensSelector";
 
 const preconceptions = [
   {
@@ -281,6 +282,9 @@ export default function Index() {
       <div className="relative z-10">
         {/* Hero Section with Gradient Background */}
         <div className="bg-gradient-to-b from-primary/5 to-transparent -mx-6 px-6 pt-8 pb-12 mb-8 rounded-b-3xl">
+          {/* Lens Selector - Interactive analytical frame chooser */}
+          <LensSelector />
+
           {/* Churchill Quote - Enhanced */}
           {/* Quotes Section */}
           <div className="max-w-2xl mx-auto mb-12 animate-fade-in">
