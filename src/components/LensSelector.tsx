@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight } from "lucide-react";
@@ -10,7 +10,8 @@ interface Lens {
   heading: string;
   body: string;
   buttonLabel: string;
-  personaRoute: string;
+  personaName: string;
+  path: string[];
 }
 
 const lenses: Lens[] = [
@@ -20,7 +21,8 @@ const lenses: Lens[] = [
     heading: "The Disarming Question",
     body: "Decades of cultural stigma have relegated unidentified phenomena to the fringe. However, when the Intelligence Community Inspector General validates whistleblower claims of unacknowledged programs as 'credible and urgent,' serious analysts must prioritize the underlying data over the surrounding mythology.",
     buttonLabel: "Begin as Skeptic",
-    personaRoute: "/personas/skeptic",
+    personaName: "Skeptical Analyst",
+    path: ["a", "b", "d", "c"],
   },
   {
     id: "risk",
@@ -28,7 +30,8 @@ const lenses: Lens[] = [
     heading: "The Information Asymmetry Frame",
     body: "Waived Special Access Programs have created a significant information gap between the defense sector and capital markets. We synthesize the testimonies of high-ranking insiders to map the fiscal and technological assets currently sequestered from public oversight and standard market valuation.",
     buttonLabel: "Begin as Strategist",
-    personaRoute: "/personas/strategist",
+    personaName: "The Strategist",
+    path: ["f", "h", "l", "e"],
   },
   {
     id: "historical",
@@ -36,7 +39,8 @@ const lenses: Lens[] = [
     heading: "The Historical Parallel",
     body: "Just as the Manhattan Project once operated as a state-within-a-state, evidence suggests a parallel lineage of aerospace development has remained classified for decades. Understanding this bifurcation is essential for assessing the imminent transition of disruptive propulsion and energy technologies into the commercial sector.",
     buttonLabel: "Begin as Historian",
-    personaRoute: "/personas/historian",
+    personaName: "The Historian",
+    path: ["d", "e", "f", "h"],
   },
   {
     id: "policy",
@@ -44,7 +48,8 @@ const lenses: Lens[] = [
     heading: "The Congressional Reality Check",
     body: "The UAP Disclosure Act and recent sworn testimony have moved this subject into the legislative mainstream. With federal law now defining 'non-human intelligence' and 'technologies of unknown origin,' these phenomena represent a documented regulatory and national security priority rather than a speculative interest.",
     buttonLabel: "Begin as Investigator",
-    personaRoute: "/personas/investigator",
+    personaName: "The Investigator",
+    path: ["b", "g", "k", "f"],
   },
   {
     id: "edge",
@@ -52,7 +57,8 @@ const lenses: Lens[] = [
     heading: "The Analyst's Dilemma",
     body: "Evaluating unidentified phenomena is no longer a matter of personal belief but of institutional risk management. For leaders in AI and finance, the primary concern is the asymmetrical advantage held by those who control the derivative technologies and their associated intellectual property.",
     buttonLabel: "Begin as Empiricist",
-    personaRoute: "/personas/empiricist",
+    personaName: "The Empiricist",
+    path: ["a", "b", "c", "f"],
   },
   {
     id: "engineering",
@@ -60,11 +66,13 @@ const lenses: Lens[] = [
     heading: "The R&D Frontier",
     body: "Observed flight performance exceeding known aerodynamic limits, alongside verified Navy patent filings and peer-reviewed materials analysis from Stanford and Harvard, points to a sophisticated R&D frontier. Investors are noting the '5 Observables' as evidence that new physics and capabilities exist—regardless of origin story. Evaluating these anomalies in metric engineering and non-conventional propulsion is now a prerequisite for assessing future aerospace and energy disruption.",
     buttonLabel: "Begin as Technologist",
-    personaRoute: "/personas/technologist",
+    personaName: "The Technologist",
+    path: ["c", "j", "l", "g"],
   },
 ];
 
 export function LensSelector() {
+  const navigate = useNavigate();
   // Default to "policy" (Policy Tracker - The Congressional Reality Check)
   const [selectedLens, setSelectedLens] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -126,13 +134,20 @@ export function LensSelector() {
             
             {/* Understated navigation button */}
             <div className="flex justify-end">
-              <Link
-                to={currentLens.personaRoute}
+              <button
+                onClick={() => {
+                  localStorage.setItem("uap_path", JSON.stringify(currentLens.path));
+                  localStorage.setItem("uap_path_index", "0");
+                  localStorage.setItem("uap_archetype_name", currentLens.personaName);
+                  localStorage.setItem("uap_archetype_id", currentLens.id);
+                  window.dispatchEvent(new StorageEvent("storage", { key: "uap_path" }));
+                  navigate(`/section/${currentLens.path[0]}`);
+                }}
                 className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group"
               >
                 {currentLens.buttonLabel}
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+              </button>
             </div>
           </motion.div>
         </AnimatePresence>
