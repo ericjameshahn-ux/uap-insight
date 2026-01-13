@@ -62,18 +62,23 @@ export function LensSelector() {
 
   return (
     <div className="max-w-2xl mx-auto mb-10 animate-fade-in">
-      {/* Tab Pills */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6">
+      {/* Label */}
+      <p className="text-center text-sm font-medium text-muted-foreground mb-3">
+        Select Your Perspective:
+      </p>
+
+      {/* File Folder Tabs */}
+      <div className="flex flex-wrap justify-center gap-1 relative z-10">
         {lenses.map((lens) => (
           <button
             key={lens.id}
             onClick={() => setSelectedLens(lens.id)}
             className={cn(
-              "px-4 py-2 text-sm font-medium rounded-full transition-all duration-200",
-              "border focus:outline-none focus:ring-2 focus:ring-primary/50",
+              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              "rounded-t-lg border-t border-l border-r focus:outline-none focus:ring-2 focus:ring-primary/50",
               selectedLens === lens.id
-                ? "bg-primary/15 border-primary/40 text-primary"
-                : "bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border"
+                ? "bg-card border-border text-foreground relative z-20 -mb-px shadow-sm"
+                : "bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground -mb-px"
             )}
           >
             {lens.tabLabel}
@@ -81,16 +86,16 @@ export function LensSelector() {
         ))}
       </div>
 
-      {/* Content Area */}
-      <div className="relative min-h-[180px]">
+      {/* Content Area - Connected to active tab */}
+      <div className="relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedLens}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-700/50 rounded-xl p-6 shadow-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-card border border-border rounded-b-xl rounded-tr-xl p-6 shadow-md"
           >
             <h3 className="text-lg font-semibold text-foreground mb-3">
               {currentLens.heading}
