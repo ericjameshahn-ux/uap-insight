@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 
 interface Lens {
   id: string;
   tabLabel: string;
   heading: string;
   body: string;
+  buttonLabel: string;
+  personaRoute: string;
 }
 
 const lenses: Lens[] = [
@@ -15,37 +19,54 @@ const lenses: Lens[] = [
     tabLabel: "Skeptic's Gate",
     heading: "The Disarming Question",
     body: "Decades of cultural stigma have relegated unidentified phenomena to the fringe. However, when the Intelligence Community Inspector General validates whistleblower claims of unacknowledged programs as 'credible and urgent,' serious analysts must prioritize the underlying data over the surrounding mythology.",
+    buttonLabel: "Begin as Skeptic",
+    personaRoute: "/personas/skeptic",
   },
   {
     id: "risk",
     tabLabel: "Risk Analyst",
     heading: "The Information Asymmetry Frame",
     body: "Waived Special Access Programs have created a significant information gap between the defense sector and capital markets. We synthesize the testimonies of high-ranking insiders to map the fiscal and technological assets currently sequestered from public oversight and standard market valuation.",
+    buttonLabel: "Begin as Strategist",
+    personaRoute: "/personas/strategist",
   },
   {
     id: "historical",
     tabLabel: "Historical Lens",
     heading: "The Historical Parallel",
     body: "Just as the Manhattan Project once operated as a state-within-a-state, evidence suggests a parallel lineage of aerospace development has remained classified for decades. Understanding this bifurcation is essential for assessing the imminent transition of disruptive propulsion and energy technologies into the commercial sector.",
+    buttonLabel: "Begin as Historian",
+    personaRoute: "/personas/historian",
   },
   {
     id: "policy",
     tabLabel: "Policy Tracker",
     heading: "The Congressional Reality Check",
     body: "The UAP Disclosure Act and recent sworn testimony have moved this subject into the legislative mainstream. With federal law now defining 'non-human intelligence' and 'technologies of unknown origin,' these phenomena represent a documented regulatory and national security priority rather than a speculative interest.",
+    buttonLabel: "Begin as Investigator",
+    personaRoute: "/personas/investigator",
   },
   {
     id: "edge",
     tabLabel: "Information Edge",
     heading: "The Analyst's Dilemma",
     body: "Evaluating unidentified phenomena is no longer a matter of personal belief but of institutional risk management. For leaders in AI and finance, the primary concern is the asymmetrical advantage held by those who control the derivative technologies and their associated intellectual property.",
+    buttonLabel: "Begin as Empiricist",
+    personaRoute: "/personas/empiricist",
+  },
+  {
+    id: "engineering",
+    tabLabel: "Engineering Edge",
+    heading: "The R&D Frontier",
+    body: "Observed flight performance exceeding known aerodynamic limits, alongside verified Navy patent filings and peer-reviewed materials analysis from Stanford and Harvard, points to a sophisticated R&D frontier. Investors are noting the '5 Observables' as evidence that new physics and capabilities exist—regardless of origin story. Evaluating these anomalies in metric engineering and non-conventional propulsion is now a prerequisite for assessing future aerospace and energy disruption.",
+    buttonLabel: "Begin as Technologist",
+    personaRoute: "/personas/technologist",
   },
 ];
 
 export function LensSelector() {
   // Default to "policy" (Policy Tracker - The Congressional Reality Check)
   const [selectedLens, setSelectedLens] = useState<string>(() => {
-    // Try to restore from session storage
     if (typeof window !== "undefined") {
       const saved = sessionStorage.getItem("uap_selected_lens");
       return saved || "policy";
@@ -55,7 +76,6 @@ export function LensSelector() {
 
   const currentLens = lenses.find((l) => l.id === selectedLens) || lenses[3];
 
-  // Save selection to session storage
   useEffect(() => {
     sessionStorage.setItem("uap_selected_lens", selectedLens);
   }, [selectedLens]);
@@ -67,14 +87,14 @@ export function LensSelector() {
         Select Your Perspective:
       </p>
 
-      {/* File Folder Tabs */}
+      {/* File Folder Tabs - 2 rows of 3 on mobile */}
       <div className="flex flex-wrap justify-center gap-1 relative z-10">
         {lenses.map((lens) => (
           <button
             key={lens.id}
             onClick={() => setSelectedLens(lens.id)}
             className={cn(
-              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-200",
               "rounded-t-lg border-t border-l border-r focus:outline-none focus:ring-2 focus:ring-primary/50",
               selectedLens === lens.id
                 ? "bg-card border-border text-foreground relative z-20 -mb-px shadow-sm"
@@ -100,9 +120,20 @@ export function LensSelector() {
             <h3 className="text-lg font-semibold text-foreground mb-3">
               {currentLens.heading}
             </h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed mb-4">
               {currentLens.body}
             </p>
+            
+            {/* Understated navigation button */}
+            <div className="flex justify-end">
+              <Link
+                to={currentLens.personaRoute}
+                className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group"
+              >
+                {currentLens.buttonLabel}
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
