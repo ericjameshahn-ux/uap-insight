@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Eye, Bookmark, SkipForward, ExternalLink, Play } from "lucide-react";
-import { supabase, Claim, Video, getUserId } from "@/lib/supabase";
+import { supabase, Claim, Video } from "@/lib/supabase";
+import { useAuth, useAuthenticatedAction } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,68 +30,58 @@ function getYouTubeId(url: string): string | null {
 }
 
 export default function SavedItems() {
-  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [claims, setClaims] = useState<EnrichedClaim[]>([]);
   const [videos, setVideos] = useState<EnrichedVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const { userId, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { executeWithAuth } = useAuthenticatedAction();
 
   useEffect(() => {
     const fetchSavedItems = async () => {
       setLoading(true);
-      const userId = getUserId();
 
-      // First try to get from Supabase
+      // If not authenticated, only show localStorage items
+      if (!userId) {
+        // Check localStorage for any saved statuses
+        const localSavedItems: SavedItem[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key?.startsWith('claim-status-') || key?.startsWith('video-status-')) {
+            const status = localStorage.getItem(key);
+            if (status && ['viewed', 'later', 'skip'].includes(status)) {
+              const isVideo = key.startsWith('video-status-');
+              const contentId = key.replace(/^(claim|video)-status-/, '');
+              localSavedItems.push({
+                id: key,
+                user_id: 'local',
+                content_type: isVideo ? 'video' : 'claim',
+                content_id: contentId,
+                status: status as 'viewed' | 'later' | 'skip',
+                updated_at: new Date().toISOString()
+              });
+            }
+          }
+        }
+
+        await fetchContentDetails(localSavedItems);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch from Supabase with authenticated user ID
       const { data: progressData } = await supabase
         .from('user_progress')
         .select('*')
         .eq('user_id', userId);
 
-      // Also check localStorage for any saved statuses
-      const localSavedItems: SavedItem[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith('uap_content_')) {
-          try {
-            const data = JSON.parse(localStorage.getItem(key) || '{}');
-            if (data.status && data.status !== 'none') {
-              const parts = key.replace('uap_content_', '').split('_');
-              const contentType = parts[0] as 'video' | 'claim';
-              const contentId = parts.slice(1).join('_');
-              localSavedItems.push({
-                id: key,
-                user_id: userId,
-                content_type: contentType,
-                content_id: contentId,
-                status: data.status,
-                updated_at: new Date().toISOString()
-              });
-            }
-          } catch (e) {
-            // Ignore parse errors
-          }
-        }
-      }
+      const mergedItems = progressData || [];
+      await fetchContentDetails(mergedItems);
+      setLoading(false);
+    };
 
-      // Merge Supabase and localStorage items (localStorage takes precedence)
-      const allItems = progressData || [];
-      const mergedItems = [...allItems];
-      
-      localSavedItems.forEach(localItem => {
-        const existingIndex = mergedItems.findIndex(
-          item => item.content_type === localItem.content_type && item.content_id === localItem.content_id
-        );
-        if (existingIndex === -1) {
-          mergedItems.push(localItem);
-        } else {
-          mergedItems[existingIndex] = localItem;
-        }
-      });
-
-      setSavedItems(mergedItems);
-
-      // Fetch claim and video details
-      const claimIds = mergedItems.filter(i => i.content_type === 'claim').map(i => i.content_id);
-      const videoIds = mergedItems.filter(i => i.content_type === 'video').map(i => i.content_id);
+    const fetchContentDetails = async (items: SavedItem[]) => {
+      const claimIds = items.filter(i => i.content_type === 'claim').map(i => i.content_id);
+      const videoIds = items.filter(i => i.content_type === 'video').map(i => i.content_id);
 
       if (claimIds.length > 0) {
         const { data: claimsData } = await supabase
@@ -100,11 +91,13 @@ export default function SavedItems() {
 
         if (claimsData) {
           const enrichedClaims = claimsData.map(claim => {
-            const saved = mergedItems.find(i => i.content_type === 'claim' && i.content_id === claim.id);
+            const saved = items.find(i => i.content_type === 'claim' && i.content_id === claim.id);
             return { ...claim, savedStatus: saved?.status || 'later' } as EnrichedClaim;
           });
           setClaims(enrichedClaims);
         }
+      } else {
+        setClaims([]);
       }
 
       if (videoIds.length > 0) {
@@ -115,34 +108,36 @@ export default function SavedItems() {
 
         if (videosData) {
           const enrichedVideos = videosData.map(video => {
-            const saved = mergedItems.find(i => i.content_type === 'video' && i.content_id === video.id);
+            const saved = items.find(i => i.content_type === 'video' && i.content_id === video.id);
             return { ...video, savedStatus: saved?.status || 'later' } as EnrichedVideo;
           });
           setVideos(enrichedVideos);
         }
+      } else {
+        setVideos([]);
       }
-
-      setLoading(false);
     };
 
-    fetchSavedItems();
-  }, []);
+    if (!authLoading) {
+      fetchSavedItems();
+    }
+  }, [userId, authLoading]);
 
   const updateStatus = async (contentType: 'video' | 'claim', contentId: string, newStatus: 'viewed' | 'later' | 'skip') => {
-    const userId = getUserId();
+    // Update localStorage for immediate feedback
+    const key = `${contentType}-status-${contentId}`;
+    localStorage.setItem(key, newStatus);
     
-    // Update localStorage
-    const key = `uap_content_${contentType}_${contentId}`;
-    localStorage.setItem(key, JSON.stringify({ status: newStatus }));
-    
-    // Update Supabase
-    await supabase.from('user_progress').upsert({
-      user_id: userId,
-      content_type: contentType,
-      content_id: contentId,
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,content_type,content_id' });
+    // Update Supabase with authenticated user
+    await executeWithAuth(async (authUserId) => {
+      await supabase.from('user_progress').upsert({
+        user_id: authUserId,
+        content_type: contentType,
+        content_id: contentId,
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,content_type,content_id' });
+    });
 
     // Update local state
     if (contentType === 'claim') {
@@ -160,7 +155,7 @@ export default function SavedItems() {
   const viewedVideos = videos.filter(v => v.savedStatus === 'viewed');
   const skippedVideos = videos.filter(v => v.savedStatus === 'skip');
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="animate-pulse space-y-6">
@@ -188,6 +183,11 @@ export default function SavedItems() {
             : "No saved items yet. Browse sections and bookmark content to build your queue."
           }
         </p>
+        {!isAuthenticated && totalSaved > 0 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+            ⚠️ Items saved locally only. Sign in to sync across devices.
+          </p>
+        )}
       </div>
 
       {totalSaved === 0 ? (

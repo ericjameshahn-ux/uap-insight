@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { ChevronDown, User, Eye, Bookmark, X, Check, HelpCircle } from "lucide-react";
 import { TierBadge } from "./TierBadge";
 import { cn } from "@/lib/utils";
-import { Claim, getUserId, supabase } from "@/lib/supabase";
+import { Claim, supabase } from "@/lib/supabase";
+import { useAuthenticatedAction } from "@/hooks/useAuth";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +30,7 @@ const getVerificationStatus = (claim: Claim) => {
 export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState<ContentStatus>(null);
+  const { executeWithAuth } = useAuthenticatedAction();
   const isLongQuote = claim.quote && claim.quote.length > 300;
   
   // Generate claim ID like "A-01"
@@ -37,7 +39,7 @@ export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProp
   
   const verificationStatus = getVerificationStatus(claim);
 
-  // Load status from localStorage on mount
+  // Load status from localStorage on mount (for display only)
   useEffect(() => {
     const saved = localStorage.getItem(`claim-status-${claim.id}`);
     if (saved) {
@@ -50,29 +52,30 @@ export function ClaimCard({ claim, sectionLetter, onFigureClick }: ClaimCardProp
     const finalStatus = status === newStatus ? null : newStatus;
     setStatus(finalStatus);
 
-    // Save to localStorage
+    // Save to localStorage for immediate UI feedback
     if (finalStatus) {
       localStorage.setItem(`claim-status-${claim.id}`, finalStatus);
     } else {
       localStorage.removeItem(`claim-status-${claim.id}`);
     }
 
-    // Save to database
-    const userId = getUserId();
-    if (finalStatus) {
-      await supabase.from('user_progress').upsert({
-        user_id: userId,
-        content_type: 'claim',
-        content_id: claim.id,
-        status: finalStatus,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,content_type,content_id' });
-    } else {
-      await supabase.from('user_progress').delete()
-        .eq('user_id', userId)
-        .eq('content_type', 'claim')
-        .eq('content_id', claim.id);
-    }
+    // Save to database with authenticated user ID
+    await executeWithAuth(async (userId) => {
+      if (finalStatus) {
+        await supabase.from('user_progress').upsert({
+          user_id: userId,
+          content_type: 'claim',
+          content_id: claim.id,
+          status: finalStatus,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,content_type,content_id' });
+      } else {
+        await supabase.from('user_progress').delete()
+          .eq('user_id', userId)
+          .eq('content_type', 'claim')
+          .eq('content_id', claim.id);
+      }
+    });
   };
 
   return (
