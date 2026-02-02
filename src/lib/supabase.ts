@@ -161,12 +161,31 @@ export interface PersonaLens {
   sort_order: number;
 }
 
-// Helper to get or create user ID
+/**
+ * @deprecated Use useAuth() hook instead for secure user identification.
+ * This function is kept for backwards compatibility during migration,
+ * but new code should use the auth hook which provides server-validated user IDs.
+ * 
+ * SECURITY WARNING: This generates client-side UUIDs that can be spoofed.
+ * Use auth.userId from useAuth() hook for secure operations.
+ */
 export function getUserId(): string {
+  console.warn('getUserId() is deprecated. Use useAuth() hook for secure user identification.');
   let userId = localStorage.getItem('uap_user_id');
   if (!userId) {
     userId = crypto.randomUUID();
     localStorage.setItem('uap_user_id', userId);
   }
   return userId;
+
+}
+
+/**
+ * Get the current authenticated user's ID.
+ * Returns null if not authenticated.
+ * For write operations, use useAuthenticatedAction() hook instead.
+ */
+export async function getAuthUserId(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.id ?? null;
 }

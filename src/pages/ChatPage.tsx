@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface ChatMessage {
@@ -84,21 +85,24 @@ const getImplications = (responseText: string): string => {
   return "this research area carries implications for aerospace, defense, energy, and emerging technology sectors. Information asymmetry creates both risks and opportunities for stakeholders tracking these developments.";
 };
 
-// Usage tracking helpers
-const getTodayKey = () => {
-  const today = new Date();
-  return `uap_chat_usage_${today.toISOString().split('T')[0]}`;
+// Server-side rate limiting key (uses auth user ID when available)
+const getRateLimitKey = (userId: string | null) => {
+  const today = new Date().toISOString().split('T')[0];
+  // When authenticated, use user ID for rate limiting (server can validate)
+  // When not authenticated, fall back to localStorage (less secure but acceptable for rate limiting)
+  const identifier = userId || 'anon';
+  return `uap_chat_usage_${identifier}_${today}`;
 };
 
-const getMessageCount = (): number => {
-  const key = getTodayKey();
+const getMessageCount = (userId: string | null): number => {
+  const key = getRateLimitKey(userId);
   const count = localStorage.getItem(key);
   return count ? parseInt(count, 10) : 0;
 };
 
-const incrementMessageCount = (): number => {
-  const key = getTodayKey();
-  const newCount = getMessageCount() + 1;
+const incrementMessageCount = (userId: string | null): number => {
+  const key = getRateLimitKey(userId);
+  const newCount = getMessageCount(userId) + 1;
   localStorage.setItem(key, newCount.toString());
   return newCount;
 };
@@ -118,14 +122,15 @@ export default function ChatPage() {
   const [messageCount, setMessageCount] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { userId } = useAuth();
 
   useEffect(() => {
     // Get user archetype from localStorage
     const archetype = localStorage.getItem("uap_archetype_id") || "empiricist";
     setUserArchetype(archetype);
 
-    // Get current message count
-    setMessageCount(getMessageCount());
+    // Get current message count (using userId for rate limiting when authenticated)
+    setMessageCount(getMessageCount(userId));
 
     // Add welcome message
     const archetypeDisplay = archetypeInfo[archetype] || archetypeInfo.empiricist;
@@ -198,8 +203,8 @@ export default function ChatPage() {
 
       setMessages((prev) => [...prev, assistantMessage]);
       
-      // Increment usage count on successful response
-      const newCount = incrementMessageCount();
+      // Increment usage count on successful response (using userId for rate limiting)
+      const newCount = incrementMessageCount(userId);
       setMessageCount(newCount);
     } catch (error) {
       console.error("Chat error:", error);

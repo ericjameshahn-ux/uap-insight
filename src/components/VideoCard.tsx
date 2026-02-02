@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Play, Star, ExternalLink, Clock, Eye, Bookmark, X } from "lucide-react";
-import { Video, getUserId } from "@/lib/supabase";
-import { supabase } from "@/lib/supabase";
+import { Video, supabase } from "@/lib/supabase";
+import { useAuthenticatedAction } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 interface VideoCardProps {
@@ -32,8 +32,9 @@ export function VideoCard({ video, showEmbed = false }: VideoCardProps) {
   const youtubeId = getYouTubeId(video.url);
   const isYouTube = isYouTubeUrl(video.url);
   const [status, setStatus] = useState<ContentStatus>(null);
+  const { executeWithAuth } = useAuthenticatedAction();
 
-  // Load status from localStorage on mount
+  // Load status from localStorage on mount (for display only)
   useEffect(() => {
     const saved = localStorage.getItem(`video-status-${video.id}`);
     if (saved) {
@@ -46,29 +47,30 @@ export function VideoCard({ video, showEmbed = false }: VideoCardProps) {
     const finalStatus = status === newStatus ? null : newStatus;
     setStatus(finalStatus);
 
-    // Save to localStorage
+    // Save to localStorage for immediate UI feedback
     if (finalStatus) {
       localStorage.setItem(`video-status-${video.id}`, finalStatus);
     } else {
       localStorage.removeItem(`video-status-${video.id}`);
     }
 
-    // Save to database
-    const userId = getUserId();
-    if (finalStatus) {
-      await supabase.from('user_progress').upsert({
-        user_id: userId,
-        content_type: 'video',
-        content_id: video.id,
-        status: finalStatus,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,content_type,content_id' });
-    } else {
-      await supabase.from('user_progress').delete()
-        .eq('user_id', userId)
-        .eq('content_type', 'video')
-        .eq('content_id', video.id);
-    }
+    // Save to database with authenticated user ID
+    await executeWithAuth(async (userId) => {
+      if (finalStatus) {
+        await supabase.from('user_progress').upsert({
+          user_id: userId,
+          content_type: 'video',
+          content_id: video.id,
+          status: finalStatus,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,content_type,content_id' });
+      } else {
+        await supabase.from('user_progress').delete()
+          .eq('user_id', userId)
+          .eq('content_type', 'video')
+          .eq('content_id', video.id);
+      }
+    });
   };
 
   return (
