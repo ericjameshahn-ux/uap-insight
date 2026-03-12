@@ -44,6 +44,7 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/intro" element={<Navigate to="/framework" replace />} />
             <Route path="/old-start-1" element={<OldStart1 />} />
             <Route path="/old-start-2" element={<OldStart2 />} />
