@@ -64,12 +64,12 @@ export default function InstitutionalPage() {
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">The Structure of Secrecy</h2>
-            <p className="text-muted-foreground mb-4">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Structure of Secrecy</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-4">
               The U.S. classified aerospace apparatus is not merely a government operation
               but a symbiosis of Executive Agencies, FFRDCs, and Prime Contractors.
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-slate-700 dark:text-slate-300">
               While oversight bodies exist, the mechanism of "Waived" Special Access Programs
               often creates accountability gaps, shielding operations from standard review.
             </p>
