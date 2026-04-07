@@ -79,8 +79,8 @@ export default function InstitutionalPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">The Security Apparatus</h2>
-            <p className="text-muted-foreground mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Security Apparatus</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
               Security is not just about fences—it's about information compartmentalization.
               The system ensures individuals only know specific "slices" of a program.
             </p>
@@ -116,8 +116,8 @@ export default function InstitutionalPage() {
 
         {/* Prime Contractors Section */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Prime Contractors</h2>
-          <p className="text-muted-foreground mb-8 max-w-3xl">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Prime Contractors</h2>
+          <p className="text-slate-700 dark:text-slate-300 mb-8 max-w-3xl">
             Private corporations that execute classified programs. These companies hold their own SAPs
             and employ the majority of cleared personnel working on advanced aerospace.
           </p>
@@ -130,8 +130,8 @@ export default function InstitutionalPage() {
 
         {/* Revolving Door Section */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-6">The Revolving Door</h2>
-          <p className="text-muted-foreground mb-8 max-w-3xl">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">The Revolving Door</h2>
+          <p className="text-slate-700 dark:text-slate-300 mb-8 max-w-3xl">
             Career paths frequently alternate between government positions and private sector roles,
             creating networks of influence that span both worlds.
           </p>
