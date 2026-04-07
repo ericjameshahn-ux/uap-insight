@@ -358,80 +358,99 @@ export default function SectionPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <BackButton />
-      
-      {/* Path Progress Banner */}
-      {userPath.length > 0 && isInPath && (
-        <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-primary">
-              Part {currentPathPosition + 1} of {userPath.length} in your {archetypeName} path
+    <div className="min-h-screen bg-background">
+      {/* Dark Hero Header */}
+      <section className="py-12 px-4 bg-slate-900">
+        <div className="max-w-4xl mx-auto">
+          <BackButton className="text-slate-400 hover:text-white mb-6" />
+          
+          {/* Path Progress Banner */}
+          {userPath.length > 0 && isInPath && (
+            <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-lg animate-fade-in">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-blue-400">
+                  Part {currentPathPosition + 1} of {userPath.length} in your {archetypeName} path
+                </span>
+                <button 
+                  onClick={handleExitPath}
+                  className="text-xs text-slate-400 hover:text-white flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" />
+                  Exit path
+                </button>
+              </div>
+              <Progress value={pathProgress} className="h-2" />
+              <div className="flex items-center gap-1 mt-2 flex-wrap">
+                {userPath.map((s, i) => (
+                  <Link
+                    key={s}
+                    to={`/section/${s}`}
+                    className={`px-2 py-0.5 rounded text-xs font-mono uppercase transition-colors ${
+                      s === currentSectionLower 
+                        ? 'bg-blue-500 text-white' 
+                        : i < currentPathPosition 
+                          ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                          : 'bg-white/10 text-slate-400 hover:bg-white/20'
+                    }`}
+                  >
+                    {s}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-3xl md:text-4xl font-bold text-white">
+              {section.letter}.
             </span>
-            <button 
-              onClick={handleExitPath}
-              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-            >
-              <X className="w-3 h-3" />
-              Exit path
-            </button>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase mb-1">
+                EVIDENCE SECTION
+              </p>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">{section.title}</h1>
+              {section.subtitle && (
+                <p className="text-slate-300 text-sm mt-1">{section.subtitle}</p>
+              )}
+            </div>
+            <ConvictionBadge conviction={section.conviction} />
           </div>
-          <Progress value={pathProgress} className="h-2" />
-          <div className="flex items-center gap-1 mt-2 flex-wrap">
-            {userPath.map((s, i) => (
-              <Link
-                key={s}
-                to={`/section/${s}`}
-                className={`px-2 py-0.5 rounded text-xs font-mono uppercase transition-colors ${
-                  s === currentSectionLower 
-                    ? 'bg-primary text-primary-foreground' 
-                    : i < currentPathPosition 
-                      ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {s}
-              </Link>
-            ))}
-          </div>
+          {section.description && (
+            <p className="text-slate-300 leading-relaxed mt-3">{section.description}</p>
+          )}
         </div>
-      )}
+      </section>
 
       {/* Sticky Section Header */}
       <div 
         ref={headerRef}
         className={cn(
-          "mb-8 animate-fade-in sticky top-0 z-20 -mx-6 px-6 py-4 transition-all duration-200",
-          isSticky && "bg-background/95 backdrop-blur-sm shadow-md border-b border-border"
+          "sticky top-0 z-20 transition-all duration-200",
+          isSticky && "bg-background/95 backdrop-blur-sm shadow-md border-b border-border px-6 py-3"
         )}
       >
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-3xl md:text-4xl font-bold text-foreground">
-            {section.letter}.
-          </span>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold truncate">{section.title}</h1>
-            {section.subtitle && !isSticky && (
-              <p className="text-muted-foreground text-sm">{section.subtitle}</p>
+        {isSticky && (
+          <div className="max-w-4xl mx-auto flex items-center gap-4">
+            <span className="font-mono text-xl font-bold text-foreground">
+              {section.letter}.
+            </span>
+            <h2 className="text-lg font-bold truncate flex-1">{section.title}</h2>
+            <ConvictionBadge conviction={section.conviction} />
+            {nextSection && (
+              <Button 
+                size="sm" 
+                onClick={handleNextSection}
+                className="hidden md:flex items-center gap-1"
+              >
+                Continue
+                <ArrowRight className="w-3 h-3" />
+              </Button>
             )}
           </div>
-          <ConvictionBadge conviction={section.conviction} />
-          {/* Continue button in sticky header when path is active */}
-          {isSticky && nextSection && (
-            <Button 
-              size="sm" 
-              onClick={handleNextSection}
-              className="hidden md:flex items-center gap-1"
-            >
-              Continue
-              <ArrowRight className="w-3 h-3" />
-            </Button>
-          )}
-        </div>
-        {!isSticky && section.description && (
-          <p className="text-muted-foreground leading-relaxed mt-3">{section.description}</p>
         )}
       </div>
+
+      <section className="max-w-4xl mx-auto px-6 py-8">
 
       {/* Section Summary */}
       {section.section_summary && (
@@ -674,6 +693,7 @@ export default function SectionPage() {
           })()}
         </div>
       )}
+      </section>
 
       {/* Figure Modal */}
       <Dialog open={!!selectedFigure} onOpenChange={() => setSelectedFigure(null)}>
