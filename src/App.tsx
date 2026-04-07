@@ -32,6 +32,7 @@ import WilsonDavisCaseStudy from "./pages/WilsonDavisCaseStudy";
 import BeforeYouBegin from "./pages/BeforeYouBegin";
 import UAPTaxonomy from "./pages/UAPTaxonomy";
 import Admin from "./pages/Admin";
+import AdminIngest from "./pages/AdminIngest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/before-you-begin" element={<BeforeYouBegin />} />
             <Route path="/case-studies/wilson-davis" element={<WilsonDavisCaseStudy />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/ingest" element={<AdminIngest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
