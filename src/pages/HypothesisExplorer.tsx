@@ -169,22 +169,22 @@ export default function HypothesisExplorer() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <section className="py-12 px-4 bg-gradient-to-b from-slate-900 to-background">
+      <section className="py-12 px-4 bg-slate-900">
         <div className="container mx-auto max-w-6xl">
-          <Link to="/framework" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <Link to="/framework" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to Framework
           </Link>
 
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-widest text-primary uppercase mb-2">
+              <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase mb-2">
                 MAPPING THE POSSIBILITIES
               </p>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 UAP Hypothesis Explorer
               </h1>
-              <p className="text-muted-foreground max-w-2xl">
+              <p className="text-slate-300 max-w-2xl">
                 A comprehensive taxonomy of 7 categories explaining what UAP could be—from conventional to exotic.
               </p>
             </div>
