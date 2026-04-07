@@ -6,68 +6,68 @@
 
 @layer base {
   :root {
-    /* Canvas & Surface */
-    --background: 210 20% 98%;
-    --foreground: 220 25% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    /* Canvas & Surface — Clinical Pastels */
+    --background: 210 40% 98%;          /* Ice White #F8FAFC */
+    --foreground: 222 47% 11%;          /* Deep Charcoal #0F172A */
+    --card: 0 0% 100%;                  /* Pure White cards */
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary - Indigo */
-    --primary: 239 84% 67%;
+    /* Primary — Deep Blue (from hero accent) */
+    --primary: 224 76% 33%;             /* #1E3A8A */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Cool Gray */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 25% 20%;
+    /* Secondary — Pale Slate */
+    --secondary: 214 32% 95%;           /* #F1F5F9 */
+    --secondary-foreground: 215 25% 27%;
 
-    /* Muted */
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    /* Muted — Pale Slate */
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 16% 47%;    /* #475569 medium-dark slate */
 
-    /* Accent */
-    --accent: 239 84% 97%;
-    --accent-foreground: 239 84% 40%;
+    /* Accent — Quantum Mist (faint cyan) */
+    --accent: 183 100% 96%;             /* #ECFEFF */
+    --accent-foreground: 224 76% 33%;
 
-    /* Destructive */
-    --destructive: 0 84% 60%;
+    /* Destructive — Quantum Orange */
+    --destructive: 20 91% 48%;          /* #EA580C */
     --destructive-foreground: 0 0% 100%;
 
-    /* Border & Input */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 239 84% 67%;
+    /* Border & Input — cool gray */
+    --border: 214 32% 82%;              /* #CBD5E1 */
+    --input: 214 32% 82%;
+    --ring: 224 76% 33%;
 
     /* Radius */
     --radius: 0.5rem;
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 25% 20%;
-    --sidebar-primary: 239 84% 67%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 224 76% 33%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 239 84% 97%;
-    --sidebar-accent-foreground: 239 84% 40%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-accent: 183 100% 96%;
+    --sidebar-accent-foreground: 224 76% 33%;
+    --sidebar-border: 214 32% 82%;
+    --sidebar-ring: 224 76% 33%;
 
     /* Conviction Badges */
     --conviction-highest-bg: 142 76% 94%;
     --conviction-highest-text: 142 72% 29%;
     --conviction-high-bg: 217 91% 95%;
-    --conviction-high-text: 221 83% 53%;
-    --conviction-medium-high-bg: 199 95% 95%;
-    --conviction-medium-high-text: 199 89% 40%;
-    --conviction-medium-bg: 48 96% 95%;
-    --conviction-medium-text: 28 73% 26%;
+    --conviction-high-text: 224 76% 33%;
+    --conviction-medium-high-bg: 183 100% 96%;
+    --conviction-medium-high-text: 199 89% 32%;
+    --conviction-medium-bg: 33 96% 95%;
+    --conviction-medium-text: 20 91% 30%;
     --conviction-lower-bg: 0 93% 96%;
     --conviction-lower-text: 0 72% 50%;
-    --conviction-info-bg: 220 14% 96%;
-    --conviction-info-text: 220 10% 35%;
+    --conviction-info-bg: 214 32% 95%;
+    --conviction-info-text: 215 16% 35%;
 
     /* Custom */
-    --quote-border: 239 84% 67%;
+    --quote-border: 224 76% 33%;
     --surface-elevated: 0 0% 100%;
   }
 
