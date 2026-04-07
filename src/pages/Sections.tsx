@@ -49,12 +49,22 @@ const Sections = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <BackButton />
-      <h1 className="text-2xl font-bold mb-2">Evidence Sections</h1>
-      <p className="text-muted-foreground mb-8">
-        13 categories of UAP evidence, organized by theme and conviction level
-      </p>
+    <div className="min-h-screen bg-background">
+      {/* Dark Hero Header */}
+      <section className="py-12 px-4 bg-slate-900">
+        <div className="max-w-4xl mx-auto">
+          <BackButton className="text-slate-400 hover:text-white mb-6" />
+          <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase mb-2">
+            RESEARCH DATABASE
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Evidence Sections</h1>
+          <p className="text-slate-300">
+            13 categories of UAP evidence, organized by theme and conviction level
+          </p>
+        </div>
+      </section>
+
+      <section className="max-w-4xl mx-auto px-6 py-8">
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sections?.filter(section => section.letter).map((section, i) => (
@@ -90,6 +100,7 @@ const Sections = () => {
           </Link>
         ))}
       </div>
+      </section>
     </div>
   );
 };
