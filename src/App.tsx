@@ -31,6 +31,7 @@ import Glossary from "./pages/Glossary";
 import WilsonDavisCaseStudy from "./pages/WilsonDavisCaseStudy";
 import BeforeYouBegin from "./pages/BeforeYouBegin";
 import UAPTaxonomy from "./pages/UAPTaxonomy";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/how-secrecy-works" element={<HowSecrecyWorks />} />
             <Route path="/before-you-begin" element={<BeforeYouBegin />} />
             <Route path="/case-studies/wilson-davis" element={<WilsonDavisCaseStudy />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
