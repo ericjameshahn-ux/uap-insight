@@ -99,6 +99,7 @@ const Sections = () => {
             </Card>
           </Link>
         ))}
+      </div>
       </section>
     </div>
   );
