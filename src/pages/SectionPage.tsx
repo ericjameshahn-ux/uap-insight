@@ -693,6 +693,7 @@ export default function SectionPage() {
           })()}
         </div>
       )}
+      </section>
 
       {/* Figure Modal */}
       <Dialog open={!!selectedFigure} onOpenChange={() => setSelectedFigure(null)}>
