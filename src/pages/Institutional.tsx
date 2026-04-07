@@ -45,17 +45,20 @@ const sampleTimeline = {
 export default function InstitutionalPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-12 sm:py-16 px-4 sm:px-6">
+      {/* Dark Hero Header */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-slate-900">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase mb-2">
+            INSTITUTIONAL ANALYSIS
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             The Classified Aerospace Ecosystem
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto">
             Understanding the institutional infrastructure enabling unacknowledged programs
           </p>
         </div>
-      </div>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
         {/* Two-column layout */}
