@@ -45,28 +45,31 @@ const sampleTimeline = {
 export default function InstitutionalPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-12 sm:py-16 px-4 sm:px-6">
+      {/* Dark Hero Header */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-slate-900">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase mb-2">
+            INSTITUTIONAL ANALYSIS
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             The Classified Aerospace Ecosystem
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto">
             Understanding the institutional infrastructure enabling unacknowledged programs
           </p>
         </div>
-      </div>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">The Structure of Secrecy</h2>
-            <p className="text-muted-foreground mb-4">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Structure of Secrecy</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-4">
               The U.S. classified aerospace apparatus is not merely a government operation
               but a symbiosis of Executive Agencies, FFRDCs, and Prime Contractors.
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-slate-700 dark:text-slate-300">
               While oversight bodies exist, the mechanism of "Waived" Special Access Programs
               often creates accountability gaps, shielding operations from standard review.
             </p>
@@ -76,8 +79,8 @@ export default function InstitutionalPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">The Security Apparatus</h2>
-            <p className="text-muted-foreground mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Security Apparatus</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
               Security is not just about fences—it's about information compartmentalization.
               The system ensures individuals only know specific "slices" of a program.
             </p>
@@ -113,8 +116,8 @@ export default function InstitutionalPage() {
 
         {/* Prime Contractors Section */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Prime Contractors</h2>
-          <p className="text-muted-foreground mb-8 max-w-3xl">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Prime Contractors</h2>
+          <p className="text-slate-700 dark:text-slate-300 mb-8 max-w-3xl">
             Private corporations that execute classified programs. These companies hold their own SAPs
             and employ the majority of cleared personnel working on advanced aerospace.
           </p>
@@ -127,8 +130,8 @@ export default function InstitutionalPage() {
 
         {/* Revolving Door Section */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-6">The Revolving Door</h2>
-          <p className="text-muted-foreground mb-8 max-w-3xl">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">The Revolving Door</h2>
+          <p className="text-slate-700 dark:text-slate-300 mb-8 max-w-3xl">
             Career paths frequently alternate between government positions and private sector roles,
             creating networks of influence that span both worlds.
           </p>
