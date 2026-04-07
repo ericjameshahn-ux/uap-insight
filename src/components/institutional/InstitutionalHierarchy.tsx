@@ -5,8 +5,8 @@ const tiers = [
     level: 1,
     name: "Oversight Bodies",
     examples: "Gang of Eight • SSCI • HPSCI • GAO • IGs",
-    color: "bg-purple-900/40 border-purple-500/50",
-    textColor: "text-purple-300",
+    color: "bg-purple-100 border-purple-300",
+    textColor: "text-purple-800",
     icon: Eye,
     description: "Congressional and executive oversight with varying access levels"
   },
@@ -14,8 +14,8 @@ const tiers = [
     level: 2,
     name: "Executive Agencies",
     examples: "DoD • ODNI • CIA • NSA • DOE/NNSA",
-    color: "bg-blue-900/40 border-blue-500/50",
-    textColor: "text-blue-300",
+    color: "bg-blue-100 border-blue-300",
+    textColor: "text-blue-800",
     icon: Building2,
     description: "Government entities that sponsor and manage classified programs"
   },
@@ -23,8 +23,8 @@ const tiers = [
     level: 3,
     name: "FFRDCs & National Labs",
     examples: "Aerospace Corp • MITRE • Los Alamos • Sandia",
-    color: "bg-cyan-900/40 border-cyan-500/50",
-    textColor: "text-cyan-300",
+    color: "bg-cyan-100 border-cyan-300",
+    textColor: "text-cyan-800",
     icon: FlaskConical,
     description: "Research centers bridging government needs and private innovation"
   },
@@ -32,8 +32,8 @@ const tiers = [
     level: 4,
     name: "Prime Contractors",
     examples: "Lockheed • Northrop • Raytheon • Boeing • SAIC",
-    color: "bg-slate-700/40 border-slate-500/50",
-    textColor: "text-slate-300",
+    color: "bg-slate-100 border-slate-300",
+    textColor: "text-slate-800",
     icon: Factory,
     description: "Private corporations executing classified programs and holding SAPs"
   },
@@ -41,8 +41,8 @@ const tiers = [
     level: 5,
     name: "Security Apparatus",
     examples: "SAPs • Clearances • Compartmentalization • NDAs",
-    color: "bg-red-900/20 border-red-500/50",
-    textColor: "text-red-300",
+    color: "bg-red-50 border-red-300",
+    textColor: "text-red-800",
     icon: Shield,
     description: "The classification system that controls information flow"
   }
@@ -71,7 +71,7 @@ export function InstitutionalHierarchy() {
                 title={tier.description}
               >
                 <div className="flex items-start gap-3 sm:gap-4">
-                  <div className={`p-2 sm:p-3 rounded-full bg-background/20`}>
+                  <div className={`p-2 sm:p-3 rounded-full bg-white/60`}>
                     <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${tier.textColor}`} />
                   </div>
                   <div className="flex-1 min-w-0">

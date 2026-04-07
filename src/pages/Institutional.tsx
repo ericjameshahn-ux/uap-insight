@@ -86,25 +86,25 @@ export default function InstitutionalPage() {
             </p>
 
             <div className="space-y-4">
-              <div className="flex gap-3 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+              <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4 text-red-100" />
+                  <AlertTriangle className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-red-300">Waived SAP</h4>
-                  <p className="text-sm text-red-200/70">
+                  <h4 className="font-semibold text-red-800">Waived SAP</h4>
+                  <p className="text-sm text-red-700">
                     Exempt from standard reporting. Existence denied. Limited to Gang of Eight.
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-3 p-4 bg-orange-900/20 border border-orange-500/30 rounded-lg">
-                <div className="flex-shrink-0 w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-sm font-bold text-orange-100">
+              <div className="flex gap-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex-shrink-0 w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-sm font-bold text-white">
                   2
                 </div>
                 <div>
-                  <h4 className="font-semibold text-orange-300">Acknowledged SAP</h4>
-                  <p className="text-sm text-orange-200/70">
+                  <h4 className="font-semibold text-orange-800">Acknowledged SAP</h4>
+                  <p className="text-sm text-orange-700">
                     Existence known, details classified. "Black programs" with public names.
                   </p>
                 </div>
